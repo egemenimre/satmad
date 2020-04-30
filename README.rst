@@ -1,9 +1,61 @@
-Satellite Mission Analysis and Design
--------------------------------------
+SatMAD: Satellite Mission Analysis and Design
+---------------------------------------------
+.. image:: https://readthedocs.org/projects/satmad/badge/?version=latest
+    :target: https://satmad.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 .. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
     :target: http://www.astropy.org
     :alt: Powered by Astropy Badge
+
+SatMAD is an open source Python package, aiming at providing the base functionality to solve
+satellite mission analysis and design as well as orbital mechanics problems with enough precision and performance
+to be used in the design and operation of real satellites. The target audience is academics and amateur satellite
+community, including Cubesats.
+
+While current functionality is limited, the aim looks like this:
+
+#. Operations support
+    a) Groundstation communication times
+    b) Target imaging times
+#. Satellite propagation
+    a) Numerical Propagation with full force model: Geopotentials, Solar Radiation Pressure, 3rd body interactions, atmospheric drag
+    b) Analytical Propagation: SGP4 and Keplerian
+#. Satellite orbit design and analysis
+    GEO, Sun-synch and repeating orbits as well as deviations from the ideal
+#. Orbit change
+    Manoeuvres and Delta-V calculations
+#. Attitude kinematics modelling and basic attitude laws
+    Sun pointing, yaw compensation, spin
+#. Satellite design
+    a) Power generation with solar arrays
+    b) Power consumption and battery sizing
+
+TODO insert simple run example here
+
+.. code-block:: python
+
+    from satmad.examples import XXX
+
+    XXX.runX()
+
+Documentation
+-------------
+
+The documentation lives here:
+https://satmad.readthedocs.io/
+
+
+Examples
+--------
+
+You can find Jupyter notebooks with sample applications of Satmad under the `examples` directory.
+
+Requirements
+------------
+
+- NumPy and SciPy are used for the underlying mathematical algorithms
+- Astropy handles all time and reference frame computations
 
 
 License
@@ -14,36 +66,3 @@ the terms of the GNU GPL v3+ license. This package is based upon
 the `Astropy package template <https://github.com/astropy/package-template>`_
 which is licensed under the BSD 3-clause license. See the licenses folder for
 more information.
-
-
-Contributing
-------------
-
-We love contributions! satmad is open source,
-built on open source, and we'd love to have you hang out in our community.
-
-**Imposter syndrome disclaimer**: We want your help. No, really.
-
-There may be a little voice inside your head that is telling you that you're not
-ready to be an open source contributor; that your skills aren't nearly good
-enough to contribute. What could you possibly offer a project like this one?
-
-We assure you - the little voice in your head is wrong. If you can write code at
-all, you can contribute code to open source. Contributing to open source
-projects is a fantastic way to advance one's coding skills. Writing perfect code
-isn't the measure of a good developer (that would disqualify all of us!); it's
-trying to create something, making mistakes, and learning from those
-mistakes. That's how we all improve, and we are happy to help others learn.
-
-Being an open source contributor doesn't just mean writing code, either. You can
-help out by writing documentation, tests, or even giving feedback about the
-project (and yes - that includes giving feedback about the contribution
-process). Some of these contributions may be the most valuable to the project as
-a whole, because you're coming to the project with fresh eyes, so you can see
-the errors and assumptions that seasoned contributors have glossed over.
-
-Note: This disclaimer was originally written by
-`Adrienne Lowe <https://github.com/adriennefriend>`_ for a
-`PyCon talk <https://www.youtube.com/watch?v=6Uj746j9Heo>`_, and was adapted by
-satmad based on its use in the README file for the
-`MetPy project <https://github.com/Unidata/MetPy>`_.
