@@ -1,5 +1,4 @@
 """
-This is the docstring for the frames package.  Normally you would
-have whatever.py files in this directory implementing some modules, but this
-is just an example sub-package, so it doesn't actually do anything.
+This subpackage contains classes and functions for coordinates of satellites
+and other objects not defined in Astropy.
 """
