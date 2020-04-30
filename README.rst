@@ -22,14 +22,16 @@ While current functionality is limited, the aim looks like this:
     a) Numerical Propagation with full force model: Geopotentials, Solar Radiation Pressure, 3rd body interactions, atmospheric drag
     b) Analytical Propagation: SGP4 and Keplerian
 #. Satellite orbit design and analysis
-    GEO, Sun-synch and repeating orbits as well as deviations from the ideal
+    a) GEO, Sun-synch and repeating orbits
+    b) Analysis of deviations from the ideal orbits
 #. Orbit change
-    Manoeuvres and Delta-V calculations
+    a) Manoeuvres and Delta-V calculations
 #. Attitude kinematics modelling and basic attitude laws
-    Sun pointing, yaw compensation, spin
+    a) Sun pointing, yaw compensation, spin
 #. Satellite design
     a) Power generation with solar arrays
     b) Power consumption and battery sizing
+    c) Propellant budget
 
 TODO insert simple run example here
 
@@ -62,7 +64,4 @@ License
 -------
 
 This project is Copyright (c) Egemen Imre and licensed under
-the terms of the GNU GPL v3+ license. This package is based upon
-the `Astropy package template <https://github.com/astropy/package-template>`_
-which is licensed under the BSD 3-clause license. See the licenses folder for
-more information.
+the terms of the GNU GPL v3+ license.
