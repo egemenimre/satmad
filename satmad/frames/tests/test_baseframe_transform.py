@@ -91,7 +91,22 @@ def vel_err(rv_test, rv_true):
     return v_diff.norm().to(u.mm / u.s)
 
 
+# ********** Functional testing **********
+
+def test_tirs_to_teme_no_vel():
+    """Check whether coord transform without velocity is possible."""
+    rv_tirs_no_vel = TIRS(r_tirs_true, obstime=time, representation_type="cartesian")
+    rv_tirs_no_vel.transform_to(TEME(obstime=time))
+
+
+def test_teme_to_tirs_no_vel():
+    """Check whether coord transform without velocity is possible."""
+    rv_teme_no_vel = TEME(r_teme_true, obstime=time, representation_type="cartesian")
+    rv_teme_no_vel.transform_to(TIRS(obstime=time))
+
+
 def test_itrs_roundtrip():
+    """Check whether transforming to a coord and then transforming back yields the same output."""
     # test_frame = "ITRS"
     allowable_pos_diff = 1.5e-6 * u.mm
     allowable_vel_diff = 2.2e-9 * u.mm / u.s
@@ -110,6 +125,7 @@ def test_itrs_roundtrip():
 
 
 def test_j2000_roundtrip():
+    """Check whether transforming to a coord and then transforming back yields the same output."""
     # test_frame = "J2000"
     allowable_pos_diff = 1.5e-6 * u.mm
     allowable_vel_diff = 1.0e-9 * u.mm / u.s
@@ -126,8 +142,10 @@ def test_j2000_roundtrip():
     assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
     assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
 
+# ********** Perfromance testing **********
 
 def test_j2000_to_gcrs():
+    """Check the coordinate transform accuracy."""
     # test_frame = "GCRS"
     allowable_pos_diff = 800 * u.mm
     allowable_vel_diff = 0.36 * u.mm / u.s
@@ -145,6 +163,7 @@ def test_j2000_to_gcrs():
 
 
 def test_teme_to_tirs():
+    """Check the coordinate transform accuracy."""
     # test_frame = "TIRS"
     allowable_pos_diff = 300 * u.mm
     allowable_vel_diff = 0.18 * u.mm / u.s
@@ -162,6 +181,7 @@ def test_teme_to_tirs():
 
 
 def test_itrs_to_teme():
+    """Check the coordinate transform accuracy."""
     # test_frame = "TEME"
     allowable_pos_diff = 300 * u.mm
     allowable_vel_diff = 0.21 * u.mm / u.s
@@ -179,6 +199,7 @@ def test_itrs_to_teme():
 
 
 def test_itrs_to_tirs():
+    """Check the coordinate transform accuracy."""
     # test_frame = "TIRS"
     allowable_pos_diff = 60 * u.mm
     allowable_vel_diff = 0.05 * u.mm / u.s
@@ -196,6 +217,7 @@ def test_itrs_to_tirs():
 
 
 def test_tirs_to_itrs():
+    """Check the coordinate transform accuracy."""
     # test_frame = "ITRS"
     allowable_pos_diff = 60 * u.mm
     allowable_vel_diff = 0.05 * u.mm / u.s

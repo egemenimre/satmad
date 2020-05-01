@@ -74,15 +74,20 @@ def teme_to_tirs(teme_coord, tirs_frame):
     # rotate position vector: TEME to TIRS
     r_tirs = teme_coord.cartesian.transform(teme_to_pef_mat)
 
-    # prepare rotation offset: w x r_TIRS
-    wxr = CartesianRepresentation(_w).cross(r_tirs)
+    # Check for velocity - skip velocity transform if not present
+    if teme_coord.data.differentials:
+        # prepare rotation offset: w x r_TIRS
+        wxr = CartesianRepresentation(_w).cross(r_tirs)
 
-    # do the velocity rotation and then add rotation offset
-    v_tirs = teme_coord.velocity.to_cartesian().transform(teme_to_pef_mat) - wxr
-    v_tirs = CartesianDifferential.from_cartesian(v_tirs)
+        # do the velocity rotation and then add rotation offset
+        v_tirs = teme_coord.velocity.to_cartesian().transform(teme_to_pef_mat) - wxr
+        v_tirs = CartesianDifferential.from_cartesian(v_tirs)
 
-    # Prepare final coord vector with velocity
-    tirs_coord = r_tirs.with_differentials(v_tirs)
+        # Prepare final coord vector with velocity
+        tirs_coord = r_tirs.with_differentials(v_tirs)
+    else:
+        # Prepare final coord vector without velocity
+        tirs_coord = r_tirs
 
     # Add coord data to the existing frame
     return tirs_frame.realize_frame(tirs_coord)
@@ -97,15 +102,20 @@ def tirs_to_teme(tirs_coord, teme_frame):
     # rotate position vector: TIRS to TEME
     r_teme = tirs_coord.cartesian.transform(pef_to_teme_mat)
 
-    # prepare rotation offset: w x r_TIRS
-    wxr = CartesianRepresentation(_w).cross(tirs_coord.cartesian)
+    # Check for velocity - skip velocity transform if not present
+    if tirs_coord.data.differentials:
+        # prepare rotation offset: w x r_TIRS
+        wxr = CartesianRepresentation(_w).cross(tirs_coord.cartesian)
 
-    # add rotation offset and then do the velocity rotation
-    v_teme = (tirs_coord.velocity.to_cartesian() + wxr).transform(pef_to_teme_mat)
-    v_teme = CartesianDifferential.from_cartesian(v_teme)
+        # add rotation offset and then do the velocity rotation
+        v_teme = (tirs_coord.velocity.to_cartesian() + wxr).transform(pef_to_teme_mat)
+        v_teme = CartesianDifferential.from_cartesian(v_teme)
 
-    # Prepare final coord vector with velocity
-    teme_coord = r_teme.with_differentials(v_teme)
+        # Prepare final coord vector with velocity
+        teme_coord = r_teme.with_differentials(v_teme)
+    else:
+        # Prepare final coord vector without velocity
+        teme_coord = r_teme
 
     # Add coord data to the existing frame
     return teme_frame.realize_frame(teme_coord)
