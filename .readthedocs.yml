@@ -24,5 +24,6 @@ python:
     - method: pip
       path: .
       extra_requirements:
+        - docs/requirements.txt
         - docs
         - all
