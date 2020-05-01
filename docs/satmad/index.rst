@@ -2,7 +2,7 @@
 satmad Documentation
 ********************
 
-This is the documentation for satmad.
+This is the documentation for satmad. XXX
 
 Reference/API
 =============
