@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-# Licensed under a 3-clause BSD style license - see LICENSE.rst
 #
-# Astropy documentation build configuration file.
+# SatMAD documentation build configuration file.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -30,11 +29,16 @@ import sys
 import datetime
 from importlib import import_module
 
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+import sphinx_rtd_theme
+
 # try:
 #     from sphinx_astropy.conf.v1 import *  # noqa
 # except ImportError:
 #     print('ERROR: the documentation requires the sphinx-astropy package to be installed')
 #     sys.exit(1)
+
 
 # Get configuration information from setup.cfg
 from configparser import ConfigParser
@@ -63,7 +67,29 @@ highlight_language = 'python3'
 # be used globally.
 # rst_epilog += """
 
+# Add any Sphinx extension module names here, as strings. They can be
+# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
+# ones.
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.todo',
+    'sphinx.ext.intersphinx',
+    'nbsphinx',
+    'IPython.sphinxext.ipython_console_highlighting',
+    'sphinx.ext.mathjax',  # Maths visualization
+    'sphinx.ext.graphviz',  # Dependency diagrams
+    'notfound.extension',
+]
 
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ['_templates']
+
+# The suffix of source filenames.
+source_suffix = '.rst'
+
+# The master toctree document.
+master_doc = 'index'
 
 # -- Project information ------------------------------------------------------
 
@@ -85,6 +111,22 @@ version = package.__version__.split('-', 1)[0]
 # The full version, including alpha/beta/rc tags.
 release = package.__version__
 
+#Intersphinx configuration
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'astropy': ('http://docs.astropy.org/en/stable/', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+    'matplotlib': ('https://matplotlib.org', None)
+}
+
+if os.environ.get('READTHEDOCS') == 'True':
+    nbsphinx_execute = 'never'
+else:
+    nbsphinx_execute = 'always'
+
+    # Controls when a cell will time out (defaults to 30; use -1 for no timeout):
+    nbsphinx_timeout = 60
 
 # -- Options for HTML output --------------------------------------------------
 
@@ -106,11 +148,11 @@ release = package.__version__
 #html_theme = None
 
 
-html_theme_options = {
-    'logotext1': 'satmad',  # white,  semi-bold
-    'logotext2': '',  # orange, light
-    'logotext3': ':docs'   # white,  light
-    }
+# html_theme_options = {
+#     'logotext1': 'satmad',  # white,  semi-bold
+#     'logotext2': '',  # orange, light
+#     'logotext3': ':docs'   # white,  light
+#     }
 
 
 # Custom sidebar templates, maps document names to template names.
@@ -131,11 +173,15 @@ html_theme_options = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = '{0} v{1}'.format(project, release)
+# html_title = '{0} v{1}'.format(project, release)
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = project + 'doc'
+# htmlhelp_basename = project + 'doc'
 
+html_theme = "sphinx_rtd_theme"
+
+# Add any paths that contain custom themes here, relative to this directory.
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # -- Options for LaTeX output -------------------------------------------------
 
