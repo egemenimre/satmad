@@ -62,7 +62,8 @@ highlight_language = 'python3'
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
 # rst_epilog += """
-"""
+
+
 
 # -- Project information ------------------------------------------------------
 
@@ -192,4 +193,5 @@ github_issues_url = 'https://github.com/{0}/issues/'.format(setup_cfg['github_pr
 #     dtype, target = line.split(None, 1)
 #     target = target.strip()
 #     nitpick_ignore.append((dtype, six.u(target)))
+
 
