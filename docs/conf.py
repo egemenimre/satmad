@@ -61,7 +61,7 @@ highlight_language = 'python3'
 
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
-rst_epilog += """
+# rst_epilog += """
 """
 
 # -- Project information ------------------------------------------------------
