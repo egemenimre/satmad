@@ -57,7 +57,7 @@ highlight_language = 'python3'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns.append('_templates')
+# exclude_patterns.append('_templates')
 
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
@@ -156,7 +156,7 @@ man_pages = [('index', project.lower(), project + u' Documentation',
 
 if setup_cfg.get('edit_on_github').lower() == 'true':
 
-    extensions += ['sphinx_astropy.ext.edit_on_github']
+    # extensions += ['sphinx_astropy.ext.edit_on_github']
 
     edit_on_github_project = setup_cfg['github_project']
     edit_on_github_branch = "master"
