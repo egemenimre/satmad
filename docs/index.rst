@@ -6,6 +6,8 @@ satellite mission analysis and design as well as orbital mechanics problems with
 to be used in the design and operation of real satellites. The target audience is academics and amateur satellite
 community, including Cubesats.
 
+Check the source code here: https://github.com/egemenimre/satmad
+
 While current functionality is limited, the aim looks like this:
 
 #. Operations support
