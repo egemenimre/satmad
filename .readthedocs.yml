@@ -16,7 +16,7 @@ version: 2
 # Optionally build your docs in additional formats such as PDF and ePub
 # formats: all
 # Don't build any extra formats
- formats: []
+formats: []
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
