@@ -75,7 +75,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.intersphinx',
-    'nbsphinx',
+#    'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting',
     'sphinx.ext.mathjax',  # Maths visualization
     'sphinx.ext.graphviz',  # Dependency diagrams
