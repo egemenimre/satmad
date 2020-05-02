@@ -11,9 +11,9 @@ from astropy import units as u
 from astropy.coordinates import CartesianRepresentation, ITRS, CIRS, CartesianDifferential, GCRS
 from astropy.time import Time
 
-from satmad.frames.j2000 import J2000
-from satmad.frames.teme import TEME
-from satmad.frames.tirs import TIRS
+from satmad.coordinates.j2000 import J2000
+from satmad.coordinates.teme import TEME
+from satmad.coordinates.tirs import TIRS
 
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
 
