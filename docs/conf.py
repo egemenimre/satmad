@@ -71,7 +71,7 @@ needs_sphinx = '1.3'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
+    'sphinx.ext.autodoc',  # generate apidoc
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.intersphinx',
@@ -79,8 +79,8 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting',
     'sphinx.ext.mathjax',  # Maths visualization
     'sphinx.ext.graphviz',  # Dependency diagrams
-    'notfound.extension',
-    'sphinx_automodapi.automodapi'
+    'notfound.extension'
+    # 'sphinx_automodapi.automodapi'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

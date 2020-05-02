@@ -7,4 +7,5 @@ Introduction
 Reference/API
 -------------
 
-.. automodapi:: satmad.frames
+.. automodule:: package_name.module
+   :members:
