@@ -7,6 +7,6 @@ Introduction
 Reference/API
 -------------
 
-.. automodapi:: satmad.frames.teme
+
 
 
