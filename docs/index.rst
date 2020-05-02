@@ -31,7 +31,7 @@ While current functionality is limited, the aim looks like this:
 .. toctree::
    :maxdepth: 2
 
-   frames/index
+   coordinates/index
 .. getting_started
 .. tutorials
 .. api
