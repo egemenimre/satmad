@@ -36,7 +36,6 @@ While current functionality is limited, the aim looks like this:
 .. tutorials
 .. api
 
-.. automodapi:: .frames
 
 Indices and tables
 ==================
