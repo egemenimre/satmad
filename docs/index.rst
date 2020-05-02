@@ -30,7 +30,6 @@ While current functionality is limited, the aim looks like this:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 .. getting_started
 .. tutorials
 .. api
