@@ -80,6 +80,7 @@ extensions = [
     'sphinx.ext.mathjax',  # Maths visualization
     'sphinx.ext.graphviz',  # Dependency diagrams
     'notfound.extension',
+    'sphinx_automodapi.automodapi'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
