@@ -1,4 +1,0 @@
-nbsphinx
-ipython
-sphinx-notfound-page
-sphinx-automodapi 
