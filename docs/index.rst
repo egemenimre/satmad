@@ -32,5 +32,5 @@ While current functionality is limited, the aim looks like this:
 .. toctree::
   :maxdepth: 2
 
-  satmad/index.rst
+  frames/index.rst
 
