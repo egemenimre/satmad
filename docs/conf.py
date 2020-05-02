@@ -28,9 +28,11 @@ author = 'Egemen Imre'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',  # auto api generation
+    'sphinx_automodapi.automodapi',  # auto api generation
+    'sphinx.ext.napoleon',  # numpy support
     'sphinx.ext.mathjax',  # LaTex style math
 ]
+numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
