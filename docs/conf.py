@@ -21,8 +21,11 @@ project = 'satmad'
 copyright = '2020, Egemen Imre'
 author = 'Egemen Imre'
 
+version = '0.0.1'
 
 # -- General configuration ---------------------------------------------------
+# By default, highlight as Python 3.
+highlight_language = 'python3'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -31,6 +34,7 @@ extensions = [
     'sphinx_automodapi.automodapi',  # auto api generation
     'sphinx.ext.napoleon',  # numpy support
     'sphinx.ext.mathjax',  # LaTex style math
+    'sphinx.ext.graphviz'  # Dependency diagrams
 ]
 numpydoc_show_class_members = False
 
@@ -48,7 +52,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
