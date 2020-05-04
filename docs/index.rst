@@ -32,6 +32,7 @@ While current functionality is limited, the aim looks like this:
    :maxdepth: 2
 
    coordinates/index
+   utils/index
 .. getting_started
 .. tutorials
 .. api
