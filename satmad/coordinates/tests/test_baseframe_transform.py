@@ -6,10 +6,10 @@ Copyright (C) 2020 Egemen Imre
 Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 
 """
-from pytest import approx
 from astropy import units as u
 from astropy.coordinates import CartesianRepresentation, ITRS, CIRS, CartesianDifferential, GCRS
 from astropy.time import Time
+from pytest import approx
 
 from satmad.coordinates.j2000 import J2000
 from satmad.coordinates.teme import TEME
@@ -18,37 +18,37 @@ from satmad.coordinates.tirs import TIRS
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
 
 # Vallado IAU 2000 - Table 3-6
-v_gcrs_true = CartesianDifferential(d_x=[-4.7432201610, 0.7905364950, 5.5337557240], unit=u.km / u.s, copy=True)
-r_gcrs_true = CartesianRepresentation(x=[5102.50895290, 6123.01139910, 6378.13693380], unit=u.km, copy=True)
+v_gcrs_true = CartesianDifferential([-4.7432201610, 0.7905364950, 5.5337557240], unit=u.km / u.s, copy=True)
+r_gcrs_true = CartesianRepresentation([5102.50895290, 6123.01139910, 6378.13693380], unit=u.km, copy=True)
 rv_gcrs_true = GCRS(r_gcrs_true.with_differentials(v_gcrs_true), obstime=time, representation_type="cartesian",
                     differential_type="cartesian")
 
 # Vallado IAU 2000 - Table 3-6 J2000
-v_j2000_true = CartesianDifferential(d_x=[-4.7432196000, 0.7905366000, 5.5337561900], unit=u.km / u.s, copy=True)
-r_j2000_true = CartesianRepresentation(x=[5102.50960000, 6123.01152000, 6378.13630000], unit=u.km, copy=True)
+v_j2000_true = CartesianDifferential([-4.7432196000, 0.7905366000, 5.5337561900], unit=u.km / u.s, copy=True)
+r_j2000_true = CartesianRepresentation([5102.50960000, 6123.01152000, 6378.13630000], unit=u.km, copy=True)
 rv_j2000_true = J2000(r_j2000_true.with_differentials(v_j2000_true), obstime=time, representation_type="cartesian",
                       differential_type="cartesian")
 # Vallado IAU 2000 - Table 3-6 CIRS
-v_cirs_true = CartesianDifferential(d_x=[-4.7453803300, 0.7903414530, 5.5319312880], unit=u.km / u.s, copy=True)
-r_cirs_true = CartesianRepresentation(x=[5100.01840470, 6122.78636480, 6380.34453270], unit=u.km, copy=True)
+v_cirs_true = CartesianDifferential([-4.7453803300, 0.7903414530, 5.5319312880], unit=u.km / u.s, copy=True)
+r_cirs_true = CartesianRepresentation([5100.01840470, 6122.78636480, 6380.34453270], unit=u.km, copy=True)
 rv_cirs_true = CIRS(r_cirs_true.with_differentials(v_cirs_true), obstime=time, representation_type="cartesian",
                     differential_type="cartesian")
 
 # Vallado IAU 2000 - Table 3-6 ITRS
-v_itrs_true = CartesianDifferential(d_x=[-3.2256365200, -2.8724514500, 5.5319244460], unit=u.km / u.s, copy=True)
-r_itrs_true = CartesianRepresentation(x=[-1033.4793830, 7901.29527540, 6380.35659580], unit=u.km, copy=True)
+v_itrs_true = CartesianDifferential([-3.2256365200, -2.8724514500, 5.5319244460], unit=u.km / u.s, copy=True)
+r_itrs_true = CartesianRepresentation([-1033.4793830, 7901.29527540, 6380.35659580], unit=u.km, copy=True)
 rv_itrs_true = ITRS(r_itrs_true.with_differentials(v_itrs_true), obstime=time, representation_type="cartesian",
                     differential_type="cartesian")
 
 # Vallado IAU 2000 - Table 3-6 TIRS
-v_tirs_true = CartesianDifferential(d_x=[-3.2256327470, -2.8724425110, 5.5319312880], unit=u.km / u.s, copy=True)
-r_tirs_true = CartesianRepresentation(x=[-1033.47503120, 7901.30558560, 6380.34453270], unit=u.km, copy=True)
+v_tirs_true = CartesianDifferential([-3.2256327470, -2.8724425110, 5.5319312880], unit=u.km / u.s, copy=True)
+r_tirs_true = CartesianRepresentation([-1033.47503120, 7901.30558560, 6380.34453270], unit=u.km, copy=True)
 rv_tirs_true = TIRS(r_tirs_true.with_differentials(v_tirs_true), obstime=time, representation_type="cartesian",
                     differential_type="cartesian")
 
 # Vallado IAU 2000 - Table 3-6 TEME
-v_teme_true = CartesianDifferential(d_x=[-4.7461314870, 0.7858180410, 5.5319312880], unit=u.km / u.s, copy=True)
-r_teme_true = CartesianRepresentation(x=[5094.18016210, 6127.64465950, 6380.34453270], unit=u.km, copy=True)
+v_teme_true = CartesianDifferential([-4.7461314870, 0.7858180410, 5.5319312880], unit=u.km / u.s, copy=True)
+r_teme_true = CartesianRepresentation([5094.18016210, 6127.64465950, 6380.34453270], unit=u.km, copy=True)
 rv_teme_true = TEME(r_teme_true.with_differentials(v_teme_true), obstime=time, representation_type="cartesian",
                     differential_type="cartesian")
 
