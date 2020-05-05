@@ -36,9 +36,7 @@ While current functionality is limited, the aim looks like this:
 
 .. about
 .. getting_started
-user_guide
-coordinates/index
-utils/index
+.. user_guide
 .. tutorials
 .. api
 .. references
