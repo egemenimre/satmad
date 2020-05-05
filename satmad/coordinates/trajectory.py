@@ -19,7 +19,7 @@ class Trajectory:
     Class that keeps the coordinates of a trajectory and interpolates coordinates in between.
 
     This class keeps the coordinate points in time and lazy inits an interpolated a set of new
-    _in between_ coordinates when requested. This enables sub-sampling or supersampling the
+    in between coordinates when requested. This enables sub-sampling or supersampling the
     coordinates or finding special points (e.g. Equator crossings) with ease.
 
     The class uses an `InterpolatedUnivariateSpline` inside, so the spline function is guaranteed
