@@ -39,7 +39,7 @@ class J2000(BaseCoordinateFrame):
 
     References
     ----------
-    The definitions and conversions are from IERS Conventions 2010, Chapter 5 [1]_.
+    The definitions and conversions are from IERS Conventions 2010, Chapter 5 [Ref2]_.
 
     """
     obstime = TimeAttribute(default=DEFAULT_OBSTIME)
@@ -60,7 +60,7 @@ class TEME(BaseCoordinateFrame):
     References
     ----------
     The definitions and conversions are from Fundamentals of Astrodynamics and Applications 4th Ed. Section 3.7, pg 231
-    [1]_.
+    [Ref1]_.
 
     """
     obstime = TimeAttribute(default=DEFAULT_OBSTIME)
@@ -77,7 +77,7 @@ class TIRS(BaseCoordinateFrame):
 
     References
     ----------
-    The definitions and conversions are from IERS Conventions 2010, Chapter 5 [1]_.
+    The definitions and conversions are from IERS Conventions 2010, Chapter 5 [Ref2]_.
 
     """
 
@@ -188,6 +188,7 @@ def tirs_to_teme(tirs_coord, teme_frame):
 
 @frame_transform_graph.transform(DynamicMatrixTransform, TIRS, ITRS)
 def tirs_to_itrs(tirs_coord, itrs_frame):
+    """Dynamic conversion matrix (Polar Motion) from TIRS to ITRS."""
     tirs_to_itrs_mat = _polar_mot_matrix(tirs_coord.obstime)
 
     return tirs_to_itrs_mat
@@ -195,6 +196,7 @@ def tirs_to_itrs(tirs_coord, itrs_frame):
 
 @frame_transform_graph.transform(DynamicMatrixTransform, ITRS, TIRS)
 def itrs_to_tirs(itrs_coord, tirs_frame):
+    """Dynamic conversion matrix (Polar Motion) from ITRS to TIRS."""
     itrs_to_tirs_mat = _polar_mot_matrix(itrs_coord.obstime).transpose()
 
     return itrs_to_tirs_mat
@@ -202,9 +204,11 @@ def itrs_to_tirs(itrs_coord, tirs_frame):
 
 @frame_transform_graph.transform(StaticMatrixTransform, J2000, GCRS)
 def j2000_to_gcrs():
+    """Constant conversion matrix (Frame Bias) from J2000 to GCRS."""
     return _FRAME_BIAS_MATRIX
 
 
 @frame_transform_graph.transform(StaticMatrixTransform, GCRS, J2000)
 def gcrs_to_j2000():
+    """Constant conversion matrix (Frame Bias) from GCRS to J2000."""
     return _FRAME_BIAS_MATRIX.transpose()
