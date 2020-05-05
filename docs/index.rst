@@ -1,5 +1,5 @@
 SatMAD: Satellite Mission Analysis and Design
----------------------------------------------------
+=============================================
 
 SatMAD is an open source Python package, aiming at providing the base functionality to solve
 satellite mission analysis and design as well as orbital mechanics problems with enough precision and performance
@@ -31,15 +31,22 @@ While current functionality is limited, the aim looks like this:
 .. toctree::
    :maxdepth: 2
 
-   coordinates/index
-   utils/index
+   user_guide
+   references
+
+.. about
 .. getting_started
+user_guide
+coordinates/index
+utils/index
 .. tutorials
 .. api
+.. references
+
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
