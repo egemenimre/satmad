@@ -8,7 +8,8 @@ Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import CartesianRepresentation, CartesianDifferential, SkyCoord
+from astropy.coordinates import CartesianRepresentation, \
+    CartesianDifferential, SkyCoord
 from astropy.time import Time
 
 from satmad.utils.interpolators import CartInterpolator3D
@@ -16,21 +17,26 @@ from satmad.utils.interpolators import CartInterpolator3D
 
 class Trajectory:
     """
-    Class that keeps the coordinates of a trajectory and interpolates coordinates in between.
+    Class that keeps the coordinates of a trajectory and interpolates
+    coordinates in between.
 
-    This class keeps the coordinate points in time and lazy inits an interpolated a set of new
-    in between coordinates when requested. This enables sub-sampling or supersampling the
-    coordinates or finding special points (e.g. Equator crossings) with ease.
+    This class keeps the coordinate points in time and lazy inits an
+    interpolated a set of new
+    in between coordinates when requested. This enables sub-sampling or
+    supersampling the coordinates or finding special points (e.g. Equator
+    crossings) with ease.
 
-    The class uses an `InterpolatedUnivariateSpline` inside, so the spline function is guaranteed
-    to pass through all provided points. The default spline degree is set to 5.
+    The class uses an `InterpolatedUnivariateSpline` inside, so the spline
+    function is guaranteed to pass through all provided points. The default
+    spline degree is set to 5.
 
     Parameters
     ----------
     coords_list : SkyCoord
         `SkyCoord` object containing the trajectory
     replicate : bool
-        If `True` replicates the `coords_list` into the object, otherwise creates a shallow copy
+        If `True` replicates the `coords_list` into the object, otherwise
+        creates a shallow copy
         of the `coords_list`
     """
 
@@ -39,8 +45,9 @@ class Trajectory:
     """Flag to indicate whether interpolators are already initialised."""
 
     _has_velocity = False
-    """Flag to indicate whether there is velocity information in the supplied 
-    trajectory coordinates. Controls whether velocity interpolation is to take place or not."""
+    """Flag to indicate whether there is velocity information in the supplied
+    trajectory coordinates. Controls whether velocity interpolation is to
+    take place or not."""
 
     # TODO _t_begin to be replaced by Episode object
     _t_begin: Time
@@ -51,8 +58,10 @@ class Trajectory:
     _extrapolate_action = "raise"
 
     _EPS_TIME = 10 * u.us
-    """Allowable time threshold, this much 'out of bounds' is allowed when handling requested 
-    interpolation times. This helps with floating point artifacts such as round-off errors."""
+    """Allowable time threshold, this much 'out of bounds' is allowed when
+    handling requested
+    interpolation times. This helps with floating point artifacts such as
+    round-off errors."""
 
     # Shorthand to save rendering of the derived unit
     _u_km_per_s = u.km / u.s
@@ -69,7 +78,8 @@ class Trajectory:
         # save the frame name for easy access when creating new instances
         self._frame_name = self._coord_list.frame[0].name
 
-        # save the begin and end times for the internal trajectory and the interpolator
+        # save the begin and end times for the internal trajectory
+        # and the interpolator
         self._t_begin = self._coord_list[0].obstime
         self._t_end = self._coord_list[-1].obstime
 
@@ -89,7 +99,8 @@ class Trajectory:
         Returns
         -------
         coords : SkyCoord
-           A `SkyCoord` object with the requested coordinate(s), in the original frame
+           A `SkyCoord` object with the requested coordinate(s), in the
+           original frame
 
         Raises
         ------
@@ -113,13 +124,14 @@ class Trajectory:
             v = CartesianDifferential(np.asarray(v), copy=False, xyz_axis=1)
             coords = coords.with_differentials(v)
 
-        return SkyCoord(coords, obstime=t, frame=self._frame_name, representation_type="cartesian",
+        return SkyCoord(coords, obstime=t, frame=self._frame_name,
+                        representation_type="cartesian",
                         differential_type="cartesian")
 
     def _compute_pos(self, t):
         """
-        Computes the position vector at the interpolated time, also checks for the small
-        float artifacts at beginning or end.
+        Computes the position vector at the interpolated time, also checks for
+        the small float artifacts at beginning or end.
 
         Parameters
         ----------
@@ -135,7 +147,8 @@ class Trajectory:
         ValueError
             If the requested `t` value is out of bounds for the interpolator
         """
-        # check whether the requested times are _almost_ equal to begin and end times
+        # check whether the requested times are _almost_ equal to begin and
+        # end times.
         # this saves against floating point rounding errors
         # is the requested time very close to first time
         if abs((t - self._t_begin).to(u.us)) < self._EPS_TIME:
@@ -147,7 +160,8 @@ class Trajectory:
             # set position to last position component
             r = self._coord_list[-1].cartesian.xyz
 
-        # target time is either completely out of bounds or comfortably inside the interpolation range
+        # target time is either completely out of bounds or comfortably
+        # inside the interpolation range
         else:
             # Convert time to "days since epoch"
             t_req = (t - self._t_begin).jd
@@ -158,8 +172,8 @@ class Trajectory:
 
     def _compute_vel(self, t):
         """
-        Computes the velocity vector at the interpolated time, also checks for the small
-        float artifacts at beginning or end.
+        Computes the velocity vector at the interpolated time, also checks for
+        the small float artifacts at beginning or end.
 
         Parameters
         ----------
@@ -175,7 +189,8 @@ class Trajectory:
         ValueError
             If the requested `t` value is out of bounds for the interpolator
         """
-        # check whether the requested times are _almost_ equal to begin and end times
+        # check whether the requested times are _almost_ equal to begin and
+        # end times
         # this saves against floating point rounding errors
         # is the requested time very close to first time
         if abs((t - self._t_begin).to(u.us)) < self._EPS_TIME:
@@ -187,7 +202,8 @@ class Trajectory:
             # set velocity to last velocity component
             v = self._coord_list[-1].velocity.d_xyz
 
-        # target time is either completely out of bounds or comfortably inside the interpolation range
+        # target time is either completely out of bounds or comfortably
+        # inside the interpolation range
         else:
             # Convert time to "days since epoch"
             t_req = (t - self._t_begin).jd
@@ -199,7 +215,8 @@ class Trajectory:
 
     @property
     def coord_list(self):
-        """Returns the list of underlying coordinates forming the trajectory."""
+        """Returns the list of underlying coordinates forming the
+        trajectory."""
         return self._coord_list
 
     def _init_interpolators(self):
@@ -216,7 +233,7 @@ class Trajectory:
             self._init_vel_interpolators(t_list)
 
         # Finally, set interpolators flag
-        _interpolators_initialised = True
+        self._interpolators_initialised = True
 
     def _init_pos_interpolators(self, t_list):
         """
@@ -232,8 +249,10 @@ class Trajectory:
         r_y_list = self._coord_list.cartesian.xyz[1, :].to(u.km).value
         r_z_list = self._coord_list.cartesian.xyz[2, :].to(u.km).value
 
-        self._r_interpol = CartInterpolator3D(t_list, r_x_list, r_y_list, r_z_list, spline_degree=self._spline_degree,
-                                              extrapolate_action=self._extrapolate_action)
+        self._r_interpol = CartInterpolator3D(
+            t_list, r_x_list, r_y_list, r_z_list,
+            spline_degree=self._spline_degree,
+            extrapolate_action=self._extrapolate_action)
 
     def _init_vel_interpolators(self, t_list):
         """
@@ -245,14 +264,21 @@ class Trajectory:
             Input dimension of data points -- must be strictly increasing
 
         """
-        v_x_list = self._coord_list.velocity.d_xyz[0].to(self._u_km_per_s).value
-        v_y_list = self._coord_list.velocity.d_xyz[1].to(self._u_km_per_s).value
-        v_z_list = self._coord_list.velocity.d_xyz[2].to(self._u_km_per_s).value
+        v_x_list = self._coord_list.velocity.d_xyz[0]\
+            .to(self._u_km_per_s).value
+        v_y_list = self._coord_list.velocity.d_xyz[1]\
+            .to(self._u_km_per_s).value
+        v_z_list = self._coord_list.velocity.d_xyz[2]\
+            .to(self._u_km_per_s).value
 
-        self._v_interpol = CartInterpolator3D(t_list, v_x_list, v_y_list, v_z_list, spline_degree=self._spline_degree,
-                                              extrapolate_action=self._extrapolate_action)
+        self._v_interpol = CartInterpolator3D(
+            t_list, v_x_list, v_y_list, v_z_list,
+            spline_degree=self._spline_degree,
+            extrapolate_action=self._extrapolate_action)
 
     def __str__(self):
         """String representation of the object."""
-        return f"Trajectory from {self._t_begin} to {self._t_end} in frame {self._frame_name}. " \
-               f"(Interpolators initialised: {self._interpolators_initialised})"
+        return f"Trajectory from {self._t_begin} to {self._t_end} i" \
+               f"n frame {self._frame_name}. " \
+               f"(Interpolators initialised: " \
+               f"{self._interpolators_initialised})"
