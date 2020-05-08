@@ -3,9 +3,9 @@ version: 2
 
 jobs:
 
-  build:
+  tests:
     docker:
-      - image: themattrix/tox
+      - image: circleci/python:3.7
 
     steps:
       - checkout
@@ -15,8 +15,6 @@ jobs:
       - run:
           name: Run tests
           command: tox -e py37-test
-    - store_artifacts:
-        path: results
       - store_artifacts:
           path: ./log
           destination: logs-file
@@ -48,4 +46,4 @@ workflows:
   tests_and_docs:
     jobs:
       - html-docs
-      - build
+      - tests
