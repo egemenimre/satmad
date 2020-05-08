@@ -3,15 +3,15 @@ version: 2
 
 jobs:
 
-  tests:
+  build:
     docker:
       - image: themattrix/tox
 
     steps:
       - checkout
       - run:
-        name: Install tox
-        command: pip install tox
+          name: Install tox
+          command: pip install tox
       - run:
           name: Run tests
           command: tox -e py37-test
@@ -48,4 +48,4 @@ workflows:
   tests_and_docs:
     jobs:
       - html-docs
-      - tests
+      - build
