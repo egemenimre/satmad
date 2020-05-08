@@ -8,8 +8,8 @@ Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import CartesianRepresentation, \
-    CartesianDifferential, SkyCoord
+from astropy.coordinates import (CartesianDifferential,
+                                 CartesianRepresentation, SkyCoord)
 from astropy.time import Time
 
 from satmad.utils.interpolators import CartInterpolator3D

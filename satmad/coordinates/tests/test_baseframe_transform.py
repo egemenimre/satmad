@@ -7,8 +7,8 @@ Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 
 """
 from astropy import units as u
-from astropy.coordinates import CartesianRepresentation, ITRS, CIRS, \
-    CartesianDifferential, GCRS
+from astropy.coordinates import (CIRS, GCRS, ITRS, CartesianDifferential,
+                                 CartesianRepresentation)
 from astropy.time import Time
 from pytest import approx
 

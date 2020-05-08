@@ -7,39 +7,54 @@ Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 
 """
 import numpy as np
-from astropy import units as u, _erfa as erfa
-from astropy.coordinates import BaseCoordinateFrame, TimeAttribute, representation as r, frame_transform_graph, \
-    StaticMatrixTransform, GCRS, FunctionTransform, CartesianRepresentation, CartesianDifferential, \
-    DynamicMatrixTransform, ITRS
-from astropy.coordinates.builtin_frames.utils import DEFAULT_OBSTIME, get_jd12, get_polar_motion
+from astropy import _erfa as erfa
+from astropy import units as u
+from astropy.coordinates import (GCRS, ITRS, BaseCoordinateFrame,
+                                 CartesianDifferential,
+                                 CartesianRepresentation,
+                                 DynamicMatrixTransform, FunctionTransform,
+                                 StaticMatrixTransform, TimeAttribute,
+                                 frame_transform_graph)
+from astropy.coordinates import representation as r
+from astropy.coordinates.builtin_frames.utils import (DEFAULT_OBSTIME,
+                                                      get_jd12,
+                                                      get_polar_motion)
 from astropy.coordinates.matrix_utilities import rotation_matrix
 
 _w = np.array([0, 0, 7.292115E-5]) / u.s
-"""Nominal mean angular velocity of the Earth [rad/s] as per GRS 80. (see IERS TN 36)"""
+"""Nominal mean angular velocity of the Earth [rad/s] as per GRS 80.
+(see IERS TN 36)"""
 
 _FRAME_BIAS_MATRIX = np.array(
     [[0.9999999999999942, 7.078279477857338E-8, -8.056217380986972E-8],
      [-7.078279744199198E-8, 0.9999999999999969, -3.306040883980552E-8],
      [8.056217146976134E-8, 3.3060414542221364E-8, 0.9999999999999962]])
-"""This is the fixed 3x3 frame bias matrix that does the conversion between the J2000 and GCRS frames. 
+"""This is the fixed 3x3 frame bias matrix that does the conversion between the
+ J2000 and GCRS frames.
 """
 
 
-# ***********  Mean Pole and Equinox at J2000.0 Reference System (J2000) ***********
+# ******  Mean Pole and Equinox at J2000.0 Reference System (J2000) ******
 
 class J2000(BaseCoordinateFrame):
     """
-    A coordinate or frame in the Mean Pole and Equinox at J2000.0 Reference System (J2000).
+    A coordinate or frame in the Mean Pole and Equinox at J2000.0 Reference
+    System (J2000).
 
-    This coordinate frame is similar to GCRS but rotated by the frame bias. This rotation is applicable only to the
-    equinox based approach, and is only an approximation. The difference between GCRS and J2000 is less than 1m for
-    the Low Earth Orbit, therefore these two can be used interchangeably with a small error.
+    This coordinate frame is similar to GCRS but rotated by the frame bias.
+    This rotation is applicable only to the
+    equinox based approach, and is only an approximation. The difference
+    betweenGCRS and J2000 is less than 1m for
+    the Low Earth Orbit, therefore these two can be used interchangeably with
+    a small error.
 
-    This frame is for legacy applications that store data in J2000. GCRS should be used wherever possible.
+    This frame is for legacy applications that store data in J2000. GCRS
+    should be used wherever possible.
 
     References
     ----------
-    The definitions and conversions are from IERS Conventions 2010, Chapter 5 [Ref2]_.
+    The definitions and conversions are from IERS Conventions 2010, Chapter 5
+    [Ref2]_.
 
     """
     obstime = TimeAttribute(default=DEFAULT_OBSTIME)
@@ -48,18 +63,22 @@ class J2000(BaseCoordinateFrame):
     default_differential = r.CartesianDifferential
 
 
-# *********** True Equator Mean Equinox Reference System definition and conversions. ***********
+# *********** True Equator Mean Equinox Reference System definition and
+# conversions. ***********
 
 class TEME(BaseCoordinateFrame):
     """
-    A coordinate or frame in the True Equator Mean Equinox Reference System (TEME).
+    A coordinate or frame in the True Equator Mean Equinox Reference System
+    (TEME).
 
-    This frame is used as the output of the SGP4 Satellite Propagator. This should not be used for any other purpose.
+    This frame is used as the output of the SGP4 Satellite Propagator.
+    This should not be used for any other purpose.
     GCRS should be used wherever possible.
 
     References
     ----------
-    The definitions and conversions are from Fundamentals of Astrodynamics and Applications 4th Ed. Section 3.7, pg 231
+    The definitions and conversions are from Fundamentals of Astrodynamics and
+    Applications 4th Ed. Section 3.7, pg 231
     [Ref1]_.
 
     """
@@ -69,15 +88,18 @@ class TEME(BaseCoordinateFrame):
     default_differential = r.CartesianDifferential
 
 
-# *********** Terrestrial Intermediate Reference System (TIRS) definition and conversions. ***********
+# *********** Terrestrial Intermediate Reference System (TIRS) definition
+# and conversions. ***********
 
 class TIRS(BaseCoordinateFrame):
     """
-    A coordinate or frame in the Terrestrial Intermediate Reference System (TIRS).
+    A coordinate or frame in the Terrestrial Intermediate Reference System
+    (TIRS).
 
     References
     ----------
-    The definitions and conversions are from IERS Conventions 2010, Chapter 5 [Ref2]_.
+    The definitions and conversions are from IERS Conventions 2010, Chapter 5
+    [Ref2]_.
 
     """
 
@@ -111,7 +133,8 @@ def _polar_mot_matrix(obstime):
     """
     Form the matrix of polar motion for a given date, IAU 2000.
 
-    The matrix operates in the sense V(TRS) = rpom * V(CIP), meaning that it is the final rotation when computing the
+    The matrix operates in the sense V(TRS) = rpom * V(CIP), meaning that
+    it is the final rotation when computing the
     pointing direction to a celestial source.
 
     Parameters
@@ -134,7 +157,8 @@ def _polar_mot_matrix(obstime):
 @frame_transform_graph.transform(FunctionTransform, TEME, TIRS)
 def teme_to_tirs(teme_coord, tirs_frame):
     # TEME to TIRS basic rotation matrix
-    teme_to_pef_mat = rotation_matrix(_gmst82_angle(teme_coord.obstime), axis='z')
+    teme_to_pef_mat = rotation_matrix(
+        _gmst82_angle(teme_coord.obstime), axis='z')
 
     # rotate position vector: TEME to TIRS
     r_tirs = teme_coord.cartesian.transform(teme_to_pef_mat)
@@ -145,7 +169,8 @@ def teme_to_tirs(teme_coord, tirs_frame):
         wxr = CartesianRepresentation(_w).cross(r_tirs)
 
         # do the velocity rotation and then add rotation offset
-        v_tirs = teme_coord.velocity.to_cartesian().transform(teme_to_pef_mat) - wxr
+        v_tirs =\
+            teme_coord.velocity.to_cartesian().transform(teme_to_pef_mat) - wxr
         v_tirs = CartesianDifferential.from_cartesian(v_tirs)
 
         # Prepare final coord vector with velocity
@@ -161,7 +186,8 @@ def teme_to_tirs(teme_coord, tirs_frame):
 @frame_transform_graph.transform(FunctionTransform, TIRS, TEME)
 def tirs_to_teme(tirs_coord, teme_frame):
     # TIRS to TEME basic rotation matrix
-    teme_to_pef_mat = rotation_matrix(_gmst82_angle(tirs_coord.obstime), axis='z')
+    teme_to_pef_mat = rotation_matrix(
+        _gmst82_angle(tirs_coord.obstime), axis='z')
     pef_to_teme_mat = teme_to_pef_mat.transpose()
 
     # rotate position vector: TIRS to TEME
@@ -173,7 +199,8 @@ def tirs_to_teme(tirs_coord, teme_frame):
         wxr = CartesianRepresentation(_w).cross(tirs_coord.cartesian)
 
         # add rotation offset and then do the velocity rotation
-        v_teme = (tirs_coord.velocity.to_cartesian() + wxr).transform(pef_to_teme_mat)
+        v_teme = (tirs_coord.velocity.to_cartesian() + wxr).\
+            transform(pef_to_teme_mat)
         v_teme = CartesianDifferential.from_cartesian(v_teme)
 
         # Prepare final coord vector with velocity
