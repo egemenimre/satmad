@@ -15,8 +15,6 @@ jobs:
         - run:
             name: Run tests
             command: tox -e py37-test
-      - store_artifacts:
-          path: results
         - store_artifacts:
             path: ./log
             destination: logs-file
