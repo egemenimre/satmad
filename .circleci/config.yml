@@ -1,26 +1,51 @@
 # Python CircleCI 2.0 configuration file
 version: 2
+
 jobs:
-  build:
+
+  tests:
+      docker:
+        - image: themattrix/tox
+
+      steps:
+        - checkout
+        - run:
+          name: Install tox
+          command: pip install tox
+        - run:
+            name: Run tests
+            command: tox -e py37-test
+      - store_artifacts:
+          path: results
+        - store_artifacts:
+            path: ./log
+            destination: logs-file
+
+  html-docs:
     docker:
       - image: circleci/python:3.7
-
-    working_directory: ~/repo
-
     steps:
-      # Step 1: obtain repo from GitHub
       - checkout
-      # Step 2: create virtual env and install dependencies
       - run:
-          name: install dependencies
+          name: Install apt packages
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
-      # Step 3: run linter and tests
+            sudo apt update
+            sudo apt install -y graphviz
       - run:
-          name: run tests
-          command: |
-            . venv/bin/activate
-            flake8 --exclude=venv* --statistics
-            pytest -v --cov=satmad
+          name: Install Python dependencies
+          command: pip install tox --user
+      - run:
+          name: Make sure style checks pass
+          command: tox -e codestyle
+      - run:
+          name: Build Docs
+          command: tox -e build_docs -- -j=4
+      - store_artifacts:
+          path: docs/_build/html
+
+workflows:
+  version: 2
+  tests_and_docs:
+    jobs:
+      - html-docs
+      - tests
