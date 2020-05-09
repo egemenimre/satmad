@@ -69,13 +69,14 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+_build
 
 # PyBuilder
 target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+*/.ipynb_checkpoints/*
 
 # IPython
 profile_default/
@@ -113,6 +114,12 @@ venv.bak/
 # Spyder project settings
 .spyderproject
 .spyproject
+
+# VSCode
+.vscode
+
+# PyCharm
+.idea
 
 # Rope project settings
 .ropeproject
