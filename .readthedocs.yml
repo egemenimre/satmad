@@ -7,7 +7,9 @@ version: 2
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
+  builder: html
   configuration: docs/conf.py
+  fail_on_warning: true
 
 # Don't build any extra formats
 formats: []
@@ -16,6 +18,11 @@ formats: []
 python:
   version: 3.7
   install:
-    - requirements: docs/requirements.txt
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+#  install:
+#    - requirements: docs/requirements.txt
 
 
