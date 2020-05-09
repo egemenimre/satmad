@@ -34,7 +34,8 @@ extensions = [
     'sphinx.ext.autodoc',  # auto api generation
     'sphinx.ext.napoleon',  # numpy support
     'sphinx.ext.mathjax',  # LaTex style math
-    'sphinx.ext.graphviz'  # Dependency diagrams
+    'sphinx.ext.graphviz',  # Dependency diagrams
+    'sphinx.ext.intersphinx',  # Link mapping to external projects
 ]
 numpydoc_show_class_members = False
 
@@ -51,6 +52,15 @@ source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
+
+#Intersphinx configuration
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'astropy': ('http://docs.astropy.org/en/stable/', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+    'matplotlib': ('https://matplotlib.org', None)
+}
 
 # -- Options for HTML output -------------------------------------------------
 
