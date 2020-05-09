@@ -1,9 +1,10 @@
+# SatMAD: Satellite Mission Analysis and Design for Python
+#
+# Copyright (C) ${YEAR} Egemen Imre
+#
+# Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
 Test coordinate transformations for the TEME, J2000 and TIRS coordinate frames.
-
-Copyright (C) 2020 Egemen Imre
-
-Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 
 """
 from astropy import units as u

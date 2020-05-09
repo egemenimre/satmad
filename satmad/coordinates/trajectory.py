@@ -1,9 +1,10 @@
+# SatMAD: Satellite Mission Analysis and Design for Python
+#
+# Copyright (C) ${YEAR} Egemen Imre
+#
+# Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
 Trajectory of an object with interpolators.
-
-Copyright (C) 2020 Egemen Imre
-
-Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 
 """
 import numpy as np
