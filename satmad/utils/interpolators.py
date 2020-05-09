@@ -51,15 +51,17 @@ class CartInterpolator3D:
      The number of data points must be larger than the `spline_degree`.
     """
 
-    def __init__(self, t, x, y, z, spline_degree=5,
-                 extrapolate_action="raise"):
+    def __init__(self, t, x, y, z, spline_degree=5, extrapolate_action="raise"):
         # init interpolators
         self._r_x_interpol = ip.InterpolatedUnivariateSpline(
-            t, x, k=spline_degree, ext=extrapolate_action)
+            t, x, k=spline_degree, ext=extrapolate_action
+        )
         self._r_y_interpol = ip.InterpolatedUnivariateSpline(
-            t, y, k=spline_degree, ext=extrapolate_action)
+            t, y, k=spline_degree, ext=extrapolate_action
+        )
         self._r_z_interpol = ip.InterpolatedUnivariateSpline(
-            t, z, k=spline_degree, ext=extrapolate_action)
+            t, z, k=spline_degree, ext=extrapolate_action
+        )
 
         # set the interpolator class name
         self._interpolator_name = type(self._r_x_interpol).__name__
@@ -108,13 +110,17 @@ class CartInterpolator3D:
         # t limit check is carried out within the interpolators themselves
 
         # generate the interpolated values
-        r = [self._r_x_interpol(t, nu, ext),
-             self._r_y_interpol(t, nu, ext),
-             self._r_z_interpol(t, nu, ext)]
+        r = [
+            self._r_x_interpol(t, nu, ext),
+            self._r_y_interpol(t, nu, ext),
+            self._r_z_interpol(t, nu, ext),
+        ]
 
         return r
 
     def __str__(self):
-        return f"3D Cartesian Interpolator ({self.interpolator_name}) " \
-               f"with {len(self._r_x_interpol.get_knots())} " \
-               f"knots for each axis."
+        return (
+            f"3D Cartesian Interpolator ({self.interpolator_name}) "
+            f"with {len(self._r_x_interpol.get_knots())} "
+            f"knots for each axis."
+        )

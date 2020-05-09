@@ -8,8 +8,7 @@ Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import (CartesianDifferential,
-                                 CartesianRepresentation, SkyCoord)
+from astropy.coordinates import CartesianDifferential, CartesianRepresentation, SkyCoord
 from astropy.time import Time
 
 from satmad.utils.interpolators import CartInterpolator3D
@@ -124,9 +123,13 @@ class Trajectory:
             v = CartesianDifferential(np.asarray(v), copy=False, xyz_axis=1)
             coords = coords.with_differentials(v)
 
-        return SkyCoord(coords, obstime=t, frame=self._frame_name,
-                        representation_type="cartesian",
-                        differential_type="cartesian")
+        return SkyCoord(
+            coords,
+            obstime=t,
+            frame=self._frame_name,
+            representation_type="cartesian",
+            differential_type="cartesian",
+        )
 
     def _compute_pos(self, t):
         """
@@ -250,9 +253,13 @@ class Trajectory:
         r_z_list = self._coord_list.cartesian.xyz[2, :].to(u.km).value
 
         self._r_interpol = CartInterpolator3D(
-            t_list, r_x_list, r_y_list, r_z_list,
+            t_list,
+            r_x_list,
+            r_y_list,
+            r_z_list,
             spline_degree=self._spline_degree,
-            extrapolate_action=self._extrapolate_action)
+            extrapolate_action=self._extrapolate_action,
+        )
 
     def _init_vel_interpolators(self, t_list):
         """
@@ -264,21 +271,24 @@ class Trajectory:
             Input dimension of data points -- must be strictly increasing
 
         """
-        v_x_list = self._coord_list.velocity.d_xyz[0]\
-            .to(self._u_km_per_s).value
-        v_y_list = self._coord_list.velocity.d_xyz[1]\
-            .to(self._u_km_per_s).value
-        v_z_list = self._coord_list.velocity.d_xyz[2]\
-            .to(self._u_km_per_s).value
+        v_x_list = self._coord_list.velocity.d_xyz[0].to(self._u_km_per_s).value
+        v_y_list = self._coord_list.velocity.d_xyz[1].to(self._u_km_per_s).value
+        v_z_list = self._coord_list.velocity.d_xyz[2].to(self._u_km_per_s).value
 
         self._v_interpol = CartInterpolator3D(
-            t_list, v_x_list, v_y_list, v_z_list,
+            t_list,
+            v_x_list,
+            v_y_list,
+            v_z_list,
             spline_degree=self._spline_degree,
-            extrapolate_action=self._extrapolate_action)
+            extrapolate_action=self._extrapolate_action,
+        )
 
     def __str__(self):
         """String representation of the object."""
-        return f"Trajectory from {self._t_begin} to {self._t_end} i" \
-               f"n frame {self._frame_name}. " \
-               f"(Interpolators initialised: " \
-               f"{self._interpolators_initialised})"
+        return (
+            f"Trajectory from {self._t_begin} to {self._t_end} i"
+            f"n frame {self._frame_name}. "
+            f"(Interpolators initialised: "
+            f"{self._interpolators_initialised})"
+        )
