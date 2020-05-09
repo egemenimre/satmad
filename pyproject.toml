@@ -6,6 +6,15 @@ build-backend = "flit_core.buildapi"
 module = "satmad"
 author = "Egemen Imre"
 description-file = "README.rst"
-home-page = "https://satmad.readthedocs.io/"
-classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+home-page = "https://github.com/egemenimre/satmad/"
+keywords = "satellite,satellite design,mission analysis,aerospace,engineering,astrodynamics,orbits,orbital mechanics"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 
