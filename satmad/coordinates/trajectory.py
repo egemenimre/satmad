@@ -30,14 +30,6 @@ class Trajectory:
     function is guaranteed to pass through all provided points. The default
     spline degree is set to 5.
 
-    Parameters
-    ----------
-    coords_list : SkyCoord
-        `SkyCoord` object containing the trajectory
-    replicate : bool
-        If `True` replicates the `coords_list` into the object, otherwise
-        creates a shallow copy
-        of the `coords_list`
     """
 
     # Do not init interpolators by default - lazy init when requested
@@ -67,6 +59,16 @@ class Trajectory:
     _u_km_per_s = u.km / u.s
 
     def __init__(self, coords_list: SkyCoord, replicate=False):
+        """
+        Parameters
+        ----------
+        coords_list : SkyCoord
+            `SkyCoord` object containing the trajectory
+        replicate : bool, optional
+            If `True` replicates the `coords_list` into the object, otherwise
+            creates a shallow copy
+            of the `coords_list`. Default is False.
+        """
 
         if replicate:
             # replicate internal coordinate data
