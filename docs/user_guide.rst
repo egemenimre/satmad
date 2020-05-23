@@ -1,7 +1,7 @@
 User Guide
 ==========
 
-Everything Starts with a :py:class:`~satmad.coordinates.trajectory.Trajectory`
+Everything Starts with a :class:`.Trajectory`
 ------------------------------------------------------------------------------
 
 At the heart of the SatMAD data structures is the :class:`.Trajectory` class.
@@ -19,4 +19,5 @@ Other Topics
 
    coordinates/trajectory
    coordinates/frames
+   utils/timeinterval
    utils/index
