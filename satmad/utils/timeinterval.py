@@ -36,8 +36,8 @@ class TimeInterval:
     #     flag begin inclusive
 
     _EPS_TIME = 10 * u.us
-    """Allowable time threshold, this much 'out of bounds' is allowed when handling 
-    requested interpolation times. This helps with floating point artifacts such as 
+    """Allowable time threshold, this much 'out of bounds' is allowed when handling
+    requested interpolation times. This helps with floating point artifacts such as
     round-off errors."""
 
     def __init__(self, init_times, end_times, replicate=False):
