@@ -14,12 +14,12 @@ from astropy.time import Time, TimeDelta
 from satmad.utils.timeinterval import (
     TimeInterval,
     _contains,
+    _expand,
     _intersect,
+    _interval_equals,
     _is_intersecting,
     _is_within_interval,
     _union,
-    _expand,
-    _interval_equals,
 )
 
 before = (
