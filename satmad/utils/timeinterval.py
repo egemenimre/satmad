@@ -61,7 +61,16 @@ class TimeInterval:
             end = end_time[0]
 
         # Check the type of end_time and fill values accordingly
-        if isinstance(end_time, Time):
+        if isinstance(end_time, TimeDelta):
+            # end time is a TimeDelta (duration)
+
+            if replicate:
+                self._start = start.replicate()
+            else:
+                self._start = start
+            self._end = start + end
+
+        elif isinstance(end_time, Time) and not isinstance(end_time, TimeDelta):
             # end time is a Time
 
             # replicate or shallow copy start and end values - use the first
@@ -79,14 +88,6 @@ class TimeInterval:
                 raise ValueError(
                     f"End time ({end.isot}) is earlier than start time ({start.isot})"
                 )
-        elif isinstance(end_time, TimeDelta):
-            # end time is a TimeDelta (duration)
-
-            if replicate:
-                self._start = start.replicate()
-            else:
-                self._start = start
-            self._end = start + end
         else:
             raise ValueError(
                 f"End time is an instance of {end.__class__()}, "
@@ -417,7 +418,7 @@ class TimeIntervalList:
                     f"Durations (size: {len(end_times)})."
                 ) from err
 
-        elif isinstance(end_times, Time):
+        elif isinstance(end_times, Time) and not isinstance(end_times, TimeDelta):
             # End times are of type `Time`, make sure array sizes match
             if len(end_times) == len(start_times):
                 end_times_tmp = end_times
@@ -480,6 +481,8 @@ class TimeIntervalList:
     def get_interval(self, index):
         """
         Gets the time interval for the given index.
+
+        Note that, any operation that changes the
 
         Parameters
         ----------
