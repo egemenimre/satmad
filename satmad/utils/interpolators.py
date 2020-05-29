@@ -69,7 +69,7 @@ class CartInterpolator3D:
 
     @property
     def interpolator_name(self) -> str:
-        """str: Returns the name of the interpolator."""
+        """Returns the name of the interpolator."""
         return self._interpolator_name
 
     def __call__(self, t, nu=0, ext=None) -> list:
