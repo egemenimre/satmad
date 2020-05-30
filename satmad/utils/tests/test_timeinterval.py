@@ -141,24 +141,31 @@ def test_union(init_times, durations):
 
 def test_expand():
     """Test `expand` method."""
+    # Test expansion
+    expanded = within.expand(
+        start_delta=TimeDelta(5 * 60, format="sec"),
+        end_delta=TimeDelta(2 * 60, format="sec"),
+    )
+    assert expanded.is_equal(exact)
+
+    # Test shrinkage
+    shrunk = exact.expand(
+        start_delta=TimeDelta(-5 * 60, format="sec"),
+        end_delta=TimeDelta(-2 * 60, format="sec"),
+    )
+    assert shrunk.is_equal(within)
+
+
+def test_expand_shrink_zero():
+    """Test `expand` method with shrink to zero - should raise `ValueError`."""
     with pytest.raises(ValueError):
-        # Test expansion
-        expanded = within.expand(
-            start_delta=TimeDelta(5 * 60, format="sec"),
-            end_delta=TimeDelta(2 * 60, format="sec"),
-        )
-        assert expanded.is_equal(exact)
-
-        # Test shrinkage
-        shrunk = exact.expand(
-            start_delta=TimeDelta(-5 * 60, format="sec"),
-            end_delta=TimeDelta(-2 * 60, format="sec"),
-        )
-        assert shrunk.is_equal(within)
-
         # Test shrink to zero - this raises a ValueError
         assert within.expand(start_delta=TimeDelta(-3 * 60, format="sec"))
 
+
+def test_expand_shrink_negative():
+    """Test `expand` method with shrink to negative - should raise `ValueError`."""
+    with pytest.raises(ValueError):
         # Test a negative duration shrinkage - this raises a ValueError
         assert within.expand(
             start_delta=TimeDelta(-5 * 60, format="sec"),
