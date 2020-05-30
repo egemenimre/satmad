@@ -10,7 +10,6 @@ Trajectory of an object with interpolators.
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import CartesianDifferential, CartesianRepresentation, SkyCoord
-from astropy.time import Time
 
 from satmad.utils.interpolators import CartInterpolator3D
 from satmad.utils.timeinterval import TimeInterval
