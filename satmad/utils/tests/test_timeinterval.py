@@ -86,7 +86,7 @@ def test_is_intersecting(init_times, durations):
 
 
 def test_contains(init_times, durations):
-    """Test `_contains` method."""
+    """Test `contains` method."""
     interval = TimeIntervalList(init_times, durations).get_interval(0)
 
     assert interval.contains(before) is False
@@ -114,28 +114,28 @@ def test_is_within_interval(init_times, durations):
 
 
 def test_intersect(init_times, durations):
-    """Test `_intersect` method."""
+    """Test `intersect` method."""
     interval = TimeIntervalList(init_times, durations).get_interval(0)
 
     assert interval.intersect(before) is None
-    assert interval.intersect(within).is_equals(within)
-    assert interval.intersect(intersect).is_equals(
+    assert interval.intersect(within).is_equal(within)
+    assert interval.intersect(intersect).is_equal(
         TimeInterval(interval.start, intersect.end)
     )
-    assert exact.is_equals(interval.intersect(exact))
+    assert exact.is_equal(interval.intersect(exact))
     assert interval.intersect(after) is None
 
 
 def test_union(init_times, durations):
-    """Test `_union` method."""
+    """Test `union` method."""
     interval = TimeIntervalList(init_times, durations).get_interval(0)
 
     assert interval.union(before) is None
-    assert interval.union(within).is_equals(interval)
-    assert interval.union(intersect).is_equals(
+    assert interval.union(within).is_equal(interval)
+    assert interval.union(intersect).is_equal(
         TimeInterval(intersect.start, interval.end)
     )
-    assert interval.union(exact).is_equals(interval)
+    assert interval.union(exact).is_equal(interval)
     assert interval.union(after) is None
 
 
@@ -147,14 +147,14 @@ def test_expand():
             start_delta=TimeDelta(5 * 60, format="sec"),
             end_delta=TimeDelta(2 * 60, format="sec"),
         )
-        assert expanded.is_equals(exact)
+        assert expanded.is_equal(exact)
 
         # Test shrinkage
         shrunk = exact.expand(
             start_delta=TimeDelta(-5 * 60, format="sec"),
             end_delta=TimeDelta(-2 * 60, format="sec"),
         )
-        assert shrunk.is_equals(within)
+        assert shrunk.is_equal(within)
 
         # Test shrink to zero - this raises a ValueError
         assert within.expand(start_delta=TimeDelta(-3 * 60, format="sec"))
