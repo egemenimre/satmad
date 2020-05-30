@@ -9,6 +9,7 @@ Test TimeInterval class and associated methods and functionalities.
 """
 import numpy as np
 import pytest
+from astropy import units as u
 from astropy.time import Time, TimeDelta
 
 from satmad.utils.timeinterval import TimeInterval, TimeIntervalList
@@ -44,7 +45,42 @@ def durations():
     return np.arange(1, 4) * TimeDelta(600, format="sec")
 
 
-def test_init_with_durations(init_times, durations):
+def test_interval_init_with_durations(init_times, durations):
+    """Test initialisation with durations."""
+
+    interval = TimeInterval(init_times, durations)
+
+    truth_txt = "[ 2020-04-11T00:00:00.000  2020-04-11T00:10:00.000 ]"
+
+    assert truth_txt == str(interval)
+
+
+def test_interval_init_with_end_times(init_times, durations):
+    """Test initialisation with explicit end times."""
+
+    end_times = init_times + durations
+
+    interval = TimeInterval(init_times, end_times, replicate=True)
+
+    truth_txt = "[ 2020-04-11T00:00:00.000  2020-04-11T00:10:00.000 ]"
+
+    assert truth_txt == str(interval)
+
+
+def test_interval_init_switched_err(init_times, durations):
+    """Test `init` with switched init and end times - should raise `ValueError`."""
+    with pytest.raises(ValueError):
+        end_times = init_times + durations
+        TimeInterval(end_times, init_times)
+
+
+def test_interval_init_zero_dur_err(init_times):
+    """Test `init` with equal init and end times - should raise `ValueError`."""
+    with pytest.raises(ValueError):
+        TimeInterval(init_times, init_times + 1 * u.us)
+
+
+def test_interval_list_init_with_durations(init_times, durations):
     """Test initialisation with durations."""
 
     intervals = TimeIntervalList(init_times, durations)
@@ -58,12 +94,14 @@ def test_init_with_durations(init_times, durations):
     assert truth_txt == str(intervals)
 
 
-def test_init_with_end_times(init_times, durations):
+def test_interval_list_init_with_end_times(init_times, durations):
     """Test initialisation with explicit end times."""
 
     end_times = init_times + durations
 
-    intervals = TimeIntervalList(init_times, end_times)
+    intervals = TimeIntervalList(
+        init_times, end_times, start_valid=init_times[0], end_valid=end_times[-1]
+    )
 
     truth_txt = (
         "[ 2020-04-11T00:00:00.000  2020-04-11T00:10:00.000 ]\n"
@@ -71,7 +109,18 @@ def test_init_with_end_times(init_times, durations):
         "[ 2020-04-13T00:00:00.000  2020-04-13T00:30:00.000 ]\n"
     )
 
+    truth_validity = "[ 2020-04-11T00:00:00.000  2020-04-13T00:30:00.000 ]"
+
     assert truth_txt == str(intervals)
+    assert truth_validity == str(intervals.validity_interval())
+
+
+def test_interval_list_init_mismatch_err(init_times):
+    """Test `init` with switched mismatching init and end times - should
+    raise `ValueError`."""
+    with pytest.raises(ValueError):
+        mismatch_durations = np.arange(1, 3) * TimeDelta(600, format="sec")
+        TimeIntervalList(init_times, mismatch_durations)
 
 
 def test_is_intersecting(init_times, durations):
@@ -123,6 +172,7 @@ def test_intersect(init_times, durations):
         TimeInterval(interval.start, intersect.end)
     )
     assert exact.is_equal(interval.intersect(exact))
+    assert exact.is_equal(intersect) is False
     assert interval.intersect(after) is None
 
 
@@ -160,14 +210,14 @@ def test_expand_shrink_zero():
     """Test `expand` method with shrink to zero - should raise `ValueError`."""
     with pytest.raises(ValueError):
         # Test shrink to zero - this raises a ValueError
-        assert within.expand(start_delta=TimeDelta(-3 * 60, format="sec"))
+        within.expand(start_delta=TimeDelta(-3 * 60, format="sec"))
 
 
 def test_expand_shrink_negative():
     """Test `expand` method with shrink to negative - should raise `ValueError`."""
     with pytest.raises(ValueError):
         # Test a negative duration shrinkage - this raises a ValueError
-        assert within.expand(
+        within.expand(
             start_delta=TimeDelta(-5 * 60, format="sec"),
             end_delta=TimeDelta(-5 * 60, format="sec"),
         )
