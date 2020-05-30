@@ -129,7 +129,7 @@ class TimeInterval:
             else:
                 return False
 
-    def is_equals(self, interval):
+    def is_equal(self, interval):
         """
         Checks whether two intervals are (almost) equal in value.
 
@@ -354,9 +354,8 @@ class TimeInterval:
         return self._end
 
     def __str__(self):
-        txt = ""
-        txt += f"[ {str(getattr(self.start, self.start.format))}"
-        txt += f"  {str(getattr(self.end, self.end.format))} ]\n"
+        txt = f"[ {str(getattr(self.start, self.start.format))}"
+        txt += f"  {str(getattr(self.end, self.end.format))} ]"
 
         return txt
 
@@ -482,8 +481,6 @@ class TimeIntervalList:
         """
         Gets the time interval for the given index.
 
-        Note that, any operation that changes the
-
         Parameters
         ----------
         index : int
@@ -502,9 +499,21 @@ class TimeIntervalList:
         """
         return self._interval_list[index]
 
+    def validity_interval(self):
+        """
+        Gets the time interval of validity for the `TimeIntervalList`.
+
+        Returns
+        -------
+        TimeInterval
+            `TimeInterval` of interval of validity
+
+        """
+        return self._valid_interval
+
     def __str__(self):
         txt = ""
         for interval in self._interval_list:
-            txt += str(interval)
+            txt += str(interval) + "\n"
 
         return txt
