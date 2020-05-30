@@ -13,6 +13,7 @@ from astropy.coordinates import CartesianDifferential, CartesianRepresentation, 
 from astropy.time import Time
 
 from satmad.utils.interpolators import CartInterpolator3D
+from satmad.utils.timeinterval import TimeInterval
 
 
 class Trajectory:
@@ -40,10 +41,6 @@ class Trajectory:
     """Flag to indicate whether there is velocity information in the supplied
     trajectory coordinates. Controls whether velocity interpolation is to
     take place or not."""
-
-    # TODO _t_begin to be replaced by Episode object
-    _t_begin: Time
-    _t_end: Time
 
     # Default settings for the interpolator
     _spline_degree = 5
@@ -82,8 +79,9 @@ class Trajectory:
 
         # save the begin and end times for the internal trajectory
         # and the interpolator
-        self._t_begin = self._coord_list[0].obstime
-        self._t_end = self._coord_list[-1].obstime
+        self._interval = TimeInterval(
+            self._coord_list[0].obstime, self._coord_list[-1].obstime
+        )
 
         # Check whether we have velocity data
         if self._coord_list.data.differentials:
@@ -157,12 +155,12 @@ class Trajectory:
         # end times.
         # this saves against floating point rounding errors
         # is the requested time very close to first time
-        if abs((t - self._t_begin).to(u.us)) < self._EPS_TIME:
+        if abs((t - self._interval.start).to(u.us)) < self._EPS_TIME:
             # set position to first position component
             r = self._coord_list[0].cartesian.xyz
 
         # is the requested time very close to last time
-        elif abs((t - self._t_end).to(u.us)) < self._EPS_TIME:
+        elif abs((t - self._interval.end).to(u.us)) < self._EPS_TIME:
             # set position to last position component
             r = self._coord_list[-1].cartesian.xyz
 
@@ -170,7 +168,7 @@ class Trajectory:
         # inside the interpolation range
         else:
             # Convert time to "days since epoch"
-            t_req = (t - self._t_begin).jd
+            t_req = (t - self._interval.start).jd
             # interpolate to get position component at target time
             r = self._r_interpol(t_req) * u.km
 
@@ -199,12 +197,12 @@ class Trajectory:
         # end times
         # this saves against floating point rounding errors
         # is the requested time very close to first time
-        if abs((t - self._t_begin).to(u.us)) < self._EPS_TIME:
+        if abs((t - self._interval.start).to(u.us)) < self._EPS_TIME:
             # set velocity to first velocity component
             v = self._coord_list[0].velocity.d_xyz
 
         # is the requested time very close to last time
-        elif abs((t - self._t_end).to(u.us)) < self._EPS_TIME:
+        elif abs((t - self._interval.end).to(u.us)) < self._EPS_TIME:
             # set velocity to last velocity component
             v = self._coord_list[-1].velocity.d_xyz
 
@@ -212,7 +210,7 @@ class Trajectory:
         # inside the interpolation range
         else:
             # Convert time to "days since epoch"
-            t_req = (t - self._t_begin).jd
+            t_req = (t - self._interval.start).jd
 
             # interpolate to get velocity  component at target time
             v = self._v_interpol(t_req) * self._u_km_per_s
@@ -230,7 +228,7 @@ class Trajectory:
         Initialises position and velocity interpolators.
         """
         # Init time list in days
-        t_list = (self._coord_list.obstime - self._t_begin).jd
+        t_list = (self._coord_list.obstime - self._interval.start).jd
         # Init pos interpolators
         self._init_pos_interpolators(t_list)
 
@@ -290,7 +288,7 @@ class Trajectory:
     def __str__(self):
         """String representation of the object."""
         return (
-            f"Trajectory from {self._t_begin} to {self._t_end} i"
+            f"Trajectory from {self._interval.start} to {self._interval.end} i"
             f"n frame {self._frame_name}. "
             f"(Interpolators initialised: "
             f"{self._interpolators_initialised})"
