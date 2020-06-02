@@ -1,3 +1,5 @@
 astropy
 numpy
 scipy
+portion
+pytest
