@@ -38,7 +38,7 @@ duration of validity.
 
 
 
-Using the Basic :class:`.TimeIntervalList` Class
+Using the Basic :class:`.TimeInterval` Class
 ---------------------------------------------------
 
 A :class:`.TimeInterval` class can be simply initialised with a start time
