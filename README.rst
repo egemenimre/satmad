@@ -41,6 +41,8 @@ Requirements
 
 - NumPy and SciPy are used for the underlying mathematical algorithms
 - Astropy handles all time and reference frame computations
+- Portion handles the time interval mechanics
+- Pytest provides the testing framework
 
 
 License
