@@ -1,6 +1,6 @@
 # SatMAD: Satellite Mission Analysis and Design for Python
 #
-# Copyright (C) 2020 Egemen Imre
+# Copyright (C) {YEAR} Egemen Imre
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
@@ -10,10 +10,12 @@ Time interval module.
 lists of `TimeInterval` objects.
 """
 
+import portion as p
 from astropy import units as u
 from astropy.time import Time, TimeDelta
+from portion import Interval
 
-_EPS_TIME = 10 * u.us
+_EPS_TIME = 10 * u.ns
 """Allowable time threshold, this much 'out of bounds' is allowed when assuming two
 instances of time are *practically* equal. This helps with floating point artifacts
 such as round-off errors."""
@@ -23,22 +25,38 @@ class TimeInterval:
     """
     Represent and manipulate a single time interval.
 
-    Uses Astropy `Time` classes under the hood. Note that only the first element
-    of `start_time` and `end_time` objects are used, even if they are defined as arrays.
-    Note that `end_time` should be greater than (or later than) `start_time`. Zero
-    duration time intervals are not allowed and will raise `ValueError`.
+    This is a thin wrapper around the  :class:`portion.interval.Interval` class
+    from `portion` package (for the Atomic intervals), using Astropy `Time` classes
+    under the hood.
+
+
+    Note that:
+
+    * only the first element of `start_time` and `end_time` objects are used,
+      even if they are defined as arrays.
+
+    * `end_time` should be greater than (or later than) `start_time`.
+      Zero duration time intervals are not allowed and will raise `ValueError`.
 
     Parameters
     ----------
-    start_time : Time
+    start_time : Time or TimeInterval
         Initial time to mark the start of the interval (only the first
-        instance contained in the `Time` object is used)
-    end_time : Time or TimeDelta
+        instance contained in the `Time` object is used). If specified as TimeInterval,
+        it is copied into this and `end_time` is ignored.
+    end_time : Time, TimeDelta or None
         End time or duration to mark the end of the interval
         (only the first instance contained in the `Time` or `TimeDelta` object is used)
+        None is acceptable only when `start_time` is defined as a `TimeInterval`
     replicate : bool
         `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False` to
         use a shallow copy to save memory
+    start_inclusive : bool
+        True if the start of the interval is inclusive (closed), False if exclusive
+        (open)
+    end_inclusive : bool
+        True if the start of the interval is inclusive (closed), False if exclusive
+        (open)
 
     Raises
     ------
@@ -47,87 +65,115 @@ class TimeInterval:
         if `end_time` <= `start_time`.
     """
 
-    def __init__(self, start_time, end_time, replicate=False):
+    def __init__(
+        self,
+        start_time,
+        end_time,
+        replicate=False,
+        start_inclusive=True,
+        end_inclusive=True,
+    ):
 
-        # Check whether init and end times are scalar or array
-        if start_time.isscalar:
-            start = start_time
-        else:
-            start = start_time[0]
-
-        if end_time.isscalar:
-            end = end_time
-        else:
-            end = end_time[0]
-
-        # Check the type of end_time and fill values accordingly
-        if isinstance(end_time, TimeDelta):
-            # end time is a TimeDelta (duration)
+        if isinstance(start_time, TimeInterval):
+            # start_time is a valid TimeInterval, just copy its elements
+            start_inclusive = start_time._interval.left
+            end_inclusive = start_time._interval.right
 
             if replicate:
-                self._start = start.replicate()
+                start_interval = start_time.start.replicate()
+                end_interval = start_time.end.replicate()
             else:
-                self._start = start
-            self._end = start + end
-
-        elif isinstance(end_time, Time) and not isinstance(end_time, TimeDelta):
-            # end time is a Time
-
-            # replicate or shallow copy start and end values - use the first
-            # time instances only
-            if start < end:
-                # end time is later than start time - no probs
-                if replicate:
-                    self._start = start.replicate()
-                    self._end = end.replicate()
-                else:
-                    self._start = start
-                    self._end = end
-            else:
-                # end time is earlier than start time - raise error
-                raise ValueError(
-                    f"End time ({end.isot}) is earlier than start time ({start.isot})"
-                )
+                start_interval = start_time.start
+                end_interval = start_time.end
         else:
-            raise ValueError(
-                f"End time is an instance of {end.__class__()}, "
-                f"only Time or TimeDelta classes are allowed."
-            )
+            # Check whether init and end times are scalar or array
+            if start_time.isscalar:
+                start_tmp = start_time
+            else:
+                start_tmp = start_time[0]
+
+            if end_time.isscalar:
+                end_tmp = end_time
+            else:
+                end_tmp = end_time[0]
+
+            # Check the type of end_time and fill values accordingly
+            if isinstance(end_tmp, TimeDelta):
+                # end time is a TimeDelta (duration)
+
+                if replicate:
+                    start_interval = start_tmp.replicate()
+                    end_interval = start_tmp + end_tmp
+                else:
+                    start_interval = start_tmp
+                    end_interval = start_tmp + end_tmp
+
+            elif isinstance(end_tmp, Time) and not isinstance(end_tmp, TimeDelta):
+                # end time is a Time
+
+                # replicate or shallow copy start and end values - use the first
+                # time instances only
+                if start_tmp < end_tmp:
+                    # end time is later than start time - no probs
+                    if replicate:
+                        start_interval = start_tmp.replicate()
+                        end_interval = end_tmp.replicate()
+                    else:
+                        start_interval = start_tmp
+                        end_interval = end_tmp
+                else:
+                    # end time is earlier than start time - raise error
+                    raise ValueError(
+                        f"End time ({end_tmp.isot}) is earlier than start time"
+                        f"({start_tmp.isot})"
+                    )
+            else:
+                raise ValueError(
+                    f"End time is an instance of {end_tmp.__class__()}, "
+                    f"only Time or TimeDelta classes are allowed."
+                )
+
+        # Initialise the interval
+        self._interval: Interval = p.closed(start_interval, end_interval).replace(
+            left=start_inclusive, right=end_inclusive
+        )
 
         # Raise exception if the interval duration is too short
         # Duration guaranteed to be positive thanks to the juggling above
         if self.duration() <= _EPS_TIME:
             raise ValueError("Duration of the interval is negative or zero.")
 
-    def is_within_interval(self, time, inclusive=True):
+    def is_in_interval(self, time):
         """
         Checks whether the requested time is within the time interval.
-
-        - If the `inclusive` flag is True: interval_start <= time <= interval_end
-        - If the `inclusive` flag is False: interval_start < time < interval_end
 
         Parameters
         ----------
         time : Time
             Time to be checked
-        inclusive : bool
-            True if max and min boundaries are included in the check, False otherwise
 
         Returns
         -------
         bool
             True if time is within the reference interval, False otherwise
         """
-        if inclusive:
-            if self._start.value <= time.value <= self._end.value:
+        # check upper and lower boundaries for tolerance
+        if _are_times_almost_equal(self.start, time):
+            # time at starting edge - is edge closed?
+            if self._interval.left:
                 return True
             else:
                 return False
-        else:
-            if self._start.value < time.value < self._end.value:
+
+        if _are_times_almost_equal(self.end, time):
+            # time at end edge - is edge closed?
+            if self._interval.right:
                 return True
             else:
                 return False
+
+        # Time not edges, do a regular check
+        return self._interval.contains(time)
 
     def is_equal(self, interval):
         """
@@ -147,93 +193,10 @@ class TimeInterval:
             True if interval start and end are (almost) equal, False otherwise
 
         """
-        start_equal = abs(interval._start - self._start) < _EPS_TIME
-        end_equal = abs(interval._end - self._end) < _EPS_TIME
+        start_equal = _are_times_almost_equal(interval.start, self.start)
+        end_equal = _are_times_almost_equal(interval.end, self.end)
 
         if start_equal and end_equal:
-            return True
-        else:
-            return False
-
-    def expand(self, start_delta=0, end_delta=0):
-        """
-        Expands (or shrinks) the interval.
-
-        Generates a new `TimeInterval`, where:
-
-        - new interval start: interval_start - start_delta
-        - new interval end: interval_end + end_delta
-
-        Negative start and/or end times are possible (to shrink the interval),
-        though values ending in a negative interval will throw a `ValueError`.
-
-        Parameters
-        ----------
-        start_delta : TimeDelta
-            The delta time to expand the start of the interval
-            (or to shrink, with negative values)
-        end_delta : TimeDelta
-            The delta time to expand the end of the interval
-            (or to shrink, with negative values)
-        Returns
-        -------
-        TimeInterval
-            A new `TimeInterval` that is the result of the requested change
-
-        Raises
-        ------
-        ValueError
-            Raised if the requested expansion results in a negative duration interval
-        """
-        start = self._start - start_delta
-        end = self._end + end_delta
-
-        duration = end - start
-
-        if duration > _EPS_TIME:
-            return TimeInterval(start, end)
-        else:
-            raise ValueError(
-                "Duration of the expanded/shrunk interval is negative or zero."
-            )
-
-    def duration(self):
-        """
-        Computes the duration of the interval.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        duration : TimeDelta
-            Duration of the interval (always positive)
-        """
-        return self._end - self._start
-
-    def is_intersecting(self, interval):
-        """
-        Checks whether the requested interval intersects (or is contained within)
-        the reference interval.
-
-        Parameters
-        ----------
-        interval : TimeInterval
-            Time interval to be checked
-
-        Returns
-        -------
-        bool
-            True if check interval intersects with the reference interval,
-            False otherwise
-        """
-        if self.contains(interval):
-            # interval is contained or the same as this (self) interval
-            return True
-        elif self.is_within_interval(interval._start, False) or self.is_within_interval(
-            interval._end, False
-        ):
-            # at least interval_start or interval_end is within this interval
             return True
         else:
             return False
@@ -253,19 +216,42 @@ class TimeInterval:
             True if check interval is contained within this interval,
             False otherwise
         """
-        if self.is_within_interval(interval._start, True) and self.is_within_interval(
-            interval._end, True
-        ):
+        if self.is_in_interval(interval.start) and self.is_in_interval(interval.end):
             return True
         else:
             return False
+
+    def is_intersecting(self, interval):
+        """
+        Checks whether the requested interval intersects (or is contained within)
+        the reference interval.
+
+        Parameters
+        ----------
+        interval : TimeInterval
+            Time interval to be checked
+
+        Returns
+        -------
+        bool
+            True if check interval intersects with the reference interval,
+            False otherwise
+        """
+        intersection = self._interval.intersection(interval._interval)
+
+        if _are_times_almost_equal(intersection.upper, intersection.lower):
+            # intersection below tolerance - practically no intersection
+            return False
+        else:
+            # see what the underlying function says
+            return self._interval.overlaps(interval._interval)
 
     def intersect(self, interval):
         """
         Intersection operator for a time interval and this time interval.
 
-        Returns a new interval that is
-        the Intersection of two intervals, or None if there is no intersection.
+        Returns a new interval that is the Intersection of two intervals,
+        or None if there is no intersection.
 
         Parameters
         ----------
@@ -280,34 +266,18 @@ class TimeInterval:
 
         """
         if self.is_intersecting(interval):
+            intersection = self._interval.intersection(interval._interval)
 
-            if interval._start < self._start:
-                # other interval starts before this interval - set as
-                # this interval start
-                new_init = self._start
-            else:
-                # other interval starts after this interval - set as
-                # other interval start
-                new_init = interval._start
-
-            if self._end < interval._end:
-                # other interval ends after this interval - set as this interval end
-                new_end = self._end
-            else:
-                # other interval ends before this interval - set as other interval end
-                new_end = interval._end
-
-            return TimeInterval(new_init, new_end)
+            return _create_interval_from_portion(intersection)
         else:
-            # No intersection found
             return None
 
     def union(self, interval):
         """
         Union operator for a time interval and this time interval.
 
-        Returns a new interval that is
-        the Union of two intervals, or None if there is no intersection.
+        Returns a new interval that is the Union of two intervals,
+        or None if there is no intersection.
 
         Parameters
         ----------
@@ -322,67 +292,250 @@ class TimeInterval:
 
         """
         if self.is_intersecting(interval):
-
-            if interval._start < self._start:
-                # other interval starts before this interval - set as
-                # other interval start
-                new_init = interval._start
-            else:
-                # other interval starts after this interval - set as this interval start
-                new_init = self._start
-
-            if self._end < interval._end:
-                # other interval ends after this interval - set as other interval end
-                new_end = interval._end
-            else:
-                # other interval ends before this interval - set as this interval end
-                new_end = self._end
-
-            return TimeInterval(new_init, new_end)
+            union = self._interval.union(interval._interval)
+            return _create_interval_from_portion(union)
         else:
-            # No intersection found
             return None
+
+    def expand(
+        self,
+        start_delta=0,
+        end_delta=0,
+        replicate=False,
+        start_inclusive=True,
+        end_inclusive=True,
+    ):
+        """
+        Expands (or shrinks) the interval.
+
+        Generates a new, expanded (or shrunk) `TimeInterval`, where:
+
+        - new interval start: interval_start - start_delta
+        - new interval end: interval_end + end_delta
+
+        Negative start and/or end times are possible (to shrink the interval),
+        though values ending in a negative interval will throw a `ValueError`.
+        This method can be used to modify the ends of the interval (open or closed)
+        as well.
+
+        Parameters
+        ----------
+        start_delta : TimeDelta
+            The delta time to expand the start of the interval
+            (or to shrink, with negative values)
+        end_delta : TimeDelta
+            The delta time to expand the end of the interval
+            (or to shrink, with negative values)
+        replicate : bool
+            `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False`
+            to use a shallow copy to save memory
+        start_inclusive : bool
+            True if the start of the new interval is inclusive (closed), False if
+            exclusive (open)
+        end_inclusive : bool
+            True if the start of the new interval is inclusive (closed), False if
+            exclusive (open)
+
+        Returns
+        -------
+        TimeInterval
+            A new `TimeInterval` that is the result of the requested change
+
+        Raises
+        ------
+        ValueError
+            Raised if the requested expansion results in a negative duration interval
+        """
+        start = self.start - start_delta
+        end = self.end + end_delta
+
+        duration = end - start
+
+        if duration > _EPS_TIME:
+            return TimeInterval(
+                start,
+                end,
+                replicate=replicate,
+                start_inclusive=start_inclusive,
+                end_inclusive=end_inclusive,
+            )
+        else:
+            raise ValueError(
+                "Duration of the expanded/shrunk interval is negative or zero."
+            )
+
+    def duration(self):
+        """
+        Computes the duration of the interval.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        duration : TimeDelta
+            Duration of the interval (always positive)
+        """
+        return self.end - self.start
 
     @property
     def start(self) -> Time:
         """Returns the start time of the interval."""
-        return self._start
+        return self._interval.lower
 
     @property
     def end(self) -> Time:
         """Returns the end time of the interval."""
-        return self._end
+        return self._interval.upper
 
     def __str__(self):
-        txt = f"[ {str(getattr(self.start, self.start.format))}"
-        txt += f"  {str(getattr(self.end, self.end.format))} ]"
+        txt = ""
+        if self._interval.left:
+            txt += "["
+        else:
+            txt += "("
+
+        txt += f" {str(getattr(self.start, self.start.format))}"
+        txt += f"  {str(getattr(self.end, self.end.format))} "
+
+        if self._interval.right:
+            txt += "]"
+        else:
+            txt += ")"
 
         return txt
+
+    @property
+    def p_interval(self):
+        """
+        Returns the underlying `Interval` object.
+
+        .. warning:: Most users will not need to access this object. Intended for
+            developer use only.
+        """
+        return self._interval
+
+
+def _are_times_almost_equal(t1, t2):
+    """
+    Checks whether two time instances are are equal to a tolerance given by `_EPS_TIME`.
+
+    Parameters
+    ----------
+    t1, t2 : Time
+        Times to be checked
+
+    Returns
+    -------
+    True if times are almost equal, False otherwise
+
+    """
+    return abs(t1 - t2) < _EPS_TIME
+
+
+def _create_interval_from_portion(interval, replicate=False):
+    """
+    Create a new `TimeInterval` from a given :class:`portion.interval.Interval`
+    instance.
+
+    Parameters
+    ----------
+    interval : Interval
+        input `Interval` instance
+    replicate : bool
+        `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False`
+        to use a shallow copy to save memory
+
+    Returns
+    -------
+    New `TimeInterval` instance
+    """
+    return TimeInterval(
+        interval.lower,
+        interval.upper,
+        start_inclusive=interval.left,
+        end_inclusive=interval.right,
+        replicate=replicate,
+    )
+
+
+def _to_p_intervals(intervals):
+    """
+    Converts a `TimeInterval` instance or a list to an `Interval` list
+    (portion library objects).
+
+    This is usually done to merge and simplify the elements of the list.
+
+    Parameters
+    ----------
+    intervals : TimeInterval or list[TimeInterval]
+        List of intervals
+
+    Returns
+    -------
+    `Interval` object with the list of time intervals
+    """
+    # Fill the `Interval` list and merge as necessary
+    p_intervals = p.empty()
+    if isinstance(intervals, list):
+        for interval in intervals:
+            p_intervals = p_intervals.union(interval.p_interval)
+    else:
+        # intervals object is a single TimeInterval
+        p_intervals = intervals.p_interval
+
+    return p_intervals
+
+
+def _to_time_intervals(p_intervals, replicate=False):
+    """
+    Converts a `Interval` list to a `TimeInterval` list.
+
+    Parameters
+    ----------
+    p_intervals : Interval
+        List of intervals
+    replicate : bool
+        `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False` to
+        use a shallow copy to save memory
+
+    Returns
+    -------
+    `TimeInterval` object with the list of time intervals
+    """
+    intervals: list = []
+
+    # Fill the atomic `TimeInterval` objects using the merged list
+    for p_interval in p_intervals:
+        intervals.append(_create_interval_from_portion(p_interval, replicate=replicate))
+
+    return intervals
 
 
 class TimeIntervalList:
     """
     Represent and manipulate time intervals.
 
-    Uses Astropy `Time` classes under the hood. Note that the number of `init_times`
-    and `end_times` objects should match.
+    This is a thin wrapper around the :class:`portion.interval.Interval` class,
+    using Astropy `Time` classes under the hood.
 
     `start_valid` and `end_valid` values are used to mark the start and end of this
     list of time intervals. If they are not specified, the beginning and end points
-    of the `TimeInterval` are used.
+    of the list of `TimeInterval` instances are used.
 
     Parameters
     ----------
-    start_times : Time
-        List of initial times to mark the beginning of each interval
-    end_times : Time or TimeDelta
-        List of `TimeDelta` objects or end times, to mark the end of each interval
-    start_valid : Time
+    intervals : list[TimeInterval]
+        List of intervals
+    start_valid : Time or TimeInterval
         Time at which the validity of this `TimeInterval` starts (only the first
-        instance contained in the `Time` object is used)
-    end_valid : Time or TimeDelta
+        instance contained in the `Time` object is used). If specified as TimeInterval,
+        it is copied into this and `end_valid` is ignored (the only case where `None`
+        is acceptable).
+    end_valid : Time, TimeDelta or None
         Time or duration at which the validity of this `TimeInterval` ends (only the
-        first instance contained in the `Time` object is used)
+        first instance contained in the `Time` object is used). None is acceptable
+        only when `start_valid` is defined as a `TimeInterval`
     replicate : bool
         `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False` to
         use a shallow copy to save memory
@@ -393,45 +546,20 @@ class TimeIntervalList:
         Raised if `init_times` and `end_times` objects sizes mismatch.
     """
 
-    # TODO check for out of validity errors
-    #  when doing Union with an external interval
-    #
-    # TODO  take union etc methods to within class
-    #  with thin wrappers and checks and multiple items
-
     def __init__(
-        self, start_times, end_times, start_valid=None, end_valid=None, replicate=False
+        self, intervals, start_valid=None, end_valid=None, replicate=False,
     ):
 
-        end_times_tmp = None
-        # Fill end times depending on the type
-        if isinstance(end_times, TimeDelta):
-            # End times are of type `TimeDelta`, make sure array sizes match
-            # - or that there is a single duration
-            try:
-                end_times_tmp = start_times + end_times
-            except Exception as err:
-                raise ValueError(
-                    f"Array size mismatch between "
-                    f"Initial Times (size: {len(start_times)}) and "
-                    f"Durations (size: {len(end_times)})."
-                ) from err
+        self._intervals: list = []
 
-        elif isinstance(end_times, Time) and not isinstance(end_times, TimeDelta):
-            # End times are of type `Time`, make sure array sizes match
-            if len(end_times) == len(start_times):
-                end_times_tmp = end_times
-            else:
-                raise ValueError(
-                    f"Array size mismatch between "
-                    f"Initial Times (size: {len(start_times)}) and "
-                    f"End Times (size: {len(end_times)})."
-                )
+        if intervals:
+            # if start_times is None, then there is no time interval defined
 
-        # Fill the `TimeInterval` list
-        self._interval_list: list = []
-        for i, start_time in enumerate(start_times):
-            self._interval_list.append(TimeInterval(start_times[i], end_times_tmp[i]))
+            # Fill the `Interval` list and merge as necessary
+            p_intervals = _to_p_intervals(intervals)
+
+            # Fill the atomic `TimeInterval` objects using the merged list
+            self._intervals = _to_time_intervals(p_intervals, replicate)
 
         # Init range of validity
         self._valid_interval = self.__init_validity_rng(
@@ -443,17 +571,21 @@ class TimeIntervalList:
         Initialises the beginning and end of the range of validity.
 
         `start_valid` and `end_valid` values are used to mark the start and end of this
-        list of time intervals. If they are not specified, the beginning and end points
+        list of time intervals (and are Inclusive or Closed by default).
+        If they are not specified, the beginning and end points
         of the `TimeInterval` are used.
 
         Parameters
         ----------
-        start_valid : Time
+        start_valid : Time or TimeInterval
             Time at which the validity of this `TimeInterval` starts (only the first
-            instance contained in the `Time` object is used)
-        end_valid : Time or TimeDelta
+            instance contained in the `Time` object is used). If specified as
+            `TimeInterval`, it is copied into this and `end_valid` is ignored
+            (the only case where `None` is acceptable for it).
+        end_valid : Time or TimeDelta or None
             Time or duration at which the validity of this `TimeInterval` ends (only the
-            first instance contained in the `Time` object is used)
+            first instance contained in the `Time` object is used). None is acceptable
+            only when `start_time` is defined as a `TimeInterval`
         replicate : bool
             `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False`
             to use a shallow copy to save memory
@@ -463,19 +595,74 @@ class TimeIntervalList:
         TimeInterval
             A new `TimeInterval` instance containing the start and end of validity
         """
+
+        start_inclusive = True
+        end_inclusive = True
+
+        if isinstance(start_valid, TimeInterval):
+            # `start_valid` is already a TimeInterval, just copy it
+            return TimeInterval(start_valid, None, replicate)
+
         if start_valid is None:
             # No init time for validity defined, use the first interval init
             start_valid_tmp = self.get_interval(0).start
+            start_inclusive = self.get_interval(0).p_interval.left
         else:
             start_valid_tmp = start_valid
 
         if end_valid is None:
             # No end time for validity defined, use the last interval end
             end_valid_tmp = self.get_interval(-1).end
+            end_inclusive = self.get_interval(0).p_interval.right
         else:
             end_valid_tmp = end_valid
 
-        return TimeInterval(start_valid_tmp, end_valid_tmp, replicate)
+        # Generate the `TimeInterval`
+        return TimeInterval(
+            start_valid_tmp,
+            end_valid_tmp,
+            start_inclusive=start_inclusive,
+            end_inclusive=end_inclusive,
+            replicate=replicate,
+        )
+
+    def invert(self, replicate=False):
+        """
+        Creates an *inverted* (or complement) copy of this time interval list, while
+        keeping the same validity range.
+
+        For example, for a single interval of `[t0, t1]` in a validity interval
+        `[T0,T1]`, the inverted interval list would be `[T0,t0]` and `[t1,T1]`. If
+        there are no intervals, the inverse becomes the entire validity interval.
+
+        Parameters
+        ----------
+        replicate : bool
+            `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False`
+            to use a shallow copy to save memory
+
+        Returns
+        -------
+        A new `TimeIntervalList` that has the same validity range but the individual
+        intervals are inverted.
+        """
+        # Convert `TimeInterval` list to `Interval`
+        p_interval = _to_p_intervals(self._intervals)
+
+        # Do the inversion
+        p_int_inverted = ~p_interval
+
+        # Fix the ends as necessary - no inf allowed
+        p_validity = _to_p_intervals(self.validity_interval())
+        p_int_inverted = p_int_inverted.intersection(p_validity)
+
+        # Generate the `TimeInterval` list
+        intervals = _to_time_intervals(p_int_inverted, replicate=False)
+
+        # Create the `TimeIntervalList` object
+        return TimeIntervalList(
+            intervals, start_valid=self.validity_interval(), replicate=replicate
+        )
 
     def get_interval(self, index):
         """
@@ -497,23 +684,26 @@ class TimeIntervalList:
             Requested index is out of bounds
 
         """
-        return self._interval_list[index]
+        return self._intervals[index]
 
-    def validity_interval(self):
+    def validity_interval(self) -> TimeInterval:
         """
         Gets the time interval of validity for the `TimeIntervalList`.
 
         Returns
         -------
-        TimeInterval
-            `TimeInterval` of interval of validity
+        `TimeInterval` of interval of validity
 
         """
         return self._valid_interval
 
     def __str__(self):
         txt = ""
-        for interval in self._interval_list:
-            txt += str(interval) + "\n"
+        if self._intervals:
+            # List not empty
+            for interval in self._intervals:
+                txt += str(interval) + "\n"
+        else:
+            txt = "Time interval list is empty."
 
         return txt
