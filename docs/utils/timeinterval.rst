@@ -15,10 +15,14 @@ occur during communications?" (an intersection operation between
 intersection operation between intervals of 'satellite above horizon', 'sun below
 horizon' and 'satellite not in eclipse').
 
+
 The :mod:`.timeinterval` package provides the basic time interval functionality with
 the :class:`.TimeInterval` class i.e.,
 a time interval with a start and end time/date, using the high precision
-:class:`astropy.time.Time` classes under the hood. A :class:`.TimeInterval` can interact
+:class:`astropy.time.Time` classes under the hood to represent time and
+:class:`portion.interval.Interval` class to manage and manipulate the time intervals.
+
+A :class:`.TimeInterval` can interact
 with other intervals through :meth:`.TimeInterval.union` and :meth:`.TimeInterval.intersect`
 methods. They can change their size through :meth:`.TimeInterval.expand` and they can
 check whether they contain (:meth:`.TimeInterval.contains`) or intersect with
@@ -39,7 +43,7 @@ Using the Basic :class:`.TimeIntervalList` Class
 
 A :class:`.TimeInterval` class can be simply initialised with a start time
 and either with an end time (:class:`astropy.time.Time`) or with a duration (
-:class:`astropy.time.TimeDelta`). These start and end  times can be retrieved
+:class:`astropy.time.TimeDelta`). These start and end times can be retrieved
 by the properties :meth:`.TimeInterval.start` and :meth:`.TimeInterval.end`.
 
 .. code-block:: python
@@ -69,7 +73,7 @@ The resulting time intervals can be quickly shown as
 
 The :class:`.TimeInterval` class can answer some questions:
 
-- :meth:`.TimeInterval.is_within_interval`: Is a given time within this interval?
+- :meth:`.TimeInterval.is_in_interval`: Is a given time within this interval?
 - :meth:`.TimeInterval.is_equal`: Is a given interval equal to this interval?
 - :meth:`.TimeInterval.is_intersecting`: Does a given interval have an intersection with this interval?
 - :meth:`.TimeInterval.contains`: Does a given interval contain this interval?
@@ -77,7 +81,7 @@ The :class:`.TimeInterval` class can answer some questions:
 
 .. code-block:: python
 
-    >>> interval_with_end_time.is_within_interval(Time("2020-04-11T00:05:00.000", scale="utc"))
+    >>> interval_with_end_time.is_in_interval(Time("2020-04-11T00:05:00.000", scale="utc"))
     True
     >>> interval_with_end_time.is_equal(TimeInterval(Time("2020-04-09T00:00:00", scale="utc"), TimeDelta(600.0, format="sec")))
     True
@@ -90,7 +94,7 @@ The :class:`.TimeInterval` class can answer some questions:
 
 
 The intervals can be expanded or shrunk through the :meth:`.TimeInterval.expand` method and
-defining  positive or negative :class:`astropy.time.TimeDelta` values to modify the start and
+defining positive or negative :class:`astropy.time.TimeDelta` values to modify the start and
 end times of the interval.
 
 .. code-block:: python
@@ -104,7 +108,7 @@ end times of the interval.
 Time intervals can be subjected to an intersection (a new `TimeInterval` that is the intersection of
 two intervals) or union (a new `TimeInterval` that is the union of
 two intervals) operator. These operators are possible only when these two intervals have
-some intersection.
+some intersection - otherwise the result will be a `None`.
 
 .. code-block:: python
 
@@ -118,19 +122,23 @@ List of time intervals: The :class:`.TimeIntervalList` Class
 ------------------------------------------------------------------
 
 The :class:`.TimeIntervalList` class stores the :class:`.TimeInterval` objects as well as
-another `TimeInterval` for the validity of this list. If this validity interval is not defined
-explicitly, then it is assumed to start with the beginning of the first `TimeInterval` and
-end with the end of the final `TimeInterval`.
-
-.. note:: If the `Time` object passed as the initial time (`start_times`) has multiple
-    time instances, then the end time definitions (in :class:`astropy.time.Time` or
-    :class:`astropy.time.TimeDelta`) should have the same number of time instances
-    to match. Otherwise a `ValueError` will be raised.
+another `TimeInterval` to represent the bounds of the validity of this list. If this validity
+interval is not defined explicitly, then it is assumed to start with the beginning of the first
+`TimeInterval` and end with the end of the final `TimeInterval`.
 
 Any interval within the list can be queried through :meth:`.TimeIntervalList.get_interval`
 method. Similarly, the `TimeInterval` that keeps the interval of validity can be queried
 through :meth:`.TimeIntervalList.validity_interval` method.
 
+The :class:`.TimeIntervalList` usually will not be generated explicitly by a user, except,
+for example, as an external constraint such as the durations when a groundstation is not
+available. Usually such lists are results of certain analyses such as eclipse intervals
+for a location on ground or different attitude profiles for a satellite.
+
+The `TimeIntervalList` will yield a new, inverted (or complementing) version of itself
+through the :meth:`.TimeIntervalList.invert` method. For example, for a single interval of
+`[t0, t1]` in a validity interval `[T0,T1]`, the inverted interval list would be `[T0,t0]`
+and `[t1,T1]`. If there are no intervals, the inverse becomes the entire validity interval.
 
 Reference/API
 -------------
