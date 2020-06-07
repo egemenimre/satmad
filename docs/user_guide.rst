@@ -18,6 +18,7 @@ Other Topics
    :maxdepth: 2
 
    coordinates/trajectory
+   propagation/tle
    coordinates/frames
    utils/timeinterval
    utils/index

@@ -42,6 +42,7 @@ Requirements
 - NumPy and SciPy are used for the underlying mathematical algorithms
 - Astropy handles all time and reference frame computations
 - Portion handles the time interval mechanics
+- python-sgp4 provides the SGP4 propagation engine
 - Pytest provides the testing framework
 
 
