@@ -9,6 +9,7 @@ Two-Line-Elements to represent satellites in Earth orbit.
 """
 from astropy import units as u
 from astropy.time import Time
+from astropy.units import Quantity
 from sgp4.exporter import export_tle
 from sgp4.model import WGS72, Satrec
 
@@ -215,12 +216,12 @@ class TLE:
         return self._satrec.ndot
 
     @property
-    def inclination(self) -> float:
+    def inclination(self) -> Quantity:
         """Returns the TEME mean inclination of the orbit [rad]."""
         return self._satrec.inclo * u.rad
 
     @property
-    def raan(self) -> float:
+    def raan(self) -> Quantity:
         """Returns the TEME mean right ascension of ascending node (RAAN)
         of the orbit [rad]."""
         return self._satrec.nodeo * u.rad
@@ -231,12 +232,12 @@ class TLE:
         return self._satrec.ecco
 
     @property
-    def arg_perigee(self) -> float:
+    def arg_perigee(self) -> Quantity:
         """Returns the TEME mean argument of perigee [rad]."""
         return self._satrec.nodeo * u.rad
 
     @property
-    def mean_anomaly(self) -> float:
+    def mean_anomaly(self) -> Quantity:
         """Returns the mean anomaly of the orbit [rad]."""
         return self._satrec.mo * u.rad
 
