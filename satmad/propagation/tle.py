@@ -46,7 +46,7 @@ class TLE:
     mean_anomaly : float or Quantity
         mean anomaly of the orbit [rad]
     mean_motion : float or Quantity
-        mean motion of the orbit [orbits/day]
+        mean motion of the orbit [rad/sec]
     bstar : float or Quantity
         sgp4 type drag coefficient [1 / earth radius] (see TLE class documentation)
     n_dot : float or Quantity
@@ -115,11 +115,11 @@ class TLE:
             n_dot,
             n_dotdot,
             eccentricity,
-            arg_perigee,
-            inclination,
-            mean_anomaly,
-            mean_motion,
-            raan,
+            arg_perigee.value,
+            inclination.value,
+            mean_anomaly.value,
+            mean_motion * 60,  # convert to seconds
+            raan.value,
         )
 
         # fill time with precise Time information
@@ -213,7 +213,7 @@ class TLE:
     @property
     def n_dotdot(self) -> float:
         """Returns the Second time derivative of the mean motion."""
-        return self._satrec.ndot
+        return self._satrec.nddot
 
     @property
     def inclination(self) -> Quantity:
@@ -234,7 +234,7 @@ class TLE:
     @property
     def arg_perigee(self) -> Quantity:
         """Returns the TEME mean argument of perigee [rad]."""
-        return self._satrec.nodeo * u.rad
+        return self._satrec.argpo * u.rad
 
     @property
     def mean_anomaly(self) -> Quantity:
