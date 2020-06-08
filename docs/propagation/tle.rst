@@ -1,6 +1,8 @@
 Orbit Initialisation with Two-Line Elements (TLEs)
 ====================================================
 
+.. _tle-intro:
+
 Introduction
 ------------
 A two-line element set (TLE) is a data format containing a set of TEME
@@ -72,7 +74,20 @@ Initialising the TLEs
 ----------------------
 While a TLE can be initialised using the regular :class:`.TLE` constructor by specifying the
 large number of initial parameters, by far the most usual way is to use the
-:meth:`.TLE.from_tle` method, with the regular two line input from an external source.
+:meth:`.TLE.from_tle` method, with the regular two line input from an external source
+(see :ref:`tle-intro` Section for an example). Some external sources to retrieve TLEs
+are listed in :ref:`tle-repositories` Section.
+
+.. _tle-repositories:
+
+Common TLE Repositories
+-----------------------
+
+* `Space-Track <https://www.space-track.org/>`_
+
+* `Celestrak <http://celestrak.com/NORAD/elements/>`_
+
+* `N2YO <https://www.n2yo.com/>`_
 
 Reference/API
 -------------
