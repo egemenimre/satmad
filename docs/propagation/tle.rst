@@ -1,14 +1,14 @@
-TLE
-=====
+Orbit Initialisation with Two-Line Elements (TLEs)
+====================================================
 
 Introduction
 ------------
-A two-line element set (TLE) is a data format encoding a list of TEME
-(True Equator, Mean Equinox) mean orbital elements
-of an Earth-orbiting object for a given point in time, called the Epoch Time.
+A two-line element set (TLE) is a data format containing a set of TEME
+(True Equator, Mean Equinox) mean orbital elements of an Earth-orbiting object
+for a given point in time, called the Epoch Time.
 
-These orbital elements are solely for use with the SGP4 propagator due to the
-analytical orbit theory used in its derivation.
+These orbital elements are solely for use with the SGP4 propagator as the two are coupled
+with the underlying analytical orbit theory.
 
 See the `TLE page in Wikipedia
 <https://en.wikipedia.org/wiki/Two-line_element_set>`_ or `NASA definition
@@ -27,8 +27,22 @@ A TLE object is usually initialised from these two lines of strings:
     >>> line2 = "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537"
     >>> tle = TLE.from_tle(line1, line2, "ISS (ZARYA)")
 
-In addition to the usual classical orbital elements, the components of the TLE are
-(adapted from the `NASA definition <https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/SSOP_Help/tle_def.html>`_
+Components of a TLE
+-------------------
+
+A TLE contains the well-known mean classical (or Keplerian) orbital elements such as
+Mean Anomaly, Right Ascension of the Ascending Node or
+Argument of Perigee. A semimajor axis is not directly defined, but the mean motion term
+given in revolutions/day can be used to derive the semimajor axis in a straightforward fashion.
+For example, a mean motion of 14.5 revolutions/day is equivalent to an orbital period of
+5958.62 seconds or a mean motion (:math:`n`) of 0.00106 radians/second. Then the usual
+semimajor axis (:math:`a`) can be derived from :math:`a^3 n^2=\mu`, where :math:`\mu` is
+equal to the Gravitational Constant (:math:`G`) times the mass of the Earth (:math:`M`).
+In this example, the semimajor axis is equal to 7079.056 km.
+
+In addition to the usual classical orbital elements, other components of the TLE are
+(adapted from the
+`NASA definition <https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/SSOP_Help/tle_def.html>`_
 ):
 
 * Satellite catalog number (NORAD ID): The unique string
@@ -46,13 +60,19 @@ In addition to the usual classical orbital elements, the components of the TLE a
   Simplified General Perturbations (SGP4) USSPACECOM predictor.
 
 * Second Derivative of Mean Motion: The second derivative of mean motion is a
-  second order drag term in the SGP4 predictor used to model terminal orbit decay.
+  second order drag term in the SGP4 propagator used to model terminal orbit decay.
   It measures the second time derivative in daily mean motion, divided by 6.
-  Units are :math: `revs/day^3`.
+  Units are :math:`revs/day^3`.
 
 * Drag Term (BSTAR): Also called the radiation pressure coefficient,
   the parameter is another drag term in the SGP4 predictor. Units are
-  :math: `1/earth radii`.
+  :math:`1/earth radii`.
+
+Initialising the TLEs
+----------------------
+While a TLE can be initialised using the regular :class:`.TLE` constructor by specifying the
+large number of initial parameters, by far the most usual way is to use the
+:meth:`.TLE.from_tle` method, with the regular two line input from an external source.
 
 Reference/API
 -------------
