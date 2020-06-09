@@ -166,11 +166,16 @@ class TLE:
         # create object without calling `__init__`
         tle = cls.__new__(cls)
 
-        # load TLE name
-        tle._name = name
-
         # init Satrec object with TLE strings
         tle._satrec = Satrec.twoline2rv(line1, line2, whichconst=TLE._grav_model)
+
+        # Fill epoch in Time
+        tle._epoch = Time(
+            tle._satrec.jdsatepoch, tle._satrec.jdsatepochF, scale="utc", format="jd"
+        )
+
+        # load TLE name
+        tle._name = name
 
         return tle
 
