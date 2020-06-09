@@ -7,11 +7,16 @@
 Two-Line-Elements to represent satellites in Earth orbit.
 
 """
+import math
+
 from astropy import units as u
 from astropy.time import Time
 from astropy.units import Quantity
 from sgp4.exporter import export_tle
 from sgp4.model import WGS72, Satrec
+
+# precompile the unit as constant
+_DAY_TO_SEC = (1.0 * u.day).to(u.s)
 
 
 class TLE:
@@ -194,6 +199,10 @@ class TLE:
 
         return txt
 
+    def period(self) -> Quantity:
+        """Computes the satellite period [sec]."""
+        return 2 * math.pi / self.mean_motion * u.s
+
     @property
     def epoch(self) -> Time:
         """Returns the epoch time associated with the orbital parameters."""
@@ -206,9 +215,24 @@ class TLE:
 
     @property
     def n_dot(self) -> float:
-        """Returns the first time derivative of the mean motion or
-        Ballistic Coefficient [revs/day]."""
+        """
+        Gets and sets the first time derivative of the mean motion or
+        Ballistic Coefficient [revs/day].
+
+        Absolute value of the first time derivative of the mean motion
+        can only be less than 1.0 (exclusive). Raises a `ValueError` otherwise.
+        """
         return self._satrec.ndot
+
+    @n_dot.setter
+    def n_dot(self, n_dot):
+        if abs(n_dot) < 1.0:
+            self._satrec.ndot = n_dot
+        else:
+            raise ValueError(
+                f"Given argument ({n_dot}) is an invalid derivative of mean motion, "
+                f"only absolute values less than 1.0 (exclusive) are allowed."
+            )
 
     @property
     def n_dotdot(self) -> float:
@@ -217,39 +241,139 @@ class TLE:
 
     @property
     def inclination(self) -> Quantity:
-        """Returns the TEME mean inclination of the orbit [rad]."""
+        """Gets and sets the TEME mean inclination of the orbit [rad].
+
+        Inclination should be in range 0 <= om < PI.
+        Raises a `ValueError` otherwise.
+        """
         return self._satrec.inclo * u.rad
+
+    @inclination.setter
+    def inclination(self, i):
+        if 0 <= i < math.pi:
+            self._satrec.inclo = i
+        else:
+            raise ValueError(
+                f"Given argument ({i}) is an invalid "
+                f"Inclination value, "
+                f"only values in range 0 <= i < PI are allowed."
+            )
 
     @property
     def raan(self) -> Quantity:
-        """Returns the TEME mean right ascension of ascending node (RAAN)
-        of the orbit [rad]."""
+        """Gets and sets the TEME mean right ascension of ascending node (RAAN)
+        of the orbit [rad].
+
+        RAAN should be in range 0 <= om < 2*PI.
+        Raises a `ValueError` otherwise."""
         return self._satrec.nodeo * u.rad
+
+    @raan.setter
+    def raan(self, om):
+        if 0 <= om < 2 * math.pi:
+            self._satrec.nodeo = om
+        else:
+            raise ValueError(
+                f"Given argument ({om}) is an invalid "
+                f"RAAN value, "
+                f"only values in range 0 <= om < 2*PI are allowed."
+            )
 
     @property
     def eccentricity(self) -> float:
-        """Returns the mean eccentricity of the orbit."""
+        """Gets and sets the mean eccentricity of the orbit.
+
+        Eccentricity should be in range 0 <= e < 1.0.
+        Raises a `ValueError` otherwise."""
         return self._satrec.ecco
+
+    @eccentricity.setter
+    def eccentricity(self, e):
+        if 0 <= e < 1.0:
+            self._satrec.ecco = e
+        else:
+            raise ValueError(
+                f"Given argument ({e}) is an invalid "
+                f"Eccentricity value, "
+                f"only values in range 0 <= e < 1.0 are allowed."
+            )
 
     @property
     def arg_perigee(self) -> Quantity:
-        """Returns the TEME mean argument of perigee [rad]."""
+        """Gets and sets the TEME mean argument of perigee [rad].
+
+        Argument of perigee should be in range 0 <= argp < 2*PI.
+        Raises a `ValueError` otherwise.
+        """
         return self._satrec.argpo * u.rad
+
+    @arg_perigee.setter
+    def arg_perigee(self, argp):
+        if 0 <= argp < 2 * math.pi:
+            self._satrec.argpo = argp
+        else:
+            raise ValueError(
+                f"Given argument ({argp}) is an invalid "
+                f"Argument of Perigee value, "
+                f"only values in range 0 <= om < 2*PI are allowed."
+            )
 
     @property
     def mean_anomaly(self) -> Quantity:
-        """Returns the mean anomaly of the orbit [rad]."""
+        """Gets and sets the mean anomaly of the orbit [rad].
+
+        Mean Anomaly should be in range 0 <= m_anom < 2*PI.
+        Raises a `ValueError` otherwise.
+        """
         return self._satrec.mo * u.rad
+
+    @mean_anomaly.setter
+    def mean_anomaly(self, m_anom):
+        if 0 <= m_anom < 2 * math.pi:
+            self._satrec.mo = m_anom
+        else:
+            raise ValueError(
+                f"Given argument ({m_anom}) is an invalid "
+                f"Mean Anomaly value, "
+                f"only values in range 0 <= m_anom < 2*PI are allowed."
+            )
 
     @property
     def mean_motion(self) -> float:
-        """Returns the mean motion of the orbit [rad/sec]."""
+        """Gets and sets the mean motion of the orbit [rad/sec].
+
+        Mean Motion in revs/day should be in range 0 < n <= 17.0.
+        Raises a `ValueError` otherwise.
+        """
         return self._satrec.no_kozai / 60.0
+
+    @mean_motion.setter
+    def mean_motion(self, n):
+        no = _DAY_TO_SEC * n / (2 * math.pi)
+        if 0 < no <= 17.0:
+            self._satrec.no_kozai = n * 60
+        else:
+            raise ValueError(
+                f"Given argument ({n}, converted to {no}) is an invalid "
+                f"Mean Motion value, "
+                f"only values in range 0 < n <= 17.0 are allowed."
+            )
 
     @property
     def name(self) -> str:
-        """Returns the common name of the satellite."""
+        """Gets and sets the common name of the satellite.
+
+        Satellite name cannot be `None` or empty, "NO NAME" is then assigned
+        automatically.
+        """
         return self._name
+
+    @name.setter
+    def name(self, name):
+        if name is None or not name:
+            self._name = "NO NAME"
+        else:
+            self._name = name
 
     @property
     def sat_number(self) -> int:
@@ -258,22 +382,82 @@ class TLE:
 
     @property
     def intl_designator(self) -> str:
-        """Returns the international designator of the satellite."""
+        """
+        Gets or sets the international designator of the satellite.
+
+        International Designator can only be between 0 and 100000
+        (exclusive at both ends). Raises a `ValueError` otherwise.
+        """
         return self._satrec.intldesg
+
+    @intl_designator.setter
+    def intl_designator(self, intl_designator):
+        if 0 < intl_designator < 100000:
+            self._satrec.intldesg = intl_designator
+        else:
+            raise ValueError(
+                f"Given argument ({intl_designator}) is an invalid "
+                f"International Designator, "
+                f"only values between 0 and 100000 (exclusive) are allowed."
+            )
 
     @property
     def classification(self) -> str:
-        """Returns the classification of the satellite."""
+        """
+        Gets or sets the classification of the satellite.
+
+        Classification type can only be `U`, `C` or `S`. Raises a `ValueError`
+        otherwise.
+        """
         return self._satrec.classification
+
+    @classification.setter
+    def classification(self, sec_class):
+        if sec_class == "U" or sec_class == "C" or sec_class == "S":
+            self._satrec.classification = sec_class
+        else:
+            raise ValueError(
+                f"Given argument ({sec_class}) is an invalid classification type, "
+                f"only U, C, S are allowed."
+            )
 
     @property
     def rev_nr(self) -> int:
-        """Returns the Revolution number of the object at Epoch Time [revolutions]."""
+        """
+        Gets or sets the Revolution Number of the object at Epoch Time [revolutions].
+
+        Revolution Number can only be between 0 and 100000
+        (exclusive at both ends). Raises a `ValueError` otherwise.
+        """
         return self._satrec.revnum
+
+    @rev_nr.setter
+    def rev_nr(self, rev_nr):
+        if 0 < rev_nr < 100000:
+            self._satrec.revnum = rev_nr
+        else:
+            raise ValueError(
+                f"Given argument ({rev_nr}) is an invalid Revolution Number, "
+                f"only values between 0 and 100000 (exclusive) are allowed."
+            )
 
     @property
     def el_nr(self) -> int:
-        """Returns the Element set number.
+        """Gets and sets the Element set number.
 
-        Incremented when a new TLE is generated for this object."""
+        Incremented when a new TLE is generated for this object.
+
+        Element set number should be in range 0 <= el_nr < 10000.
+        Raises a `ValueError` otherwise.
+        """
         return self._satrec.elnum
+
+    @el_nr.setter
+    def el_nr(self, el_nr):
+        if 0 <= el_nr < 10000:
+            self._satrec.elnum = el_nr
+        else:
+            raise ValueError(
+                f"Given argument ({el_nr}) is an invalid Element Set Number, "
+                f"only values between 0 and 10000 (exclusive) are allowed."
+            )
