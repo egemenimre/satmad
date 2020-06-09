@@ -73,13 +73,13 @@ class TLE:
         Element set number. Incremented when a new TLE is generated for this object.
     """
 
-    # # Gravitational constants(defaults to WGS72)
-    # _mu = 398600.8 * u.km ** 3 / u.s ** 2  # in km3 / s2
-    # _earth_radius = 6378.135 * u.km  # km
-    # _j2 = 0.001082616
+    # Gravitational constants(defaults to WGS72)
+    _grav_model = WGS72
+    _mu = 398600.8 * (u.km ** 3 / u.s ** 2)  # in km3 / s2
+    _earth_radius = 6378.135 * u.km  # km
+    _j2 = 0.001082616
 
     # Hardcoded defaults
-    _grav_model = WGS72
     _ops_mode = "i"
 
     def __init__(
@@ -202,6 +202,70 @@ class TLE:
     def period(self) -> Quantity:
         """Computes the satellite period [sec]."""
         return 2 * math.pi / self.mean_motion * u.s
+
+    def sm_axis(self) -> Quantity:
+        """Computes the semimajor axis [km].
+
+        Note that the :math:`mu` value used in the computation of the semimajor axis
+        is that of WGS72 for consistency with the orbital elements definition.
+        """
+        n = self.mean_motion
+        return math.pow(TLE._mu.value / n / n, 1 / 3) * u.km
+
+    def node_rotation_rate(self):
+        """
+        Node (or orbital plane) rotation rate due to J2.
+
+        Note that, WGS72 constants for J2 and Earth Radius (R_E) are used in
+        the computation for consistency with the orbital elements definition.
+
+        Returns
+        -------
+        Quantity
+            Node rotation rate (deg/day)
+        """
+        n = self.mean_motion
+        r_e = TLE._earth_radius
+        e = self.eccentricity
+        p = self.sm_axis() * (1 - e * e)
+        j2 = TLE._j2
+        i = self.inclination
+
+        node_rot = (-3 * n * r_e * r_e * j2 / (2 * p * p) * math.cos(i)) * (u.rad / u.s)
+
+        return node_rot.to(u.deg / u.day)
+
+    def argp_rotation_rate(self):
+        """
+        Argument of Perigee (or eccentricity vector) rotation rate due to J2.
+
+        Note that, WGS72 constants for J2 and Earth Radius (R_E) are used in
+        the computation for consistency with the orbital elements definition.
+
+        Returns
+        -------
+        Quantity
+            Arg of Perigee rotation rate (deg/day)
+        """
+        n = self.mean_motion
+        r_e = TLE._earth_radius
+        e = self.eccentricity
+        p = self.sm_axis() * (1 - e * e)
+        j2 = TLE._j2
+        sin_i = math.sin(self.inclination)
+
+        argp_rot = (
+            3.0
+            * n
+            * r_e
+            * r_e
+            * j2
+            / (4.0 * p * p)
+            * (4.0 - 5.0 * sin_i * sin_i)
+            * (u.rad / u.s)
+        )
+
+        return argp_rot.to(u.deg / u.day)
 
     @property
     def epoch(self) -> Time:
