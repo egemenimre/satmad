@@ -9,13 +9,13 @@ offers Terrestrial Intermediate Reference System (:class:`.TIRS`) and
 Mean Pole and Equinox at J2000.0 Reference System (:class:`.J2000`).
 
 The definitions and conversions for :class:`.TIRS` are from IERS Conventions 2010,
-Chapter 5 [Ref2]_. Put simply, when the TIRS coordinate is multiplied by the Polar Motion Matrix, the final
+Chapter 5 [TCF1]_. Put simply, when the TIRS coordinate is multiplied by the Polar Motion Matrix, the final
 coordinates are in ITRS:
 
 .. math:: \vec{r}_{ITRS} = W \times \vec{r}_{TIRS}
 
 :class:`.J2000` coordinate frame is similar to GCRS but rotated by a constant frame bias
-[Ref1]_:
+[TCF1]_:
 
 .. math:: \vec{r}_{J2000} = B \times \vec{r}_{GCRS}
 

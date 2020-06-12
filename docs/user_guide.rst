@@ -1,24 +1,26 @@
 User Guide
 ==========
 
-Everything Starts with a :class:`.Trajectory`
-------------------------------------------------------------------------------
+Orbit Initialisation
+--------------------
 
-At the heart of the SatMAD data structures is the :class:`.Trajectory` class.
-It contains an Astropy :class:`astropy.coordinates.SkyCoord` object to keep the discrete points of the
-trajectory. However, it can output the coordinates for any requested time within the time bounds of the original
-:class:`astropy.coordinates.SkyCoord` trajectory object. This enables many other functionalities
-not otherwise possible.
+The easiest way to start is to initialise an orbit from an existing repository, for example see the TLE of
+`ISS from Celestrak <https://celestrak.com/satcat/tle.php?CATNR=25544>`_:
 
+    >>> line1 = "1 25544U 98067A   20164.72025505  .00000382  00000-0  14906-4 0  9996"
+    >>> line2 = "2 25544  51.6454  10.5753 0002538  44.8752  74.7852 15.49438622231324"
+    >>> tle = TLE.from_tle(line1, line2, "ISS (ZARYA)")
 
-Other Topics
-------------
+It is then possible to query orbital parameters of the satellite:
 
-.. toctree::
-   :maxdepth: 2
+    >>> tle.sm_axis()
+    <Quantity 6796.50623984 km>
+    >>> tle.period()
+    <Quantity 5576.21313766 s>
 
-   coordinates/trajectory
-   propagation/tle
-   coordinates/frames
-   utils/timeinterval
-   utils/index
+The parameters have their quantities attached, so it is possible to easily convert them to more convenient units:
+
+    >>> from astropy import units as u
+    >>> tle.inclination.to(u.deg)
+    <Quantity 51.6454 deg>
+

@@ -3,8 +3,9 @@ Orbit Initialisation with Two-Line Elements (TLEs)
 
 .. _tle-intro:
 
-Introduction
-------------
+Introduction to TLEs
+---------------------
+
 A two-line element set (TLE) is a data format containing a set of TEME
 (True Equator, Mean Equinox) mean orbital elements of an Earth-orbiting object
 for a given point in time, called the Epoch Time.
@@ -77,6 +78,14 @@ large number of initial parameters, by far the most usual way is to use the
 :meth:`.TLE.from_tle` method, with the regular two line input from an external source
 (see :ref:`tle-intro` Section for an example). Some external sources to retrieve TLEs
 are listed in :ref:`tle-repositories` Section.
+
+.. _tle-orbit_properties:
+
+Checking Orbit Properties
+-------------------------
+Once the it is then possible to query the node rotation rate (to check whether the satellite is
+See [OM2]_.
+
 
 .. _tle-repositories:
 

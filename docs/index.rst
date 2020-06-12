@@ -8,30 +8,15 @@ community, including Cubesats.
 
 Check the source code here: https://github.com/egemenimre/satmad
 
-While current functionality is limited, the aim looks like this:
 
-#. Operations support
-    a) Groundstation communication times
-    b) Target imaging times
-#. Satellite propagation
-    a) Numerical Propagation with full force model: Geopotentials, Solar Radiation Pressure, 3rd body interactions, atmospheric drag
-    b) Analytical Propagation: SGP4 and Keplerian
-#. Satellite orbit design and analysis
-    a) GEO, Sun-synch and repeating orbits
-    b) Analysis of deviations from the ideal orbits
-#. Orbit change
-    a) Manoeuvres and Delta-V calculations
-#. Attitude kinematics modelling and basic attitude laws
-    a) Sun pointing, yaw compensation, spin
-#. Satellite design
-    a) Power generation with solar arrays
-    b) Power consumption and battery sizing
-    c) Propellant budget
 
 .. toctree::
    :maxdepth: 2
 
+   about
+   getting_started
    user_guide
+   doc_index
    references
 
 .. about
@@ -39,11 +24,12 @@ While current functionality is limited, the aim looks like this:
 .. user_guide
 .. tutorials
 .. api
+.. contributing
 .. references
 
 
 
-Indices and tables
+Indices and Tables
 ------------------
 
 * :ref:`genindex`
