@@ -8,7 +8,6 @@ Two-Line-Elements to represent satellites in Earth orbit.
 
 """
 import numpy as np
-
 from astropy import units as u
 from astropy.time import Time
 from astropy.units import Quantity
@@ -318,7 +317,12 @@ class TLE:
         return self._satrec.inclo * u.rad
 
     @inclination.setter
-    def inclination(self, i: float or Quantity):
+    def inclination(self, i):
+        """
+        Parameters
+        ----------
+        i : float or Quantity
+        """
         i_val = _force_angles_to_rad(i)
 
         if 0 <= i_val < np.pi:
@@ -340,7 +344,12 @@ class TLE:
         return self._satrec.nodeo * u.rad
 
     @raan.setter
-    def raan(self, om: float or Quantity):
+    def raan(self, om):
+        """
+        Parameters
+        ----------
+        om : float or Quantity
+        """
         om_val = _force_angles_to_rad(om)
 
         if 0 <= om_val < 2 * np.pi:
@@ -381,8 +390,12 @@ class TLE:
         return self._satrec.argpo * u.rad
 
     @arg_perigee.setter
-    def arg_perigee(self, argp: float or Quantity):
-
+    def arg_perigee(self, argp):
+        """
+        Parameters
+        ----------
+        argp : float or Quantity
+        """
         argp_val = _force_angles_to_rad(argp)
 
         if 0 <= argp_val < 2 * np.pi:
@@ -404,7 +417,12 @@ class TLE:
         return self._satrec.mo * u.rad
 
     @mean_anomaly.setter
-    def mean_anomaly(self, m_anom: float or Quantity):
+    def mean_anomaly(self, m_anom):
+        """
+        Parameters
+        ----------
+        m_anom : float or Quantity
+        """
         m_anom_val = _force_angles_to_rad(m_anom)
         if 0 <= m_anom_val < 2 * np.pi:
             self._satrec.mo = m_anom_val
@@ -533,8 +551,14 @@ class TLE:
             )
 
 
-def _force_angles_to_rad(angle: float or Quantity) -> float:
-    """Forces a `Quantity` or a float to output float in radians."""
+def _force_angles_to_rad(angle) -> float:
+    """
+    Forces a `Quantity` or a float to output float in radians.
+
+    Parameters
+    ----------
+    angle : float or Quantity
+    """
     if isinstance(angle, Quantity):
         angle_rad = angle.to_value(u.rad)
     else:
