@@ -67,7 +67,7 @@ class J2000(BaseCoordinateFrame):
     References
     ----------
     The definitions and conversions are from IERS Conventions 2010, Chapter 5
-    [Ref2]_.
+    [TCF1]_.
 
     """
 
@@ -94,7 +94,7 @@ class TEME(BaseCoordinateFrame):
     ----------
     The definitions and conversions are from Fundamentals of Astrodynamics and
     Applications 4th Ed. Section 3.7, pg 231
-    [Ref1]_.
+    [OM1]_.
 
     """
 
@@ -116,7 +116,7 @@ class TIRS(BaseCoordinateFrame):
     References
     ----------
     The definitions and conversions are from IERS Conventions 2010, Chapter 5
-    [Ref2]_.
+    [TCF1]_.
 
     """
 
