@@ -7,7 +7,7 @@
 Two-Line-Elements to represent satellites in Earth orbit.
 
 """
-import math
+import numpy as np
 
 from astropy import units as u
 from astropy.time import Time
@@ -206,7 +206,7 @@ class TLE:
 
     def period(self) -> Quantity:
         """Computes the satellite period [sec]."""
-        return 2 * math.pi / self.mean_motion * u.s
+        return 2 * np.pi / self.mean_motion * u.s
 
     def sm_axis(self) -> Quantity:
         """Computes the semimajor axis [km].
@@ -215,7 +215,7 @@ class TLE:
         is that of WGS72 for consistency with the orbital elements definition.
         """
         n = self.mean_motion
-        return math.pow(TLE._mu.value / n / n, 1 / 3) * u.km
+        return np.power(TLE._mu.value / n / n, 1 / 3) * u.km
 
     def node_rotation_rate(self):
         """
@@ -236,7 +236,7 @@ class TLE:
         j2 = TLE._j2
         i = self.inclination
 
-        node_rot = (-3 * n * r_e * r_e * j2 / (2 * p * p) * math.cos(i)) * (u.rad / u.s)
+        node_rot = (-3 * n * r_e * r_e * j2 / (2 * p * p) * np.cos(i)) * (u.rad / u.s)
 
         return node_rot.to(u.deg / u.day)
 
@@ -257,7 +257,7 @@ class TLE:
         e = self.eccentricity
         p = self.sm_axis() * (1 - e * e)
         j2 = TLE._j2
-        sin_i = math.sin(self.inclination)
+        sin_i = np.sin(self.inclination)
 
         argp_rot = (
             3.0
@@ -318,9 +318,11 @@ class TLE:
         return self._satrec.inclo * u.rad
 
     @inclination.setter
-    def inclination(self, i):
-        if 0 <= i < math.pi:
-            self._satrec.inclo = i
+    def inclination(self, i: float or Quantity):
+        i_val = _force_angles_to_rad(i)
+
+        if 0 <= i_val < np.pi:
+            self._satrec.inclo = i_val
         else:
             raise ValueError(
                 f"Given argument ({i}) is an invalid "
@@ -338,9 +340,11 @@ class TLE:
         return self._satrec.nodeo * u.rad
 
     @raan.setter
-    def raan(self, om):
-        if 0 <= om < 2 * math.pi:
-            self._satrec.nodeo = om
+    def raan(self, om: float or Quantity):
+        om_val = _force_angles_to_rad(om)
+
+        if 0 <= om_val < 2 * np.pi:
+            self._satrec.nodeo = om_val
         else:
             raise ValueError(
                 f"Given argument ({om}) is an invalid "
@@ -377,9 +381,12 @@ class TLE:
         return self._satrec.argpo * u.rad
 
     @arg_perigee.setter
-    def arg_perigee(self, argp):
-        if 0 <= argp < 2 * math.pi:
-            self._satrec.argpo = argp
+    def arg_perigee(self, argp: float or Quantity):
+
+        argp_val = _force_angles_to_rad(argp)
+
+        if 0 <= argp_val < 2 * np.pi:
+            self._satrec.argpo = argp_val
         else:
             raise ValueError(
                 f"Given argument ({argp}) is an invalid "
@@ -397,9 +404,10 @@ class TLE:
         return self._satrec.mo * u.rad
 
     @mean_anomaly.setter
-    def mean_anomaly(self, m_anom):
-        if 0 <= m_anom < 2 * math.pi:
-            self._satrec.mo = m_anom
+    def mean_anomaly(self, m_anom: float or Quantity):
+        m_anom_val = _force_angles_to_rad(m_anom)
+        if 0 <= m_anom_val < 2 * np.pi:
+            self._satrec.mo = m_anom_val
         else:
             raise ValueError(
                 f"Given argument ({m_anom}) is an invalid "
@@ -417,8 +425,8 @@ class TLE:
         return self._satrec.no_kozai / 60.0
 
     @mean_motion.setter
-    def mean_motion(self, n):
-        no = _DAY_TO_SEC * n / (2 * math.pi)
+    def mean_motion(self, n: float):
+        no = _DAY_TO_SEC.to_value() * n / (2 * np.pi)
         if 0 < no <= 17.0:
             self._satrec.no_kozai = n * 60
         else:
@@ -461,14 +469,7 @@ class TLE:
 
     @intl_designator.setter
     def intl_designator(self, intl_designator):
-        if 0 < intl_designator < 100000:
-            self._satrec.intldesg = intl_designator
-        else:
-            raise ValueError(
-                f"Given argument ({intl_designator}) is an invalid "
-                f"International Designator, "
-                f"only values between 0 and 100000 (exclusive) are allowed."
-            )
+        self._satrec.intldesg = intl_designator
 
     @property
     def classification(self) -> str:
@@ -530,3 +531,13 @@ class TLE:
                 f"Given argument ({el_nr}) is an invalid Element Set Number, "
                 f"only values between 0 and 10000 (exclusive) are allowed."
             )
+
+
+def _force_angles_to_rad(angle: float or Quantity) -> float:
+    """Forces a `Quantity` or a float to output float in radians."""
+    if isinstance(angle, Quantity):
+        angle_rad = angle.to_value(u.rad)
+    else:
+        angle_rad = angle
+
+    return angle_rad
