@@ -94,11 +94,21 @@ def test_tle_with_params(init_tle_leo, check_str_leo):
 
 
 def test_node_rot(init_tle_sso):
+    """Test orbit plane rotation rate."""
     tle = init_tle_sso
 
-    print(tle.node_rotation_rate())
     assert tle.node_rotation_rate().to_value(u.deg / u.day) == approx(
         (0.9870658041317965 * u.deg / u.day).to_value(),
+        abs=(1e-14 * u.deg / u.day).to_value(),
+    )
+
+
+def test_argp_rot(init_tle_sso):
+    """Test argument of perigee rotation rate."""
+    tle = init_tle_sso
+
+    assert tle.argp_rotation_rate().to_value(u.deg / u.day) == approx(
+        (-2.9445253809901057 * u.deg / u.day).to_value(),
         abs=(1e-14 * u.deg / u.day).to_value(),
     )
 
@@ -149,6 +159,7 @@ def test_getters_setters(init_tle_leo):
     assert tle.arg_perigee.to_value(u.deg) == approx(
         (300.2201 * u.deg).to_value(), abs=1e-8
     )
+    assert tle.n_dot == approx(4.5451282604019e-13, rel=1e-10)
 
     # test setters
     tle.inclination = 30.00 * u.deg
@@ -164,11 +175,19 @@ def test_getters_setters(init_tle_leo):
         (20.00 * u.deg).to_value(), abs=1e-8
     )
 
+    tle.mean_anomaly = 20.00 * u.deg
+    assert tle.mean_anomaly.to_value(u.deg) == approx(
+        (20.00 * u.deg).to_value(), abs=1e-8
+    )
+
     tle.eccentricity = 0.05
     assert tle.eccentricity == approx(0.05, abs=1e-10)
 
     tle.mean_motion = 1.05e-5
-    assert tle.mean_motion == approx(1.05e-5, abs=1e-10)
+    assert tle.mean_motion == approx(1.05e-5, rel=1e-10)
+
+    tle.n_dot = 1.05e-5
+    assert tle.n_dot == approx(1.05e-5, rel=1e-10)
 
     tle.el_nr = 123
     assert tle.el_nr == 123
