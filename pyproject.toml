@@ -18,3 +18,22 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 
+requires = [
+    "astropy",
+    "matplotlib",
+    "numpy",
+    "portion",
+    "scipy",
+    "sgp4",
+]
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+]
+doc = ["sphinx"]
+
+[tool.flit.metadata.urls]
+Documentation = "https://satmad.readthedocs.io/en/latest/"
