@@ -37,6 +37,7 @@ extensions = [
     "sphinx.ext.graphviz",  # Dependency diagrams
     "sphinx.ext.intersphinx",  # Link mapping to external projects
     # "sphinx.ext.doctest",  # Doctest
+    "nbsphinx",  # Jupyter notebook support
 ]
 numpydoc_show_class_members = False
 
@@ -62,6 +63,14 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
     "matplotlib": ("https://matplotlib.org", None),
 }
+
+if os.environ.get("READTHEDOCS") == "True":
+    nbsphinx_execute = "never"
+else:
+    nbsphinx_execute = "always"
+
+    # Controls when a cell will time out (defaults to 30; use -1 for no timeout):
+    nbsphinx_timeout = 60
 
 # -- Options for HTML output -------------------------------------------------
 
