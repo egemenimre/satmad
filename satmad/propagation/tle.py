@@ -120,11 +120,11 @@ class TLE:
             n_dot,
             n_dotdot,
             eccentricity,
-            arg_perigee.value,
-            inclination.value,
-            mean_anomaly.value,
+            arg_perigee.to_value(u.rad),
+            inclination.to_value(u.rad),
+            mean_anomaly.to_value(u.rad),
             mean_motion * 60,  # convert to seconds
-            raan.value,
+            raan.to_value(u.rad),
         )
 
         # fill time with precise Time information
@@ -176,6 +176,86 @@ class TLE:
 
         # load TLE name
         tle._name = name
+
+        return tle
+
+    @classmethod
+    def init_geo(
+        cls,
+        epoch,
+        longitude,
+        name="No Name",
+        intl_designator="12345A",
+        sat_num=99999,
+        classification="U",
+        rev_nr=0,
+        el_nr=1,
+    ):
+        """
+        Initialises a geostationary satellite TLE.
+        Due to the nature of the Earth's geopotential, the orbit may drift off
+        by some degrees within weeks.
+
+        Parameters
+        ----------
+        epoch : Time
+            Epoch Time corresponding to the orbital elements (nominally very near
+            the time of true ascending node passage)
+        longitude : float or Quantity
+            initial longitude of the satellite
+        name : str
+            Common name of the satellite
+        intl_designator : str
+            international designator on card 1 (up to 8 characters) (see class definition)
+        sat_num : int
+            satellite catalog number (see TLE class documentation)
+        classification : str
+            Classification (`U` for Unclassified, `C` for Classified, `S` for Secret)
+        rev_nr : int
+            Revolution number of the object at Epoch Time [revolutions]
+        el_nr : int
+            Element set number. Incremented when a new TLE is generated for this object.
+
+        Returns
+        -------
+          TLE
+                `TLE` object initialised with the required GEO parameters.
+        """
+        # init GEO specific values - period is one sidereal day
+        mean_motion = 2 * np.pi / (1.0 * u.sday).to_value(u.s)
+        raan = epoch.sidereal_time("mean", longitude)
+
+        # make sure raan value does not exceed 2pi
+        if 2 * np.pi < raan.to_value(u.rad):
+            raan = raan - 2 * np.pi * u.rad
+
+        bstar = 0  # no drag
+        n_dot = 0  # mean motion assumed constant
+
+        # init standard (near) circular orbit
+        inclination = 0.0 * u.deg
+        eccentricity = 1e-9  # cannot be zero
+        arg_perigee = 0.0 * u.deg
+        mean_anomaly = 0.0 * u.deg
+
+        tle = TLE(
+            epoch,
+            inclination,
+            raan,
+            eccentricity,
+            arg_perigee,
+            mean_anomaly,
+            mean_motion,
+            bstar,
+            n_dot,
+            n_dotdot=0.0,
+            name=name,
+            intl_designator=intl_designator,
+            sat_num=sat_num,
+            classification=classification,
+            rev_nr=rev_nr,
+            el_nr=el_nr,
+        )
 
         return tle
 

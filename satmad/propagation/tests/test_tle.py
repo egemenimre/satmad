@@ -9,6 +9,7 @@ TLE class tests.
 """
 import pytest
 from astropy import units as u
+from astropy.time import Time
 from pytest import approx
 
 from satmad.propagation.tle import TLE
@@ -59,6 +60,21 @@ def check_str_leo(tle_leo):
     return tle_leo.name + "\n" + tle_leo.line1 + "\n" + tle_leo.line2 + "\n"
 
 
+@pytest.fixture
+def tle_geo():
+    """Test Fixture with GEO TLE."""
+    name = "SAMPLE GEO"
+    line1 = "1 99999U 12345A   20162.50918981  .00000000  00000-0  00000-0 0 00005"
+    line2 = "2 99999 000.0000 124.6202 0000000 000.0000 000.0000 01.00273791000004"
+    return TLEData(line1, line2, name)
+
+
+@pytest.fixture
+def init_tle_geo(tle_geo):
+    """Generates the GEO TLE test setup."""
+    return TLE.from_tle(tle_geo.line1, tle_geo.line2, tle_geo.name)
+
+
 def test_tle_init_with_lines(tle_leo, check_str_leo):
     """Test initialise from TLE."""
     tle1 = TLE.from_tle(tle_leo.line1, tle_leo.line2, tle_leo.name)
@@ -91,6 +107,26 @@ def test_tle_with_params(init_tle_leo, check_str_leo):
     )
 
     assert str(tle2) == check_str_leo == str(tle1)
+
+
+def test_init_geo(init_tle_geo):
+    """Test init GEO satellite."""
+    tle_geo = init_tle_geo
+
+    epoch = Time("2020-06-10T12:13:14.000")
+    longitude = 42.0 * u.deg
+
+    tle = TLE.init_geo(
+        epoch,
+        longitude,
+        name=tle_geo.name,
+        sat_num=tle_geo.sat_number,
+        intl_designator=tle_geo.intl_designator,
+        rev_nr=tle_geo.rev_nr,
+        el_nr=tle_geo.el_nr,
+    )
+
+    assert str(tle_geo) == str(tle)
 
 
 def test_node_rot(init_tle_sso):

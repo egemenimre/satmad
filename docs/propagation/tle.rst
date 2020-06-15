@@ -79,12 +79,36 @@ large number of initial parameters, by far the most usual way is to use the
 (see :ref:`tle-intro` Section for an example). Some external sources to retrieve TLEs
 are listed in :ref:`tle-repositories` Section.
 
+Another way to initialise the TLE is by orbit type. For example, initialising a
+geostationary satellite TLE is as easy as defining a reference time and a target longitude:
+
+    >>> from astropy import units as u
+    >>> tle_geo = TLE.init_geo(Time("2020-06-10T12:13:14.000"), 42 * u.deg)
+    >>> print(tle_GEO)
+    No Name
+    1 99999U 12345A   20162.50918981  .00000000  00000-0  00000+0 0    15
+    2 99999   0.0000 124.6202 0000000   0.0000   0.0000  1.00273791    04
+
+
 .. _tle-orbit_properties:
 
-Checking Orbit Properties
--------------------------
-Once the it is then possible to query the node rotation rate (to check whether the satellite is
-See [OM2]_.
+Checking the Orbit Properties
+-----------------------------
+Once the TLE is initialised, it is then possible to query orbit parameters such as inclination, eccentricity
+or node rotation rate (to check whether the satellite is sun-synchronous):
+
+    >>> tle.sm_axis()
+    <Quantity 6796.50623984 km>
+    >>> tle.period()
+    <Quantity 5576.21313766 s>
+
+The parameters have their quantities attached, so it is possible to easily convert them to more convenient units:
+
+    >>> tle.inclination.to(u.deg)
+    <Quantity 51.6454 deg>
+
+Please see the example `Analysis of a Repeating Sun-Synchronous Orbit <examples/sso_analysis.ipynb>`_
+for more information. See [OM2]_ for more information on Sun-Synchronous Orbits.
 
 
 .. _tle-repositories:
