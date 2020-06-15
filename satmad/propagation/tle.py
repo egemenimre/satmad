@@ -11,6 +11,7 @@ import numpy as np
 from astropy import units as u
 from astropy.time import Time
 from astropy.units import Quantity
+from sgp4.earth_gravity import wgs72
 from sgp4.exporter import export_tle
 from sgp4.model import WGS72, Satrec
 
@@ -74,9 +75,9 @@ class TLE:
 
     # Gravitational constants(defaults to WGS72)
     _grav_model = WGS72
-    _mu = 398600.8 * (u.km ** 3 / u.s ** 2)  # in km3 / s2
-    _earth_radius = 6378.135 * u.km  # km
-    _j2 = 0.001082616
+    _mu = wgs72.mu * (u.km ** 3 / u.s ** 2)  # in km3 / s2
+    _earth_radius = wgs72.radiusearthkm * u.km  # km
+    _j2 = wgs72.j2
 
     # Hardcoded defaults
     _ops_mode = "i"
