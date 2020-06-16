@@ -50,7 +50,7 @@ class TLE:
         TEME mean argument of perigee [rad]
     mean_anomaly : float or Quantity
         mean anomaly of the orbit [rad]
-    mean_motion : float or Quantity
+    mean_motion : float
         mean motion of the orbit [rad/sec]
     bstar : float or Quantity
         sgp4 type drag coefficient [1 / earth radius] (see TLE class documentation)
@@ -110,6 +110,15 @@ class TLE:
         self._satrec.epochdays = int(yydd_str[1]) + epoch.mjd % 1
         epoch_yydd = self._satrec.epochyr * 1000 + self._satrec.epochdays
 
+        # check inclination range
+        inclination_val = _force_angles_to_rad(inclination)
+        if not 0 <= inclination_val < np.pi:
+            raise ValueError(
+                f"Given argument ({inclination}) is an invalid "
+                f"Inclination value, "
+                f"only values in range 0 <= i < PI are allowed."
+            )
+
         # fill the Satrec object
         self._satrec.sgp4init(
             TLE._grav_model,
@@ -120,11 +129,11 @@ class TLE:
             n_dot,
             n_dotdot,
             eccentricity,
-            arg_perigee.to_value(u.rad),
-            inclination.to_value(u.rad),
-            mean_anomaly.to_value(u.rad),
+            _force_angle_range(arg_perigee),
+            inclination_val,
+            _force_angle_range(mean_anomaly),
             mean_motion * 60,  # convert to seconds
-            raan.to_value(u.rad),
+            _force_angle_range(raan),
         )
 
         # fill time with precise Time information
@@ -224,10 +233,6 @@ class TLE:
         # init GEO specific values - period is one sidereal day
         mean_motion = 2 * np.pi / (1.0 * u.sday).to_value(u.s)
         raan = epoch.sidereal_time("mean", longitude)
-
-        # make sure raan value does not exceed 2pi
-        if 2 * np.pi < raan.to_value(u.rad):
-            raan = raan - 2 * np.pi * u.rad
 
         bstar = 0  # no drag
         n_dot = 0  # mean motion assumed constant
@@ -431,7 +436,7 @@ class TLE:
         ----------
         om : float or Quantity
         """
-        om_val = _force_angles_to_rad(om)
+        om_val = _force_angle_range(om)
 
         if 0 <= om_val < 2 * np.pi:
             self._satrec.nodeo = om_val
@@ -477,7 +482,7 @@ class TLE:
         ----------
         argp : float or Quantity
         """
-        argp_val = _force_angles_to_rad(argp)
+        argp_val = _force_angle_range(argp)
 
         if 0 <= argp_val < 2 * np.pi:
             self._satrec.argpo = argp_val
@@ -632,13 +637,18 @@ class TLE:
             )
 
 
-def _force_angles_to_rad(angle) -> float:
+def _force_angles_to_rad(angle):
     """
     Forces a `Quantity` or a float to output float in radians.
 
     Parameters
     ----------
     angle : float or Quantity
+
+    Returns
+    -------
+    float
+        The angle in radians
     """
     if isinstance(angle, Quantity):
         angle_rad = angle.to_value(u.rad)
@@ -646,3 +656,33 @@ def _force_angles_to_rad(angle) -> float:
         angle_rad = angle
 
     return angle_rad
+
+
+def _force_angle_range(angle_rad, min_range=0, max_range=2 * np.pi):
+    """
+    Forces the angles into a prescribed range.
+
+    Parameters
+    ----------
+    angle_rad : float or Quantity
+        Angle in radians
+    min_range : float
+        Minimum value allowable
+    max_range : float
+        Max value allowable
+
+    Returns
+    -------
+    float
+        Angle value forced into the required range
+    """
+
+    angle = _force_angles_to_rad(angle_rad)
+
+    if max_range < angle:
+        angle = angle - 2 * np.pi
+
+    if angle_rad < min_range:
+        angle = angle + 2 * np.pi
+
+    return angle

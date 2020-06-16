@@ -7,6 +7,7 @@
 TLE class tests.
 
 """
+import numpy as np
 import pytest
 from astropy import units as u
 from astropy.time import Time
@@ -129,6 +130,32 @@ def test_init_geo(init_tle_geo):
     assert str(tle_geo) == str(tle)
 
 
+def test_tle_init_incl_out_of_bounds(init_tle_leo):
+    """Tests init with inclination input value out of bounds
+    - should raise `ValueError`."""
+    with pytest.raises(ValueError):
+        tle1 = init_tle_leo
+
+        tle2 = TLE(
+            tle1.epoch,
+            2 * np.pi,
+            tle1.raan,
+            tle1.eccentricity,
+            tle1.arg_perigee,
+            tle1.mean_anomaly,
+            tle1.mean_motion,
+            tle1.bstar,
+            tle1.n_dot,
+            n_dotdot=tle1.n_dotdot,
+            name=init_tle_leo.name,
+            intl_designator=tle1.intl_designator,
+            sat_num=tle1.sat_number,
+            classification=tle1.classification,
+            rev_nr=tle1.rev_nr,
+            el_nr=tle1.el_nr,
+        )
+
+
 def test_node_rot(init_tle_sso):
     """Test orbit plane rotation rate."""
     tle = init_tle_sso
@@ -158,19 +185,10 @@ def test_incl_out_of_bounds(init_tle_leo):
 
 
 def test_raan_out_of_bounds(init_tle_leo):
-    """Tests RAAN setter with input value out of bounds
-    - should raise `ValueError`."""
-    with pytest.raises(ValueError):
-        tle = init_tle_leo
-        tle.raan = 390 * u.deg
-
-
-def test_argp_out_of_bounds(init_tle_leo):
-    """Tests Argument of Perigee setter with input value out of bounds
-    - should raise `ValueError`."""
-    with pytest.raises(ValueError):
-        tle = init_tle_leo
-        tle.arg_perigee = (390 * u.deg).to_value(u.rad)
+    """Tests RAAN setter with input value out of bounds """
+    tle = init_tle_leo
+    tle.raan = 390 * u.deg
+    assert tle.raan.to_value(u.deg) == approx((30 * u.deg).to_value(), abs=1e-8)
 
 
 def test_getters_setters(init_tle_leo):
