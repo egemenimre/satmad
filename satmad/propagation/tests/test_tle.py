@@ -136,7 +136,7 @@ def test_tle_init_incl_out_of_bounds(init_tle_leo):
     with pytest.raises(ValueError):
         tle1 = init_tle_leo
 
-        tle2 = TLE(
+        TLE(
             tle1.epoch,
             2 * np.pi,
             tle1.raan,
