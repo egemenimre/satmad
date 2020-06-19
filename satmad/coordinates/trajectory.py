@@ -116,11 +116,15 @@ class Trajectory:
         # compute raw r and v vectors and
         # fill Astropy cartesian vectors (with velocities if available)
         r = [self._compute_pos(time) for time in t]
-        coords = CartesianRepresentation(np.asarray(r), copy=False, xyz_axis=1)
+        coords = CartesianRepresentation(
+            np.asarray(r), unit=r[0].unit, copy=False, xyz_axis=1
+        )
 
         if self._has_velocity:
             v = [self._compute_vel(time) for time in t]
-            v = CartesianDifferential(np.asarray(v), copy=False, xyz_axis=1)
+            v = CartesianDifferential(
+                np.asarray(v), unit=v[0].unit, copy=False, xyz_axis=1
+            )
             coords = coords.with_differentials(v)
 
         return SkyCoord(
@@ -221,6 +225,11 @@ class Trajectory:
         """Returns the list of underlying coordinates forming the
         trajectory."""
         return self._coord_list
+
+    @property
+    def interpolator_name(self) -> str:
+        """Returns the name of the interpolator."""
+        return self._r_interpol.interpolator_name
 
     def _init_interpolators(self):
         """
