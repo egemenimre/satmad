@@ -15,6 +15,7 @@ from sgp4.api import Satrec
 
 from satmad.coordinates.frames import TEME
 from satmad.coordinates.trajectory import Trajectory
+from satmad.propagation.tle import TLE
 
 
 def propagation_engine(line1, line2, init_time, generate_plots=False):
@@ -60,8 +61,8 @@ def propagation_engine(line1, line2, init_time, generate_plots=False):
     test_stepsize = 1.0 * u.s
     test_end = 0.01 * u.day
 
-    print(f"Test duration: {(test_end - step_offset * dt).to(u.day)}")
-    print(f"Step size: {test_stepsize}")
+    # print(f"Test duration: {(test_end - step_offset * dt).to(u.day)}")
+    # print(f"Step size: {test_stepsize}")
 
     dt_list_hires = TimeDelta(
         np.arange(
@@ -145,7 +146,35 @@ def test_interpolation_err_geo():
     # test init time
     init_time = Time("2020:162:09:00:00", format="yday", scale="utc")
 
-    max_err, max_nominal_err = propagation_engine(line1, line2, init_time, True)
+    max_err, max_nominal_err = propagation_engine(line1, line2, init_time, False)
 
     assert max_err < 0.0005 * u.mm
     assert max_nominal_err < 0.0003 * u.mm
+
+
+def test_interpolation_err_heo():
+    """Tests the interpolation accuracy for Highly Elliptic Orbits."""
+
+    # Init TLE
+    line1 = "1 99999U 12345A   20162.50918981  .00000000  00000-0  00000-0 0 00005"
+    line2 = "2 99999 000.0000 124.6202 0000000 000.0000 000.0000 01.00273791000004"
+
+    # test init time
+    init_time = Time("2020:162:00:00:00", format="yday", scale="utc")
+
+    tle = TLE.from_tle(line1, line2)
+
+    tle.epoch = init_time
+    tle.mean_anomaly = 0
+    tle.eccentricity = 0.4
+
+    heo_line1, heo_line2 = tle.export_tle()
+
+    # print(tle)
+
+    max_err, max_nominal_err = propagation_engine(
+        heo_line1, heo_line2, init_time, False
+    )
+
+    assert max_err < 0.040 * u.mm
+    assert max_nominal_err < 0.00030 * u.mm
