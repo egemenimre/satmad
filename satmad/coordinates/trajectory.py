@@ -227,6 +227,12 @@ class Trajectory:
         return self._coord_list
 
     @property
+    def interval(self):
+        """Returns the interval of validity for the
+        trajectory."""
+        return self._interval
+
+    @property
     def interpolator_name(self) -> str:
         """Returns the name of the interpolator."""
         return self._r_interpol.interpolator_name
