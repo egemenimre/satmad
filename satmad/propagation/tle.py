@@ -105,9 +105,7 @@ class TLE:
         self._satrec: Satrec = Satrec()
 
         # recreate the epoch composite
-        yydd_str = epoch.utc.to_value("yday", subfmt="date").split(":")
-        self._satrec.epochyr = int(yydd_str[0][-2:])
-        self._satrec.epochdays = int(yydd_str[1]) + epoch.mjd % 1
+        self.__create_epoch_composite(epoch)
         epoch_yydd = self._satrec.epochyr * 1000 + self._satrec.epochdays
 
         # check inclination range
@@ -289,6 +287,24 @@ class TLE:
 
         return txt
 
+    def export_tle(self):
+        """
+        Exports the TLE to line1 and line2.
+
+        A sample output looks like this::
+
+            line1 = "1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927"
+            line2 = "2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537"
+
+        Returns
+        -------
+        line1, line2 : (str, str)
+            strings containing line 1, line 2
+        """
+        line1, line2 = export_tle(self._satrec)
+
+        return line1, line2
+
     def period(self) -> Quantity:
         """Computes the satellite period [sec]."""
         return 2 * np.pi / self.mean_motion * u.s
@@ -361,6 +377,16 @@ class TLE:
     def epoch(self) -> Time:
         """Returns the epoch time associated with the orbital parameters."""
         return self._epoch
+
+    @epoch.setter
+    def epoch(self, epoch: Time):
+        self._epoch = epoch.replicate()
+
+        self._satrec.jdsatepoch = self._epoch.jd1
+        self._satrec.jdsatepochF = self._epoch.jd2
+
+        # recreate the epoch composite
+        self.__create_epoch_composite(epoch)
 
     @property
     def bstar(self) -> float:
@@ -635,6 +661,13 @@ class TLE:
                 f"Given argument ({el_nr}) is an invalid Element Set Number, "
                 f"only values between 0 and 10000 (exclusive) are allowed."
             )
+
+    def __create_epoch_composite(self, epoch):
+        """Fills the `self._satrec.epochyr` and `self._satrec.epochyr` fields
+        with the `epoch` input."""
+        yydd_str = epoch.utc.to_value("yday", subfmt="date").split(":")
+        self._satrec.epochyr = int(yydd_str[0][-2:])
+        self._satrec.epochdays = int(yydd_str[1]) + epoch.mjd % 1
 
 
 def _force_angles_to_rad(angle):
