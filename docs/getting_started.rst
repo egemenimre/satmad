@@ -11,6 +11,7 @@ You can find the source code here: https://github.com/egemenimre/satmad
 Dependencies
 ------------
 - NumPy and SciPy are used for the underlying mathematical algorithms
+- Matplotlib is used for plots
 - Astropy handles all time and reference frame computations
 - Portion handles the time interval mechanics
 - python-sgp4 provides the TLE manipulation and SGP4 propagation engine
