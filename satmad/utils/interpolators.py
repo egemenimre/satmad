@@ -45,7 +45,7 @@ class CartInterpolator3D:
      See Also
      --------
      scipy.interpolate.InterpolatedUnivariateSpline : The interpolator
-     used inside this class.
+        used inside this class.
 
      Notes
      -----
