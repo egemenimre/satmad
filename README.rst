@@ -10,42 +10,26 @@ community, including Cubesats (and anyone else who might be interested).
 The focus is on good documentation and good test coverage to produce a reliable
 flight dynamics library.
 
-While current functionality is limited, the aim looks like this:
 
-#. Operations support
-    a) Groundstation communication times
-    b) Target imaging times
-#. Satellite propagation
-    a) Numerical Propagation with full force model: Geopotentials, Solar Radiation Pressure, 3rd body interactions, atmospheric drag
-    b) Analytical Propagation: SGP4 and Keplerian
-#. Satellite orbit design and analysis
-    a) GEO, Sun-synch and repeating orbits
-    b) Analysis of deviations from the ideal orbits
-#. Orbit change
-    a) Manoeuvres and Delta-V calculations
-#. Attitude kinematics modelling and basic attitude laws
-    a) Sun pointing, yaw compensation, spin
-#. Satellite design
-    a) Power generation with solar arrays
-    b) Power consumption and battery sizing
-    c) Propellant budget
+Documentation and Examples
+--------------------------
 
+The documentation for SatMAD is here: https://satmad.readthedocs.io/
 
-Documentation
--------------
-
-The documentation for SatMAD is here:
-https://satmad.readthedocs.io/
-
+You can find some hands-on Jupyter examples in the
+`examples directory <https://github.com/egemenimre/satmad/tree/master/docs/examples>`_ (or
+in the `documentation <https://satmad.readthedocs.io/en/latest/examples.html>`_ for a
+text version).
 
 
 Requirements
 ------------
 
 - NumPy and SciPy are used for the underlying mathematical algorithms
+- Matplotlib is used for plots
 - Astropy handles all time and reference frame computations
 - Portion handles the time interval mechanics
-- python-sgp4 provides the SGP4 propagation engine
+- python-sgp4 provides the TLE manipulation and SGP4 propagation engine
 - Pytest provides the testing framework
 
 
