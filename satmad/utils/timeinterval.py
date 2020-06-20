@@ -459,59 +459,6 @@ def _create_interval_from_portion(interval, replicate=False):
     )
 
 
-def _to_p_intervals(intervals):
-    """
-    Converts a `TimeInterval` instance or a list to an `Interval` list
-    (portion library objects).
-
-    This is usually done to merge and simplify the elements of the list.
-
-    Parameters
-    ----------
-    intervals : TimeInterval or list[TimeInterval]
-        List of intervals
-
-    Returns
-    -------
-    `Interval` object with the list of time intervals
-    """
-    # Fill the `Interval` list and merge as necessary
-    p_intervals = p.empty()
-    if isinstance(intervals, list):
-        for interval in intervals:
-            p_intervals = p_intervals.union(interval.p_interval)
-    else:
-        # intervals object is a single TimeInterval
-        p_intervals = intervals.p_interval
-
-    return p_intervals
-
-
-def _to_time_intervals(p_intervals, replicate=False):
-    """
-    Converts a `Interval` list to a `TimeInterval` list.
-
-    Parameters
-    ----------
-    p_intervals : Interval
-        List of intervals
-    replicate : bool
-        `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False` to
-        use a shallow copy to save memory
-
-    Returns
-    -------
-    `TimeInterval` object with the list of time intervals
-    """
-    intervals: list = []
-
-    # Fill the atomic `TimeInterval` objects using the merged list
-    for p_interval in p_intervals:
-        intervals.append(_create_interval_from_portion(p_interval, replicate=replicate))
-
-    return intervals
-
-
 class TimeIntervalList:
     """
     Represent and manipulate time intervals.
@@ -556,10 +503,10 @@ class TimeIntervalList:
             # if start_times is None, then there is no time interval defined
 
             # Fill the `Interval` list and merge as necessary
-            p_intervals = _to_p_intervals(intervals)
+            p_intervals = self._to_p_intervals(intervals)
 
             # Fill the atomic `TimeInterval` objects using the merged list
-            self._intervals = _to_time_intervals(p_intervals, replicate)
+            self._intervals = self._to_time_intervals(p_intervals, replicate)
 
         # Init range of validity
         self._valid_interval = self.__init_validity_rng(
@@ -647,17 +594,17 @@ class TimeIntervalList:
         intervals are inverted.
         """
         # Convert `TimeInterval` list to `Interval`
-        p_interval = _to_p_intervals(self._intervals)
+        p_interval = self._to_p_intervals(self._intervals)
 
         # Do the inversion
         p_int_inverted = ~p_interval
 
         # Fix the ends as necessary - no inf allowed
-        p_validity = _to_p_intervals(self.validity_interval())
+        p_validity = self._to_p_intervals(self.validity_interval())
         p_int_inverted = p_int_inverted.intersection(p_validity)
 
         # Generate the `TimeInterval` list
-        intervals = _to_time_intervals(p_int_inverted, replicate=False)
+        intervals = self._to_time_intervals(p_int_inverted, replicate=False)
 
         # Create the `TimeIntervalList` object
         return TimeIntervalList(
@@ -696,6 +643,61 @@ class TimeIntervalList:
 
         """
         return self._valid_interval
+
+    @staticmethod
+    def _to_time_intervals(p_intervals, replicate=False):
+        """
+        Converts a `Interval` list to a `TimeInterval` list.
+
+        Parameters
+        ----------
+        p_intervals : Interval
+            List of intervals
+        replicate : bool
+            `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False` to
+            use a shallow copy to save memory
+
+        Returns
+        -------
+        `TimeInterval` object with the list of time intervals
+        """
+        intervals: list = []
+
+        # Fill the atomic `TimeInterval` objects using the merged list
+        for p_interval in p_intervals:
+            intervals.append(
+                _create_interval_from_portion(p_interval, replicate=replicate)
+            )
+
+        return intervals
+
+    @staticmethod
+    def _to_p_intervals(intervals):
+        """
+        Converts a `TimeInterval` instance or a list to an `Interval` list
+        (portion library objects).
+
+        This is usually done to merge and simplify the elements of the list.
+
+        Parameters
+        ----------
+        intervals : TimeInterval or list[TimeInterval]
+            List of intervals
+
+        Returns
+        -------
+        `Interval` object with the list of time intervals
+        """
+        # Fill the `Interval` list and merge as necessary
+        p_intervals = p.empty()
+        if isinstance(intervals, list):
+            for interval in intervals:
+                p_intervals = p_intervals.union(interval.p_interval)
+        else:
+            # intervals object is a single TimeInterval
+            p_intervals = intervals.p_interval
+
+        return p_intervals
 
     def __str__(self):
         txt = ""
