@@ -158,14 +158,14 @@ class TimeInterval:
             True if time is within the reference interval, False otherwise
         """
         # check upper and lower boundaries for tolerance
-        if _are_times_almost_equal(self.start, time):
+        if self._are_times_almost_equal(self.start, time):
             # time at starting edge - is edge closed?
             if self._interval.left:
                 return True
             else:
                 return False
 
-        if _are_times_almost_equal(self.end, time):
+        if self._are_times_almost_equal(self.end, time):
             # time at end edge - is edge closed?
             if self._interval.right:
                 return True
@@ -193,8 +193,8 @@ class TimeInterval:
             True if interval start and end are (almost) equal, False otherwise
 
         """
-        start_equal = _are_times_almost_equal(interval.start, self.start)
-        end_equal = _are_times_almost_equal(interval.end, self.end)
+        start_equal = self._are_times_almost_equal(interval.start, self.start)
+        end_equal = self._are_times_almost_equal(interval.end, self.end)
 
         if start_equal and end_equal:
             return True
@@ -239,7 +239,7 @@ class TimeInterval:
         """
         intersection = self._interval.intersection(interval._interval)
 
-        if _are_times_almost_equal(intersection.upper, intersection.lower):
+        if self._are_times_almost_equal(intersection.upper, intersection.lower):
             # intersection below tolerance - practically no intersection
             return False
         else:
@@ -415,22 +415,22 @@ class TimeInterval:
         """
         return self._interval
 
+    @staticmethod
+    def _are_times_almost_equal(t1, t2):
+        """
+        Checks whether two time instances are are equal to a tolerance given by `_EPS_TIME`.
 
-def _are_times_almost_equal(t1, t2):
-    """
-    Checks whether two time instances are are equal to a tolerance given by `_EPS_TIME`.
+        Parameters
+        ----------
+        t1, t2 : Time
+            Times to be checked
 
-    Parameters
-    ----------
-    t1, t2 : Time
-        Times to be checked
+        Returns
+        -------
+        True if times are almost equal, False otherwise
 
-    Returns
-    -------
-    True if times are almost equal, False otherwise
-
-    """
-    return abs(t1 - t2) < _EPS_TIME
+        """
+        return abs(t1 - t2) < _EPS_TIME
 
 
 def _create_interval_from_portion(interval, replicate=False):
