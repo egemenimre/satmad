@@ -4,7 +4,7 @@
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
-Test TimeInterval class and associated methods and functionalities.
+Test `TimeInterval` class and associated methods and functionalities.
 
 """
 import numpy as np
@@ -52,8 +52,8 @@ def test_interval_init_with_copy(init_times, durations):
     interval_2 = TimeInterval(interval_1, None)
     interval_3 = TimeInterval(interval_1, None, replicate=True)
 
-    assert interval_1 == interval_2
-    assert interval_1 == interval_3
+    assert interval_1.is_equal(interval_2)
+    assert interval_1.is_equal(interval_3)
 
 
 def test_interval_init_with_durations(init_times, durations):
@@ -194,11 +194,12 @@ def test_intersect(init_times, durations):
     interval = TimeIntervalList(init_intervals).get_interval(0)
 
     assert interval.intersect(before) is None
-    assert interval.intersect(within) == within
-    assert interval.intersect(intersect) == TimeInterval(interval.start, intersect.end)
-
-    assert exact == interval.intersect(exact)
-    assert (exact == intersect) is False
+    assert interval.intersect(within).is_equal(within)
+    assert interval.intersect(intersect).is_equal(
+        TimeInterval(interval.start, intersect.end)
+    )
+    assert exact.is_equal(interval.intersect(exact))
+    assert exact.is_equal(intersect) is False
     assert interval.intersect(after) is None
 
 
@@ -212,9 +213,11 @@ def test_union(init_times, durations):
     interval = TimeIntervalList(init_intervals).get_interval(0)
 
     assert interval.union(before) is None
-    assert interval.union(within) == interval
-    assert interval.union(intersect) == TimeInterval(intersect.start, interval.end)
-    assert interval.union(exact) == interval
+    assert interval.union(within).is_equal(interval)
+    assert interval.union(intersect).is_equal(
+        TimeInterval(intersect.start, interval.end)
+    )
+    assert interval.union(exact).is_equal(interval)
     assert interval.union(after) is None
 
 
@@ -225,14 +228,14 @@ def test_expand():
         start_delta=TimeDelta(5 * 60, format="sec"),
         end_delta=TimeDelta(2 * 60, format="sec"),
     )
-    assert expanded == exact
+    assert expanded.is_equal(exact)
 
     # Test shrinkage
     shrunk = exact.expand(
         start_delta=TimeDelta(-5 * 60, format="sec"),
         end_delta=TimeDelta(-2 * 60, format="sec"),
     )
-    assert shrunk == within
+    assert shrunk.is_equal(within)
 
 
 def test_expand_shrink_zero():
