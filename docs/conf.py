@@ -21,7 +21,7 @@ project = "satmad"
 copyright = "2020, Egemen Imre"
 author = "Egemen Imre"
 
-version = "0.0.1"
+version = "0.0.2"
 
 # -- General configuration ---------------------------------------------------
 # By default, highlight as Python 3.
@@ -69,8 +69,8 @@ if os.environ.get("READTHEDOCS") == "True":
 else:
     nbsphinx_execute = "always"
 
-    # Controls when a cell will time out (defaults to 30; use -1 for no timeout):
-    nbsphinx_timeout = 60
+# Controls when a cell will time out (defaults to 30; use -1 for no timeout):
+nbsphinx_timeout = 60
 
 # -- Options for HTML output -------------------------------------------------
 
