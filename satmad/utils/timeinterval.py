@@ -175,7 +175,7 @@ class TimeInterval:
         # Time not edges, do a regular check
         return self._interval.contains(time)
 
-    def __eq__(self, interval):
+    def is_equal(self, interval):
         """
         Checks whether two intervals are (almost) equal in value.
 
