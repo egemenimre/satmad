@@ -1,5 +1,5 @@
-Time Intervals and Time Interval Lists (:mod:`satmad.timeinterval`)
-====================================================================
+Time Intervals and Time Interval Lists
+======================================
 
 Introduction
 ------------
@@ -39,7 +39,7 @@ duration of validity.
 
 
 Using the Basic :class:`.TimeInterval` Class
----------------------------------------------------
+----------------------------------------------
 
 A :class:`.TimeInterval` class can be simply initialised with a start time
 and either with an end time (:class:`astropy.time.Time`) or with a duration (
@@ -61,7 +61,7 @@ by the properties :meth:`.TimeInterval.start` and :meth:`.TimeInterval.end`.
         TimeDelta(60.0, format='sec'),
     )
 
-The resulting time intervals can be quickly shown as
+The resulting time intervals can be quickly shown as:
 
     >>> str(interval_with_end_time)
     '[ 2020-04-11T00:00:00.000  2020-04-11T00:10:00.000 ]\n'
