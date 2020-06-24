@@ -86,7 +86,7 @@ class Trajectory:
         if self._coord_list.data.differentials:
             self._has_velocity = True
 
-    def get_coords(self, t):
+    def __call__(self, t):
         """
         Computes the interpolated coordinates at the given time(s).
 

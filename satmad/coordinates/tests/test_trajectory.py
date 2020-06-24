@@ -83,8 +83,7 @@ def propagation_engine(line1, line2, init_time, generate_plots=False):
 
     # Generate the error list
     r_err_list = (
-        trajectory.get_coords(time_list_hires).cartesian.without_differentials()
-        - r_test_list
+        trajectory(time_list_hires).cartesian.without_differentials() - r_test_list
     )
 
     # Error stats
