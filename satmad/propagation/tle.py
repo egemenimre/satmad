@@ -374,6 +374,12 @@ class TLE:
         return argp_rot.to(u.deg / u.day)
 
     @property
+    def satrec(self) -> Satrec:
+        """Returns the underlying `Satrec` object. This is for internal use only,
+        for use with the SGP4 propagator."""
+        return self._satrec
+
+    @property
     def epoch(self) -> Time:
         """Returns the epoch time associated with the orbital parameters."""
         return self._epoch
