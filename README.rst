@@ -1,6 +1,6 @@
 SatMAD: Satellite Mission Analysis and Design
 ---------------------------------------------
-|CircleCI Status| |Documentation Status| |Astropy Badge|
+|CircleCI Status| |Codecov Status| |Documentation Status| |Astropy Badge|
 
 SatMAD is an open source Python package, aiming at providing the base functionality to solve
 satellite mission analysis and design as well as orbital mechanics problems with enough precision and performance
@@ -50,3 +50,7 @@ the terms of the GNU GPL v3+ license.
 .. |CircleCI Status| image::  https://img.shields.io/circleci/build/github/egemenimre/satmad/master?logo=circleci&label=CircleCI
     :target: https://circleci.com/gh/satmad/satmad
     :alt: SatMAD CircleCI Status
+
+.. |Codecov Status| image::  https://codecov.io/gh/egemenimre/satmad/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/egemenimre/satmad
+    :alt: SatMAD Codecov Status
