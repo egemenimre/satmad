@@ -115,17 +115,25 @@ class Trajectory:
 
         # compute raw r and v vectors and
         # fill Astropy cartesian vectors (with velocities if available)
-        r = [self._compute_pos(time) for time in t]
-        coords = CartesianRepresentation(
-            np.asarray(r), unit=r[0].unit, copy=False, xyz_axis=1
-        )
-
-        if self._has_velocity:
-            v = [self._compute_vel(time) for time in t]
-            v = CartesianDifferential(
-                np.asarray(v), unit=v[0].unit, copy=False, xyz_axis=1
+        if t.isscalar:
+            # there is a single time instance
+            coords = CartesianRepresentation(self._compute_pos(t), copy=False)
+            if self._has_velocity:
+                v = CartesianDifferential(self._compute_vel(t), copy=False)
+                coords = coords.with_differentials(v)
+        else:
+            # there is more than one time instance
+            r = [self._compute_pos(time) for time in t]
+            coords = CartesianRepresentation(
+                np.asarray(r), unit=r[0].unit, copy=False, xyz_axis=1
             )
-            coords = coords.with_differentials(v)
+
+            if self._has_velocity:
+                v = [self._compute_vel(time) for time in t]
+                v = CartesianDifferential(
+                    np.asarray(v), unit=v[0].unit, copy=False, xyz_axis=1
+                )
+                coords = coords.with_differentials(v)
 
         return SkyCoord(
             coords,
@@ -236,6 +244,11 @@ class Trajectory:
     def interpolator_name(self) -> str:
         """Returns the name of the interpolator."""
         return self._r_interpol.interpolator_name
+
+    @classmethod
+    def reqd_min_elements(cls):
+        """Returns the required minimum number of elements in the trajectory."""
+        return cls._spline_degree
 
     def _init_interpolators(self):
         """
