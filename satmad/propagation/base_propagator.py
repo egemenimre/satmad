@@ -17,7 +17,7 @@ class AbstractPropagator(ABC):
     """
     Base class for the propagators.
 
-   Parameters
+    Parameters
     ----------
     name : str
         Name of the propagator
