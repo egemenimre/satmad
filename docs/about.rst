@@ -13,8 +13,9 @@ community, including (but not limited to) Cubesats.
 Current Status
 ---------------
 
-Current functionality is rather limited, but already you can start initialising TLEs (see :ref:`tle-intro` Section)
-and analyse the orbital characteristics of existing spacecraft (see :ref:`tle-orbit_properties` Section).
+Current functionality is rather limited, but already you can start initialising TLEs
+(see :ref:`tle-intro` Section) and propagate the orbit using a SGP4 Analytical Propagator
+(see :ref:`sgp4-intro` Section).
 
 Future Functionality
 --------------------
@@ -24,7 +25,7 @@ Future Functionality
     b) Target imaging times
 2. Satellite propagation
     a) Numerical Propagation with full force model: Geopotentials, solar radiation pressure, 3rd body interactions, atmospheric drag
-    b) Analytical Propagation: SGP4 and Two-Body
+    b) Analytical Propagation: Two-Body
 3. Satellite orbit design and analysis
     a) GEO, Sun-synch and repeating orbits
     b) Analysis of deviations from the ideal orbits
