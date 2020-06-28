@@ -14,7 +14,6 @@ import portion as p
 from astropy import units as u
 from astropy.time import Time, TimeDelta
 from astropy.units import Quantity
-from portion import Interval
 
 _EPS_TIME = 10 * u.ns
 """Allowable time threshold, this much 'out of bounds' is allowed when assuming two
@@ -79,8 +78,8 @@ class TimeInterval:
         end_interval = None
         if isinstance(start_time, TimeInterval):
             # start_time is a valid TimeInterval, just copy its elements
-            start_inclusive = start_time._interval.left
-            end_inclusive = start_time._interval.right
+            start_inclusive = start_time.p_interval.left
+            end_inclusive = start_time.p_interval.right
 
             if replicate:
                 start_interval = start_time.start.replicate()
