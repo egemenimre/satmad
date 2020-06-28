@@ -13,6 +13,7 @@ lists of `TimeInterval` objects.
 import portion as p
 from astropy import units as u
 from astropy.time import Time, TimeDelta
+from astropy.units import Quantity
 from portion import Interval
 
 _EPS_TIME = 10 * u.ns
@@ -44,7 +45,7 @@ class TimeInterval:
         Initial time to mark the start of the interval (only the first
         instance contained in the `Time` object is used). If specified as TimeInterval,
         it is copied into this and `end_time` is ignored.
-    end_time : Time, TimeDelta or None
+    end_time : Time, TimeDelta, Quantity or None
         End time or duration to mark the end of the interval
         (only the first instance contained in the `Time` or `TimeDelta` object is used)
         None is acceptable only when `start_time` is defined as a `TimeInterval`
@@ -74,6 +75,8 @@ class TimeInterval:
         end_inclusive=True,
     ):
 
+        start_interval = None
+        end_interval = None
         if isinstance(start_time, TimeInterval):
             # start_time is a valid TimeInterval, just copy its elements
             start_inclusive = start_time._interval.left
@@ -108,6 +111,12 @@ class TimeInterval:
                     start_interval = start_tmp
                     end_interval = start_tmp + end_tmp
 
+            elif isinstance(end_tmp, Quantity):
+                # end time is a Quantity, but check whether it is a valid Time Quantity
+                if end_tmp.unit.decompose().physical_type == "time":
+                    start_interval = start_tmp
+                    end_interval = start_tmp + end_tmp
+
             elif isinstance(end_tmp, Time) and not isinstance(end_tmp, TimeDelta):
                 # end time is a Time
 
@@ -130,17 +139,17 @@ class TimeInterval:
             else:
                 raise ValueError(
                     f"End time is an instance of {end_tmp.__class__()}, "
-                    f"only Time or TimeDelta classes are allowed."
+                    f"only Time, Quantity (Temporal) or TimeDelta classes are allowed."
                 )
 
         # Initialise the interval
-        self._interval: Interval = p.closed(start_interval, end_interval).replace(
+        self._interval = p.closed(start_interval, end_interval).replace(
             left=start_inclusive, right=end_inclusive
         )
 
         # Raise exception if the interval duration is too short
         # Duration guaranteed to be positive thanks to the juggling above
-        if self.duration() <= _EPS_TIME:
+        if self.duration <= _EPS_TIME:
             raise ValueError("Duration of the interval is negative or zero.")
 
     def is_in_interval(self, time):
@@ -158,14 +167,14 @@ class TimeInterval:
             True if time is within the reference interval, False otherwise
         """
         # check upper and lower boundaries for tolerance
-        if self._are_times_almost_equal(self.start, time):
+        if _are_times_almost_equal(self.start, time):
             # time at starting edge - is edge closed?
             if self._interval.left:
                 return True
             else:
                 return False
 
-        if self._are_times_almost_equal(self.end, time):
+        if _are_times_almost_equal(self.end, time):
             # time at end edge - is edge closed?
             if self._interval.right:
                 return True
@@ -193,8 +202,8 @@ class TimeInterval:
             True if interval start and end are (almost) equal, False otherwise
 
         """
-        start_equal = self._are_times_almost_equal(interval.start, self.start)
-        end_equal = self._are_times_almost_equal(interval.end, self.end)
+        start_equal = _are_times_almost_equal(interval.start, self.start)
+        end_equal = _are_times_almost_equal(interval.end, self.end)
 
         if start_equal and end_equal:
             return True
@@ -239,7 +248,7 @@ class TimeInterval:
         """
         intersection = self._interval.intersection(interval._interval)
 
-        if self._are_times_almost_equal(intersection.upper, intersection.lower):
+        if _are_times_almost_equal(intersection.upper, intersection.lower):
             # intersection below tolerance - practically no intersection
             return False
         else:
@@ -364,6 +373,7 @@ class TimeInterval:
                 "Duration of the expanded/shrunk interval is negative or zero."
             )
 
+    @property
     def duration(self):
         """
         Computes the duration of the interval.
@@ -415,22 +425,22 @@ class TimeInterval:
         """
         return self._interval
 
-    @staticmethod
-    def _are_times_almost_equal(t1, t2):
-        """
-        Checks whether two time instances are are equal to a tolerance given by `_EPS_TIME`.
 
-        Parameters
-        ----------
-        t1, t2 : Time
-            Times to be checked
+def _are_times_almost_equal(t1, t2):
+    """
+    Checks whether two time instances are are equal to a tolerance given by `_EPS_TIME`.
 
-        Returns
-        -------
-        True if times are almost equal, False otherwise
+    Parameters
+    ----------
+    t1, t2 : Time
+        Times to be checked
 
-        """
-        return abs(t1 - t2) < _EPS_TIME
+    Returns
+    -------
+    True if times are almost equal, False otherwise
+
+    """
+    return abs(t1 - t2) < _EPS_TIME
 
 
 def _create_interval_from_portion(interval, replicate=False):
