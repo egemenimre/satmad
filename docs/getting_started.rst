@@ -4,7 +4,7 @@ Getting Started
 Getting the Package and the Code
 --------------------------------
 
-The SatMAD package is on `PyPI`_ and you can easily install it simply by running::
+The SatMAD package is on `PyPI`_ and you can install it simply by running::
 
     pip install satmad
 
