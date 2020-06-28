@@ -1,12 +1,18 @@
 Getting Started
 ===============
 
-Getting the Code
-----------------
-As the code is not very mature, there is no package available. Currently the quickest way is to fork or clone from
-GitHub.
+Getting the Package and the Code
+--------------------------------
 
-You can find the source code here: https://github.com/egemenimre/satmad
+The SatMAD package is on `PyPI`_ and you can easily install it simply by running::
+
+    pip install satmad
+
+Do not install `satmad` using `sudo`.
+
+You can find the source code on GitHub: https://github.com/egemenimre/satmad
+
+.. _`PyPI`: https://pypi.org/project/satmad/
 
 Dependencies
 ------------
