@@ -12,6 +12,7 @@ Orbits and Trajectories
 
    propagation/tle
    coordinates/trajectory
+   propagation/propagators
 
 Time and Coordinates
 ^^^^^^^^^^^^^^^^^^^^^
