@@ -4,7 +4,7 @@
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
-SGP4 Propagator.
+SGP4 Propagator to propagate Earth bound satellites.
 
 """
 import numpy as np
