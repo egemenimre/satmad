@@ -24,6 +24,7 @@ from satmad.propagation.sgp4_propagator import (
     SGP4SatDecayedError,
 )
 from satmad.propagation.tle import TLE
+from satmad.utils.timeinterval import TimeInterval
 
 
 @pytest.fixture
@@ -83,18 +84,24 @@ def test_propagation(init_tle_vgd):
         differential_type="cartesian",
     )
 
+    r_diff, v_diff = rv_diff(rv_gcrs, rv_gcrs_true)
+
+    # print(r_diff.to(u.mm))
+    # print(v_diff.to(u.mm / u.s))
+
+    assert r_diff.to(u.mm) < 1700 * u.mm
+    assert v_diff.to(u.mm / u.s) < 0.71 * u.mm / u.s
+
+
+def rv_diff(rv, rv_true):
+    """Computes pos and vel diff norm."""
     r_diff = (
-        rv_gcrs.cartesian.without_differentials()
-        - rv_gcrs_true.cartesian.without_differentials()
+        rv.cartesian.without_differentials() - rv_true.cartesian.without_differentials()
     )
 
-    v_diff = rv_gcrs.velocity - rv_gcrs_true.velocity
+    v_diff = rv.velocity - rv_true.velocity
 
-    # print(r_diff.norm().to(u.mm))
-    # print(v_diff.norm().to(u.mm / u.s))
-
-    assert r_diff.norm().to(u.mm) < 1700 * u.mm
-    assert v_diff.norm().to(u.mm / u.s) < 0.71 * u.mm / u.s
+    return r_diff.norm(), v_diff.norm()
 
 
 def test_decay(init_tle_decay):
@@ -119,3 +126,32 @@ def test_crashed(init_tle_decay):
         #  Propagate 3 days into future
         time = tle.epoch + 300.0 * u.day
         SGP4Propagator.propagate(tle, time)
+
+
+def test_gen_trajectory(init_tle_vgd):
+    # init TLE
+    tle = init_tle_vgd
+    # init SGP4
+    sgp4 = SGP4Propagator(stepsize=120 * u.s)
+
+    #  Generate trajectory
+    interval = TimeInterval(tle.epoch, 0.223456789 * u.day)
+    traj = sgp4.gen_trajectory(tle, interval)
+
+    # Generate true trajectory and compute max pos & vel error
+    r_diff_max = 0 * u.mm
+    v_diff_max = 0 * u.mm / u.s
+    for time in traj.coord_list.obstime:
+        rv = traj(time)
+        rv_true = SGP4Propagator.propagate(tle, time)
+        r_diff, v_diff = rv_diff(rv, rv_true)
+        if r_diff > r_diff_max:
+            r_diff_max = r_diff
+        if v_diff > v_diff_max:
+            v_diff_max = v_diff
+
+    # print(r_diff_max.to(u.mm))
+    # print(v_diff_max.to(u.mm / u.s))
+
+    assert r_diff_max.to(u.mm) < 5e-6 * u.mm
+    assert v_diff_max.to(u.mm / u.s) < 4e-9 * u.mm / u.s

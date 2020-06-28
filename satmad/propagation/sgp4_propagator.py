@@ -17,6 +17,7 @@ from astropy.coordinates import (
 )
 
 from satmad.coordinates.frames import TEME
+from satmad.coordinates.trajectory import Trajectory
 from satmad.propagation.base_propagator import AbstractPropagator
 
 
@@ -64,7 +65,7 @@ class SGP4Propagator(AbstractPropagator):
         e, r, v = tle.satrec.sgp4(time.utc.jd1, time.utc.jd2)
 
         # check error code
-        SGP4Propagator.__handle_err_code(e, tle)
+        SGP4Propagator.__handle_err_code(e)
 
         v_teme = CartesianDifferential(np.asarray(v), unit=u.km / u.s)
         r_teme = CartesianRepresentation(np.asarray(r), unit=u.km)
@@ -76,8 +77,66 @@ class SGP4Propagator(AbstractPropagator):
             rv_gcrs, representation_type="cartesian", differential_type="cartesian",
         )
 
+    def gen_trajectory(self, tle, interval):
+        """
+        Generates the trajectory (time and coordinate information) for the given
+        interval with the internal stepsize.
+        Parameters
+        ----------
+        tle : TLE
+            Two-Line-Element initial orbit information (TEME mean orbital elements)
+        interval : TimeInterval
+            Time interval for which the ephemeris will be generated
+        Returns
+        -------
+        Trajectory
+            The output trajectory (in `GCRS`)
+        """
+
+        # generate number of steps (forced to rounded up int)
+        no_of_steps = np.ceil((interval.duration / self.stepsize).decompose())
+
+        # make sure there are enough elements for interpolation
+        if no_of_steps < Trajectory.reqd_min_elements():
+            no_of_steps = Trajectory.reqd_min_elements()
+
+        # time list
+        time_list = interval.start + self.stepsize * np.arange(0, no_of_steps)
+        time_list.format = "isot"
+
+        # ****** Generate the pos, vel vectors for each time instant ******
+
+        # Run the propagation and init pos and vel vectors in TEME
+        e, r_list, v_list = tle.satrec.sgp4_array(time_list.jd1, time_list.jd2)
+
+        # Load the time, pos, vel info into astropy objects (shallow copied)
+        rv_list_teme = CartesianRepresentation(
+            r_list, unit=u.km, xyz_axis=1
+        ).with_differentials(CartesianDifferential(v_list, unit=u.km / u.s, xyz_axis=1))
+
+        rv_list_gcrs = TEME(
+            rv_list_teme,
+            obstime=time_list,
+            representation_type="cartesian",
+            differential_type="cartesian",
+        ).transform_to(GCRS(obstime=time_list))
+
+        # trajectory in astropy
+        traj_astropy = SkyCoord(
+            rv_list_gcrs,
+            obstime=time_list,
+            frame="gcrs",
+            representation_type="cartesian",
+            differential_type="cartesian",
+        )
+
+        # Init trajectory in Trajectory object
+        trajectory = Trajectory(traj_astropy)
+
+        return trajectory
+
     @staticmethod
-    def __handle_err_code(e, tle):
+    def __handle_err_code(e):
         """
         Handle the error code out of the propagation.
 
@@ -127,9 +186,6 @@ class SGP4Propagator(AbstractPropagator):
                 "SGP4 Propagation Error:"
                 "Satellite has decayed (Sat number: {tle.sat_number})"
             )
-
-    # def generate_eph(self, tle, interval):
-    #     pass
 
 
 class SGP4GeneralError(Exception):
