@@ -32,12 +32,14 @@ text version).
 Requirements
 ------------
 
-- NumPy and SciPy are used for the underlying mathematical algorithms
-- Matplotlib is used for plots
-- Astropy handles all time and reference frame computations
-- Portion handles the time interval mechanics
-- python-sgp4 provides the TLE manipulation and SGP4 propagation engine
-- Pytest provides the testing framework
+-   NumPy and SciPy are used for the underlying mathematical algorithms
+-   Matplotlib is used for plots
+-   Astropy handles all time and reference frame computations
+-   `Portion <https://github.com/AlexandreDecan/portion>`_ handles the
+    time interval mechanics
+-   `Sgp4 <https://pypi.org/project/sgp4>`_ provides the TLE manipulation
+    and SGP4 propagation engine
+-   Pytest provides the testing framework
 
 
 License
