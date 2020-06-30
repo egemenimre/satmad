@@ -10,6 +10,13 @@ community, including Cubesats (and anyone else who might be interested).
 The focus is on good documentation and good test coverage to produce a reliable
 flight dynamics library.
 
+Current functionality is:
+
+-   Initialising an orbit with a TLE
+-   Propagating the orbit via SGP4 propagator
+-   Harnessing the extensive `Astropy <http://www.astropy.org>`_ functionalities
+    (e.g. finding azimuth and elevation over a ground location and coordinate frame
+    transformations)
 
 Documentation and Examples
 --------------------------
