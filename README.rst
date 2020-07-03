@@ -28,6 +28,23 @@ You can find some hands-on Jupyter examples in the
 in the `documentation <https://satmad.readthedocs.io/en/latest/examples.html>`_ for a
 text version).
 
+Installing SatMAD
+-----------------
+
+The SatMAD package is on `PyPI`_ and you can install it simply by running::
+
+    pip install satmad
+
+You can also install it via `conda-forge`_::
+
+    conda install -c conda-forge portion
+
+Do not install `satmad` using `sudo`.
+
+You can find the source code on GitHub: https://github.com/egemenimre/satmad
+
+.. _`PyPI`: https://pypi.org/project/satmad/
+.. _`conda-forge`: https://github.com/conda-forge/satmad-feedstock
 
 Requirements
 ------------
