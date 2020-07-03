@@ -18,20 +18,23 @@ from satmad.coordinates.trajectory import Trajectory
 from satmad.propagation.tle import TLE
 
 
-def propagation_engine(line1, line2, init_time, generate_plots=False):
-    """Tests the interpolation accuracy for a given TLE."""
-
-    # Init satellite object from the TLE
-    sat = Satrec.twoline2rv(line1, line2)
-
+def generate_timelist(init_time, duration, steps):
+    """generates the time lists for propagation."""
     # ****** Generate the discrete time instants through the propagation duration ******
-    duration = TimeDelta(3.0, format="jd")
-    steps = 4000  # number of steps within the propagation duration
     dt = duration / steps
 
     # Generate time list
     dt_list = dt * np.arange(0, steps, 1)
     time_list = init_time + dt_list
+
+    return dt, time_list
+
+
+def propagation_engine(line1, line2, time_list):
+    """Tests the interpolation accuracy for a given TLE."""
+
+    # Init satellite object from the TLE
+    sat = Satrec.twoline2rv(line1, line2)
 
     # ****** Generate the pos, vel vectors for each time instant ******
 
@@ -56,6 +59,11 @@ def propagation_engine(line1, line2, init_time, generate_plots=False):
     # Init trajectory in Trajectory object
     trajectory = Trajectory(traj_astropy)
 
+    return trajectory, sat
+
+
+def check_errors(init_time, dt, sat, trajectory, generate_plots=False):
+    """Checks the errors for the given trajectory."""
     # **** Check the results ****
     step_offset = 0
     test_stepsize = 1.0 * u.s
@@ -129,7 +137,12 @@ def test_interpolation_err_iss():
     # test init time
     init_time = Time(2458826.3, format="jd", scale="utc")
 
-    max_begin_err, max_nominal_err = propagation_engine(line1, line2, init_time, False)
+    duration = TimeDelta(3.0, format="jd")
+    steps = 4000  # number of steps within the propagation duration
+
+    dt, time_list = generate_timelist(init_time, duration, steps)
+    trajectory, sat = propagation_engine(line1, line2, time_list)
+    max_begin_err, max_nominal_err = check_errors(init_time, dt, sat, trajectory, False)
 
     assert max_begin_err < 16 * u.mm
     assert max_nominal_err < 0.08 * u.mm
@@ -145,7 +158,12 @@ def test_interpolation_err_geo():
     # test init time
     init_time = Time("2020:162:09:00:00", format="yday", scale="utc")
 
-    max_err, max_nominal_err = propagation_engine(line1, line2, init_time, False)
+    duration = TimeDelta(3.0, format="jd")
+    steps = 4000  # number of steps within the propagation duration
+
+    dt, time_list = generate_timelist(init_time, duration, steps)
+    trajectory, sat = propagation_engine(line1, line2, time_list)
+    max_err, max_nominal_err = check_errors(init_time, dt, sat, trajectory, False)
 
     assert max_err < 0.0005 * u.mm
     assert max_nominal_err < 0.0003 * u.mm
@@ -171,9 +189,12 @@ def test_interpolation_err_heo():
 
     # print(tle)
 
-    max_err, max_nominal_err = propagation_engine(
-        heo_line1, heo_line2, init_time, False
-    )
+    duration = TimeDelta(3.0, format="jd")
+    steps = 4000  # number of steps within the propagation duration
+
+    dt, time_list = generate_timelist(init_time, duration, steps)
+    trajectory, sat = propagation_engine(heo_line1, heo_line2, time_list)
+    max_err, max_nominal_err = check_errors(init_time, dt, sat, trajectory, False)
 
     assert max_err < 0.040 * u.mm
     assert max_nominal_err < 0.00030 * u.mm
