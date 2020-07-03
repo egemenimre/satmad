@@ -127,6 +127,34 @@ def check_errors(init_time, dt, sat, trajectory, generate_plots=False):
     return max_err, max_nominal_err
 
 
+def test_trajectory_export():
+    """Tests the interpolation accuracy for ISS."""
+
+    # Init TLE
+    line1 = "1 25544U 98067A   19343.69339541  .00001764  00000-0  38792-4 0  9991"
+    line2 = "2 25544  51.6439 211.2001 0007417  17.6667  85.6398 15.50103472202482"
+
+    # test init time
+    init_time = Time(2458826.3, format="jd", scale="utc")
+    init_time.format = "isot"
+
+    duration = TimeDelta(3.0, format="jd")
+    steps = 4000  # number of steps within the propagation duration
+
+    dt, time_list = generate_timelist(init_time, duration, steps)
+    trajectory, sat = propagation_engine(line1, line2, time_list)
+
+    ts = trajectory.to_timeseries()
+
+    pvt = trajectory.coord_list[10]
+
+    # print(ts)
+    # print(ts["time", "v_X"])
+
+    assert (ts.time[10] - pvt.obstime) < 17 * u.us
+    assert (ts[10]["r_X"] - pvt.cartesian.x) < 1 * u.um
+
+
 def test_interpolation_err_iss():
     """Tests the interpolation accuracy for ISS."""
 

@@ -10,6 +10,7 @@ Trajectory of an object with interpolators.
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import CartesianDifferential, CartesianRepresentation, SkyCoord
+from astropy.timeseries import TimeSeries
 
 from satmad.utils.interpolators import CartInterpolator3D
 from satmad.utils.timeinterval import TimeInterval
@@ -227,6 +228,42 @@ class Trajectory:
             v = self._v_interpol(t_req) * self._u_km_per_s
 
         return v
+
+    def to_timeseries(self):
+        """
+        Converts the internal `coord_list` of the trajectory to a table for easy
+        manipulation and file output.
+
+        Returns
+        -------
+        TimeSeries
+            Coordinate list as `TimeSeries`
+        """
+        r = self.coord_list.cartesian
+
+        # generate timeseries
+
+        # add velocity info if possible
+        if self._has_velocity:
+            v = self.coord_list.velocity
+            ts = TimeSeries(
+                time=self.coord_list.obstime.isot,
+                data={
+                    "r_X": r.x,
+                    "r_Y": r.y,
+                    "r_Z": r.z,
+                    "v_X": v.d_x,
+                    "v_Y": v.d_y,
+                    "v_Z": v.d_z,
+                },
+            )
+        else:
+            ts = TimeSeries(
+                time=self.coord_list.obstime.isot,
+                data={"r_X": r.x, "r_Y": r.y, "r_Z": r.z},
+            )
+
+        return ts
 
     @property
     def coord_list(self):
