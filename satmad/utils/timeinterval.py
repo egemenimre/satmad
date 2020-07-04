@@ -506,7 +506,7 @@ class TimeIntervalList:
         self, intervals, start_valid=None, end_valid=None, replicate=False,
     ):
 
-        self._intervals: list = []
+        self.intervals: list = []
 
         if intervals:
             # if start_times is None, then there is no time interval defined
@@ -515,7 +515,7 @@ class TimeIntervalList:
             p_intervals = self._to_p_intervals(intervals)
 
             # Fill the atomic `TimeInterval` objects using the merged list
-            self._intervals = self._to_time_intervals(p_intervals, replicate)
+            self.intervals = self._to_time_intervals(p_intervals, replicate)
 
         # Init range of validity
         self._valid_interval = self.__init_validity_rng(
@@ -582,6 +582,33 @@ class TimeIntervalList:
             replicate=replicate,
         )
 
+    def is_in_interval(self, time):
+        """
+        Checks whether the requested time is within the time interval list.
+
+        Parameters
+        ----------
+        time : Time
+            Time to be checked
+
+        Returns
+        -------
+        bool
+            `True` if time is within the interval list, `False` otherwise. Also returns
+            `False` if requested time is outside validity interval.
+        """
+        # Is time within validity interval?
+        if not self.validity_interval().is_in_interval(time):
+            return False
+
+        # Are there any events that contain this time instant?
+        for interval in self.intervals:
+            if interval.is_in_interval(time):
+                return True
+
+        # If we are here, then no interval contains the time
+        return False
+
     def invert(self, replicate=False):
         """
         Creates an *inverted* (or complement) copy of this time interval list, while
@@ -603,7 +630,7 @@ class TimeIntervalList:
         intervals are inverted.
         """
         # Convert `TimeInterval` list to `Interval`
-        p_interval = self._to_p_intervals(self._intervals)
+        p_interval = self._to_p_intervals(self.intervals)
 
         # Do the inversion
         p_int_inverted = ~p_interval
@@ -640,7 +667,7 @@ class TimeIntervalList:
             Requested index is out of bounds
 
         """
-        return self._intervals[index]
+        return self.intervals[index]
 
     def validity_interval(self) -> TimeInterval:
         """
@@ -710,9 +737,9 @@ class TimeIntervalList:
 
     def __str__(self):
         txt = ""
-        if self._intervals:
+        if self.intervals:
             # List not empty
-            for interval in self._intervals:
+            for interval in self.intervals:
                 txt += str(interval) + "\n"
         else:
             txt = "Time interval list is empty."
