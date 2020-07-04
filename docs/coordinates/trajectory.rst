@@ -37,6 +37,15 @@ represents a worst case and other tests yield maximum errors on the order of 0.0
 0.0003 mm nominal for a Highly Elliptical Orbit and less than 0.0005 mm at the edge for a
 Geostationary Orbit.
 
+Output of Trajectory Data
+-----------------------------------
+
+Trajectory data can be exported to a :class:`astropy.timeseries.TimeSeries` object through the
+:meth:`.Trajectory.to_timeseries` method. The resulting `TimeSeries` data then can be written
+to a file or can be manipulated. While this sort of "time, position, velocity" information is
+useful for visualisation and data transfer, the metadata information such as coordinate system
+and information regarding how this data is generated cannot be stored in this way.
+
 Reference / API
 ---------------
 
