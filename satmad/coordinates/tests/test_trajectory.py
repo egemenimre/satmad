@@ -59,7 +59,7 @@ def propagation_engine(line1, line2, time_list):
     # Init trajectory in Trajectory object
     trajectory = Trajectory(traj_astropy)
 
-    return trajectory, sat
+    return {"traj": trajectory, "sat": sat}
 
 
 def check_errors(init_time, dt, sat, trajectory, generate_plots=False):
@@ -142,13 +142,13 @@ def test_trajectory_export():
     steps = 4000  # number of steps within the propagation duration
 
     dt, time_list = generate_timelist(init_time, duration, steps)
-    trajectory, sat = propagation_engine(line1, line2, time_list)
+    prop_output = propagation_engine(line1, line2, time_list)
 
-    ts = trajectory.to_timeseries()
+    ts = prop_output["traj"].to_timeseries()
 
-    pvt = trajectory.coord_list[10]
+    pvt = prop_output["traj"].coord_list[10]
 
-    # print(ts)
+    print(ts)
     # print(ts["time", "v_X"])
 
     assert (ts.time[10] - pvt.obstime) < 17 * u.us
@@ -169,8 +169,10 @@ def test_interpolation_err_iss():
     steps = 4000  # number of steps within the propagation duration
 
     dt, time_list = generate_timelist(init_time, duration, steps)
-    trajectory, sat = propagation_engine(line1, line2, time_list)
-    max_begin_err, max_nominal_err = check_errors(init_time, dt, sat, trajectory, False)
+    prop_output = propagation_engine(line1, line2, time_list)
+    max_begin_err, max_nominal_err = check_errors(
+        init_time, dt, prop_output["sat"], prop_output["traj"], False
+    )
 
     assert max_begin_err < 16 * u.mm
     assert max_nominal_err < 0.08 * u.mm
@@ -190,8 +192,10 @@ def test_interpolation_err_geo():
     steps = 4000  # number of steps within the propagation duration
 
     dt, time_list = generate_timelist(init_time, duration, steps)
-    trajectory, sat = propagation_engine(line1, line2, time_list)
-    max_err, max_nominal_err = check_errors(init_time, dt, sat, trajectory, False)
+    prop_output = propagation_engine(line1, line2, time_list)
+    max_err, max_nominal_err = check_errors(
+        init_time, dt, prop_output["sat"], prop_output["traj"], False
+    )
 
     assert max_err < 0.0005 * u.mm
     assert max_nominal_err < 0.0003 * u.mm
@@ -221,8 +225,10 @@ def test_interpolation_err_heo():
     steps = 4000  # number of steps within the propagation duration
 
     dt, time_list = generate_timelist(init_time, duration, steps)
-    trajectory, sat = propagation_engine(heo_line1, heo_line2, time_list)
-    max_err, max_nominal_err = check_errors(init_time, dt, sat, trajectory, False)
+    prop_output = propagation_engine(heo_line1, heo_line2, time_list)
+    max_err, max_nominal_err = check_errors(
+        init_time, dt, prop_output["sat"], prop_output["traj"], False
+    )
 
     assert max_err < 0.040 * u.mm
     assert max_nominal_err < 0.00030 * u.mm
