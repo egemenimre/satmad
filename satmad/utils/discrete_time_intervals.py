@@ -130,6 +130,8 @@ class DiscreteTimeIntervals:
                     intervals.append(
                         TimeInterval(event_start, self.search_interval.end)
                     )
+            else:
+                intervals.append(TimeInterval(event_start, self.search_interval.end))
 
         # If interval list is empty by this stage, either the complete duration is
         # is a valid interval with no event (e.g. a continuously visible satellite)
