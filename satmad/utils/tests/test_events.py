@@ -211,4 +211,4 @@ def test_init_array_mismatch():
         time_list = prepare_timelist(
             Time("2015-10-04T00:00:00.000", scale="utc"), 1.0 * u.day, 1000
         )["time_list"]
-        events = DiscreteTimeIntervals(time_list, [0.1, 1.2, 2.3])
+        DiscreteTimeIntervals(time_list, [0.1, 1.2, 2.3])
