@@ -8,24 +8,25 @@ at the end.
 Orbits and Trajectories
 ^^^^^^^^^^^^^^^^^^^^^^^
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   propagation/tle
-   coordinates/trajectory
-   propagation/propagators
+    coordinates/trajectory
+    propagation/tle
+    propagation/propagators
 
 Time and Coordinates
 ^^^^^^^^^^^^^^^^^^^^^
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   utils/timeinterval
-   coordinates/frames
+    utils/timeinterval
+    coordinates/frames
 
 
 Utilities
 ^^^^^^^^^^^^^^^^^
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   utils/interpolators
+    utils/interpolators
+    utils/discrete_time_events
