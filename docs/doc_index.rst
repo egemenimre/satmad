@@ -28,5 +28,5 @@ Utilities
 .. toctree::
     :maxdepth: 2
 
-    utils/interpolators
     utils/discrete_time_events
+    utils/interpolators
