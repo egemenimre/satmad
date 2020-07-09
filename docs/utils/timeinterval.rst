@@ -16,7 +16,7 @@ intersection operation between intervals of 'satellite above horizon', 'sun belo
 horizon' and 'satellite not in eclipse').
 
 
-The :mod:`.timeinterval` package provides the basic time interval functionality with
+The :mod:`.timeinterval` module provides the basic time interval functionality with
 the :class:`.TimeInterval` class i.e.,
 a time interval with a start and end time/date, using the high precision
 :class:`astropy.time.Time` classes under the hood to represent time and
