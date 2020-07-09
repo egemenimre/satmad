@@ -4,7 +4,7 @@
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
-Discrete time intervals management and event finding methods.
+Discrete time events and intervals finding methods.
 
 """
 from astropy import units as u
@@ -14,9 +14,9 @@ from scipy import interpolate
 from satmad.utils.timeinterval import TimeInterval, TimeIntervalList
 
 
-class DiscreteTimeIntervals:
+class DiscreteTimeEvents:
     """
-    Time events finding and storage class.
+    Discrete time events and intervals finding and storage class.
 
     An *time event* is described as a function value crossing a certain threshold in
     increasing (negative to positive) and decreasing (positive to negative) directions,
