@@ -17,7 +17,7 @@ from satmad.coordinates.tests.test_trajectory import (
     propagation_engine,
 )
 from satmad.propagation.tle import TLE
-from satmad.utils.discrete_time_intervals import DiscreteTimeIntervals
+from satmad.utils.discrete_time_events import DiscreteTimeEvents
 
 
 def prepare_timelist(init_time, duration, steps):
@@ -78,7 +78,7 @@ def event_engine(trajectory_generator, init_time, duration, steps):
     )
 
     # Find intervals in data
-    events = DiscreteTimeIntervals(time_list, sat_alt_az_list.alt.deg, 5)
+    events = DiscreteTimeEvents(time_list, sat_alt_az_list.alt.deg, 5)
 
     return events
 
@@ -211,4 +211,4 @@ def test_init_array_mismatch():
         time_list = prepare_timelist(
             Time("2015-10-04T00:00:00.000", scale="utc"), 1.0 * u.day, 1000
         )["time_list"]
-        DiscreteTimeIntervals(time_list, [0.1, 1.2, 2.3])
+        DiscreteTimeEvents(time_list, [0.1, 1.2, 2.3])
