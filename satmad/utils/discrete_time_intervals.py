@@ -63,7 +63,7 @@ class DiscreteTimeIntervals:
         # Init interpolators (for splines, root finding possible for 3rd degree
         # (cubics) only)
         self._interpolator = interpolate.CubicSpline(
-            t_float_list, value_list - crossing_value,
+            t_float_list, value_list - crossing_value
         )
 
         self._deriv_interpolator = self._interpolator.derivative()
