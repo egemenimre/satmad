@@ -64,7 +64,7 @@ With a coarse data set, it is very challenging for a numerical algorithm to find
 a high accuracy.
 
 Finally, best results can be had with continuous and smooth data. Heavy non-linearities require very small time
-steps and there is no guarantee that discontiunities will be handled well.
+steps and there is no guarantee that discontinuities will be handled well.
 
 As with all numerical algorithms, you should *"know thy problem"*.
 
