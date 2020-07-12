@@ -121,24 +121,31 @@ some intersection - otherwise the result will be a `None`.
 List of time intervals: The :class:`.TimeIntervalList` Class
 ------------------------------------------------------------------
 
-The :class:`.TimeIntervalList` class stores the :class:`.TimeInterval` objects as well as
-another `TimeInterval` to represent the bounds of the validity of this list. If this validity
-interval is not defined explicitly, then it is assumed to start with the beginning of the first
-`TimeInterval` and end with the end of the final `TimeInterval`.
-
-Any interval within the list can be queried through :meth:`.TimeIntervalList.get_interval`
-method. Similarly, the `TimeInterval` that keeps the interval of validity can be queried
-through :meth:`.TimeIntervalList.validity_interval` method.
-
 The :class:`.TimeIntervalList` usually will not be generated explicitly by a user, except,
 for example, as an external constraint such as the durations when a groundstation is not
 available. Usually such lists are results of certain analyses such as eclipse intervals
 for a location on ground or different attitude profiles for a satellite.
 
+The :class:`.TimeIntervalList` class stores the :class:`.TimeInterval` objects as well as
+another `TimeInterval` to represent the bounds of the validity of this list. If this validity
+interval is not defined explicitly, then it is assumed to start with the beginning of the first
+`TimeInterval` and end with the end of the final `TimeInterval`.
+
+Operations such as :meth:`.TimeIntervalList.intersection` and :meth:`.TimeIntervalList.union`
+are also possible for two `TimeIntervalList` objects. As a `TimeIntervalList` is defined
+for a certain validity interval, the union or intersection of two `TimeIntervalList` objects
+will yield another `TimeIntervalList` that is only valid for the intersection of validity
+of these two intervals.
+
+Any interval within the list can be queried through :meth:`.TimeIntervalList.get_interval`
+method. Similarly, the `TimeInterval` that keeps the interval of validity can be queried
+through :meth:`.TimeIntervalList.valid_interval` property.
+
 The `TimeIntervalList` will yield a new, inverted (or complementing) version of itself
 through the :meth:`.TimeIntervalList.invert` method. For example, for a single interval of
 `[t0, t1]` in a validity interval `[T0,T1]`, the inverted interval list would be `[T0,t0]`
 and `[t1,T1]`. If there are no intervals, the inverse becomes the entire validity interval.
+
 
 Reference/API
 -------------
