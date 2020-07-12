@@ -711,48 +711,97 @@ class TimeIntervalList:
             interval_list.valid_interval
         )
 
-        if len(self.intervals) == 0 or len(interval_list.intervals) == 0:
-            # No interval present in one of the lists, hence no intersection possible
-            # Return an empty list with the intersecting validity
-            return TimeIntervalList([], start_valid=common_valid_interval)
+        # Compute the portion intervals
+        p_self_intervals = TimeIntervalList._to_p_intervals(self.intervals)
+        p_other_intervals = TimeIntervalList._to_p_intervals(interval_list.intervals)
 
-        # At this point at least there are some interval elements to check for AND
-        # the validity intervals intersect
-        all_intersections = []
-        for other_interval_member in interval_list.intervals:
-            # While not very elegant, loop through the interval list to check
-            # for intersections
-            intersect_intervals = [
-                interval_member.intersect(other_interval_member)
-                for interval_member in self.intervals
-                if interval_member.is_intersecting(other_interval_member)
-            ]
+        # Do the Intersection
+        p_final = p_self_intervals.intersection(p_other_intervals)
 
-            if len(intersect_intervals) > 0:
-                # There can be only a single intersection
-                all_intersections.append(intersect_intervals[0])
-
-        return TimeIntervalList(all_intersections, start_valid=common_valid_interval)
+        return TimeIntervalList(
+            self._to_time_intervals(p_final), start_valid=common_valid_interval
+        )
 
     def union(self, interval):
         """
-          Union operator for a time interval (or list) and this time interval list.
+         Union operator for a time interval and this time interval list.
 
-          Returns a new interval list that is the Union of the requested interval
-          (or list) and this time interval list.
+         Returns a new interval that is the Union of the interval and
+         the time interval list, or None if there is no intersection.
 
-          Parameters
-          ----------
-          interval : TimeInterval or TimeIntervalList
-              Time interval(s) to be checked
+         Parameters
+         ----------
+         interval : TimeInterval
+             Time interval to be checked
 
-          Returns
-          -------
-          TimeInterval or TimeIntervalList
-             A new interval (or interval list) that is the Intersection of the interval and
-             the time interval list, or None if there is no intersection.
+         Returns
+         -------
+         TimeInterval
+            A new interval that is the Union of the interval and
+            the time interval list, or None if there is no intersection.
 
-          """
+         """
+        if len(self.intervals) == 0:
+            # No interval present in the list, hence no intersection possible
+            return None
+
+        # While not very elegant, loop through the interval list to check
+        # for intersections
+        union_intervals = [
+            interval_member.union(interval)
+            for interval_member in self.intervals
+            if interval_member.is_intersecting(interval)
+        ]
+
+        if len(union_intervals) > 0:
+            # There can be only a single intersection
+            return union_intervals[0]
+        else:
+            # no intersection
+            return None
+
+    def union_list(self, interval_list):
+        """
+         Union operator for a time interval list and this time interval list.
+
+         Returns a new interval list that is the Union of `interval_list` and
+         this time interval list, or None if there is no intersection even in the
+         validity intervals.
+
+         Parameters
+         ----------
+         interval_list : TimeIntervalList
+             Time interval list to be checked
+
+         Returns
+         -------
+         TimeIntervalList
+            A new interval list that is the Union of `interval_list` and
+            this time interval list, or None if there is no intersection.
+
+         """
+        if not self.valid_interval.is_intersecting(interval_list.valid_interval):
+            # Validity intervals do not intersect, hence no intersection possible
+            return None
+
+        common_valid_interval = self.valid_interval.intersect(
+            interval_list.valid_interval
+        )
+
+        # Compute the portion intervals
+        p_self_intervals = TimeIntervalList._to_p_intervals(self.intervals)
+        p_other_intervals = TimeIntervalList._to_p_intervals(interval_list.intervals)
+
+        # Do the Union
+        p_union = p_self_intervals.union(p_other_intervals)
+
+        # Reduce union to the common interval
+        p_common = common_valid_interval.p_interval
+        p_final = p_union.intersection(p_common)
+
+        return TimeIntervalList(
+            self._to_time_intervals(p_final), start_valid=common_valid_interval
+        )
 
     def invert(self, replicate=False):
         """
