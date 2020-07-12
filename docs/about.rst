@@ -18,7 +18,7 @@ Current functionality is:
 -   Initialising an orbit with a TLE (see :ref:`tle-intro` Section)
 -   Propagating the orbit via SGP4 propagator (see :ref:`sgp4-intro` Section)
 -   Good infrastructure for time interval management and event finding
--   Harnessing the extensive `Astropy <http://www.astropy.org>`_ functionalities
+-   Harnessing the extensive `Astropy`_ functionalities
     (e.g. finding azimuth and elevation over a ground location and coordinate frame
     transformations)
 
@@ -65,8 +65,9 @@ satellite mission analysis and design to actual satellite operations.
 Acknowledgements
 ----------------
 While setting up the code environment and continuous integration, I have taken a lot of inspiration from
-`Astropy <https://www.astropy.org/>`_ and `Poliastro <https://github.com/poliastro/poliastro>`_.
+`Astropy`_ and `Poliastro <https://github.com/poliastro/poliastro>`_.
 Astropy is an amazing Astronomy Library for Python (which is doing a lot of the tedious infrastructure job for SatMAD)
 and Poliastro is probably the most actively developed Astrodynamics and Orbital Mechanics library in Python,
 with a focus on interplanetary flight.
 
+.. _`Astropy`: https://www.astropy.org/
