@@ -247,8 +247,12 @@ class TimeInterval:
         """
         intersection = self._interval.intersection(interval._interval)
 
+        if intersection.empty:
+            # There is absolutely no intersection
+            return False
+
         if _are_times_almost_equal(intersection.upper, intersection.lower):
-            # intersection below tolerance - practically no intersection
+            # intersection below tolerance - practically empty intersection
             return False
         else:
             # see what the underlying function says
@@ -457,7 +461,8 @@ def _create_interval_from_portion(interval, replicate=False):
 
     Returns
     -------
-    New `TimeInterval` instance
+    TimeInterval
+        New `TimeInterval` instance
     """
     return TimeInterval(
         interval.lower,
@@ -502,11 +507,9 @@ class TimeIntervalList:
         Raised if `init_times` and `end_times` objects sizes mismatch.
     """
 
-    def __init__(
-        self, intervals, start_valid=None, end_valid=None, replicate=False,
-    ):
+    def __init__(self, intervals, start_valid=None, end_valid=None, replicate=False):
 
-        self.intervals: list = []
+        self._intervals: list = []
 
         if intervals:
             # if start_times is None, then there is no time interval defined
@@ -515,7 +518,7 @@ class TimeIntervalList:
             p_intervals = self._to_p_intervals(intervals)
 
             # Fill the atomic `TimeInterval` objects using the merged list
-            self.intervals = self._to_time_intervals(p_intervals, replicate)
+            self._intervals = self._to_time_intervals(p_intervals, replicate)
 
         # Init range of validity
         self._valid_interval = self.__init_validity_rng(
@@ -598,16 +601,118 @@ class TimeIntervalList:
             `False` if requested time is outside validity interval.
         """
         # Is time within validity interval?
-        if not self.validity_interval().is_in_interval(time):
+        if not self.valid_interval.is_in_interval(time):
             return False
 
         # Are there any events that contain this time instant?
-        for interval in self.intervals:
+        for interval in self._intervals:
             if interval.is_in_interval(time):
                 return True
 
         # If we are here, then no interval contains the time
         return False
+
+    def is_intersecting(self, interval):
+        """
+        Checks whether the requested interval intersects (or is contained within)
+        the interval list.
+
+        Parameters
+        ----------
+        interval : TimeInterval
+            Time interval to be checked
+
+        Returns
+        -------
+        bool
+            `True` if check interval intersects with the interval list,
+            `False` otherwise
+        """
+        if len(self._intervals) == 0:
+            # No interval present in the list, hence no intersection
+            return False
+
+        # While not very elegant, loop through the interval list to check
+        # for intersections
+        intersect_intervals = [
+            interval_member
+            for interval_member in self.intervals
+            if interval_member.is_intersecting(interval)
+        ]
+
+        if len(intersect_intervals) > 0:
+            return True
+        else:
+            return False
+
+    def intersect(self, interval):
+        """
+         Intersection operator for a time interval(s) and this time interval list.
+
+         Returns a new interval that is the Intersection of the interval and
+         the time interval list, or None if there is no intersection.
+
+         Parameters
+         ----------
+         interval : TimeInterval or TimeIntervalList
+             Time interval(s) to be checked
+
+         Returns
+         -------
+         TimeInterval or TimeIntervalList
+            A new interval (or interval list) that is the Intersection of the interval and
+            the time interval list, or None if there is no intersection.
+
+         """
+        if len(self.intervals) == 0:
+            # No interval present in the list, hence no intersection possible
+            return None
+
+        if isinstance(interval, TimeInterval):
+            # interval is a single TimeInterval
+
+            # While not very elegant, loop through the interval list to check
+            # for intersections
+            intersect_intervals = [
+                interval_member.intersect(interval)
+                for interval_member in self.intervals
+                if interval_member.is_intersecting(interval)
+            ]
+
+            if len(intersect_intervals) > 0:
+                # There can be only a single intersection
+                return intersect_intervals[0]
+            else:
+                # no intersection
+                return None
+        elif isinstance(interval, TimeIntervalList):
+            # interval is a TimeIntervalList
+
+            if len(interval.intervals) == 0:
+                # No interval present in the other list, hence no intersection possible
+                return TimeIntervalList([], start_valid=self.valid_interval)
+
+            all_intersections = []
+            for other_interval_member in interval.intervals:
+                # While not very elegant, loop through the interval list to check
+                # for intersections
+                intersect_intervals = [
+                    interval_member.intersect(other_interval_member)
+                    for interval_member in self.intervals
+                    if interval_member.is_intersecting(other_interval_member)
+                ]
+
+                if len(intersect_intervals) > 0:
+                    # There can be only a single intersection
+                    all_intersections.append(intersect_intervals[0])
+
+            return TimeIntervalList(all_intersections, start_valid=self.valid_interval)
+
+        else:
+            raise TypeError(
+                f"Interval class ({interval.__class__}) should be either TimeInterval"
+                f"or TimeIntervalList."
+            )
 
     def invert(self, replicate=False):
         """
@@ -630,13 +735,13 @@ class TimeIntervalList:
         intervals are inverted.
         """
         # Convert `TimeInterval` list to `Interval`
-        p_interval = self._to_p_intervals(self.intervals)
+        p_interval = self._to_p_intervals(self._intervals)
 
         # Do the inversion
         p_int_inverted = ~p_interval
 
         # Fix the ends as necessary - no inf allowed
-        p_validity = self._to_p_intervals(self.validity_interval())
+        p_validity = self._to_p_intervals(self.valid_interval)
         p_int_inverted = p_int_inverted.intersection(p_validity)
 
         # Generate the `TimeInterval` list
@@ -644,7 +749,7 @@ class TimeIntervalList:
 
         # Create the `TimeIntervalList` object
         return TimeIntervalList(
-            intervals, start_valid=self.validity_interval(), replicate=replicate
+            intervals, start_valid=self.valid_interval, replicate=replicate
         )
 
     def get_interval(self, index):
@@ -667,18 +772,21 @@ class TimeIntervalList:
             Requested index is out of bounds
 
         """
-        return self.intervals[index]
+        return self._intervals[index]
 
-    def validity_interval(self) -> TimeInterval:
+    @property
+    def valid_interval(self) -> TimeInterval:
         """
         Gets the time interval of validity for the `TimeIntervalList`.
-
-        Returns
-        -------
-        `TimeInterval` of interval of validity
-
         """
         return self._valid_interval
+
+    @property
+    def intervals(self):
+        """
+        Gets the time intervals within this `TimeIntervalList`.
+        """
+        return self._intervals
 
     @staticmethod
     def _to_time_intervals(p_intervals, replicate=False):
@@ -695,7 +803,8 @@ class TimeIntervalList:
 
         Returns
         -------
-        `TimeInterval` object with the list of time intervals
+        list[TimeInterval]
+            `TimeInterval` object with the list of time intervals
         """
         intervals: list = []
 
@@ -737,9 +846,9 @@ class TimeIntervalList:
 
     def __str__(self):
         txt = ""
-        if self.intervals:
+        if self._intervals:
             # List not empty
-            for interval in self.intervals:
+            for interval in self._intervals:
                 txt += str(interval) + "\n"
         else:
             txt = "Time interval list is empty."

@@ -10,6 +10,7 @@ Test `TimeInterval` class and associated methods and functionalities.
 import numpy as np
 import pytest
 from astropy.time import Time, TimeDelta
+from astropy import units as u
 
 from satmad.utils.timeinterval import _EPS_TIME, TimeInterval, TimeIntervalList
 
@@ -19,16 +20,16 @@ before = TimeInterval(
     end_inclusive=False,
 )
 within = TimeInterval(
-    Time("2020-04-11T00:05:00", scale="utc"), Time("2020-04-11T00:08:00", scale="utc"),
+    Time("2020-04-11T00:05:00", scale="utc"), Time("2020-04-11T00:08:00", scale="utc")
 )
 intersect = TimeInterval(
-    Time("2020-04-10T00:00:00", scale="utc"), Time("2020-04-11T00:08:00", scale="utc"),
+    Time("2020-04-10T00:00:00", scale="utc"), Time("2020-04-11T00:08:00", scale="utc")
 )
 exact = TimeInterval(
-    Time("2020-04-11T00:00:00", scale="utc"), Time("2020-04-11T00:10:00", scale="utc"),
+    Time("2020-04-11T00:00:00", scale="utc"), Time("2020-04-11T00:10:00", scale="utc")
 )
 after = TimeInterval(
-    Time("2020-04-11T00:10:00", scale="utc"), Time("2020-04-12T00:00:00", scale="utc"),
+    Time("2020-04-11T00:10:00", scale="utc"), Time("2020-04-12T00:00:00", scale="utc")
 )
 
 
@@ -127,7 +128,48 @@ def test_interval_list_init_with_end_times(init_times, durations):
     truth_validity = "[ 2020-04-11T00:00:00.000  2020-04-13T00:30:00.000 ]"
 
     assert truth_txt == str(intervals)
-    assert truth_validity == str(intervals.validity_interval())
+    assert truth_validity == str(intervals.valid_interval)
+
+
+def test_interval_list_intersection(init_times, durations):
+    """Test interval intersection."""
+
+    init_intervals = []
+    for i, init_time in enumerate(init_times):
+        init_intervals.append(TimeInterval(init_times[i], durations[i]))
+
+    intervals = TimeIntervalList(init_intervals)
+
+    interval_full_intersect = TimeInterval(Time("2020-04-13T00:00:00.000"), 5 * u.min)
+    interval_part_intersect = TimeInterval(Time("2020-04-10T23:50:00.000"), 60 * u.min)
+    interval_no_intersect = TimeInterval(Time("2020-04-11T12:00:00.000"), 5 * u.min)
+
+    # *** Test TimeIntervalList vs. TimeInterval intersection ***
+    assert intervals.is_intersecting(interval_full_intersect) is True
+    assert "[ 2020-04-13T00:00:00.000  2020-04-13T00:05:00.000 ]" == str(
+        intervals.intersect(interval_full_intersect)
+    )
+
+    assert intervals.is_intersecting(interval_part_intersect) is True
+    assert "[ 2020-04-11T00:00:00.000  2020-04-11T00:10:00.000 ]" == str(
+        intervals.intersect(interval_part_intersect)
+    )
+
+    assert intervals.is_intersecting(interval_no_intersect) is False
+    assert intervals.intersect(interval_no_intersect) is None
+
+    # *** Test TimeIntervalList vs. TimeIntervalList intersection ***
+
+    test_intervals = TimeIntervalList(
+        [interval_full_intersect, interval_part_intersect, interval_no_intersect]
+    )
+
+    truth_txt = (
+        "[ 2020-04-11T00:00:00.000  2020-04-11T00:10:00.000 ]\n"
+        "[ 2020-04-13T00:00:00.000  2020-04-13T00:05:00.000 ]\n"
+    )
+
+    assert truth_txt == str(intervals.intersect(test_intervals))
 
 
 def test_is_intersecting(init_times, durations):
@@ -282,4 +324,4 @@ def test_invert(init_times, durations):
     truth_validity = "[ 2020-04-10T00:00:00.000  2020-04-14T00:30:00.000 ]"
 
     assert truth_txt == str(inverted_intervals)
-    assert truth_validity == str(inverted_intervals.validity_interval())
+    assert truth_validity == str(inverted_intervals.valid_interval)
