@@ -9,8 +9,8 @@ Test `TimeInterval` class and associated methods and functionalities.
 """
 import numpy as np
 import pytest
-from astropy.time import Time, TimeDelta
 from astropy import units as u
+from astropy.time import Time, TimeDelta
 
 from satmad.utils.timeinterval import _EPS_TIME, TimeInterval, TimeIntervalList
 
