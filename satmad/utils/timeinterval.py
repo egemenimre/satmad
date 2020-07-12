@@ -647,20 +647,20 @@ class TimeIntervalList:
 
     def intersect(self, interval):
         """
-         Intersection operator for a time interval(s) and this time interval list.
+         Intersection operator for a time interval and this time interval list.
 
          Returns a new interval that is the Intersection of the interval and
          the time interval list, or None if there is no intersection.
 
          Parameters
          ----------
-         interval : TimeInterval or TimeIntervalList
-             Time interval(s) to be checked
+         interval : TimeInterval
+             Time interval to be checked
 
          Returns
          -------
-         TimeInterval or TimeIntervalList
-            A new interval (or interval list) that is the Intersection of the interval and
+         TimeInterval
+            A new interval that is the Intersection of the interval and
             the time interval list, or None if there is no intersection.
 
          """
@@ -668,51 +668,91 @@ class TimeIntervalList:
             # No interval present in the list, hence no intersection possible
             return None
 
-        if isinstance(interval, TimeInterval):
-            # interval is a single TimeInterval
+        # While not very elegant, loop through the interval list to check
+        # for intersections
+        intersect_intervals = [
+            interval_member.intersect(interval)
+            for interval_member in self.intervals
+            if interval_member.is_intersecting(interval)
+        ]
 
+        if len(intersect_intervals) > 0:
+            # There can be only a single intersection
+            return intersect_intervals[0]
+        else:
+            # no intersection
+            return None
+
+    def intersect_list(self, interval_list):
+        """
+         Intersection operator for a time interval list and this time interval list.
+
+         Returns a new interval list that is the Intersection of `interval_list` and
+         this time interval list, or None if there is no intersection even in the
+         validity intervals.
+
+         Parameters
+         ----------
+         interval_list : TimeIntervalList
+             Time interval list to be checked
+
+         Returns
+         -------
+         TimeIntervalList
+            A new interval list that is the Intersection of `interval_list` and
+            this time interval list, or None if there is no intersection.
+
+         """
+        if not self.valid_interval.is_intersecting(interval_list.valid_interval):
+            # Validity intervals do not intersect, hence no intersection possible
+            return None
+
+        common_valid_interval = self.valid_interval.intersect(
+            interval_list.valid_interval
+        )
+
+        if len(self.intervals) == 0 or len(interval_list.intervals) == 0:
+            # No interval present in one of the lists, hence no intersection possible
+            # Return an empty list with the intersecting validity
+            return TimeIntervalList([], start_valid=common_valid_interval)
+
+        # At this point at least there are some interval elements to check for AND
+        # the validity intervals intersect
+        all_intersections = []
+        for other_interval_member in interval_list.intervals:
             # While not very elegant, loop through the interval list to check
             # for intersections
             intersect_intervals = [
-                interval_member.intersect(interval)
+                interval_member.intersect(other_interval_member)
                 for interval_member in self.intervals
-                if interval_member.is_intersecting(interval)
+                if interval_member.is_intersecting(other_interval_member)
             ]
 
             if len(intersect_intervals) > 0:
                 # There can be only a single intersection
-                return intersect_intervals[0]
-            else:
-                # no intersection
-                return None
-        elif isinstance(interval, TimeIntervalList):
-            # interval is a TimeIntervalList
+                all_intersections.append(intersect_intervals[0])
 
-            if len(interval.intervals) == 0:
-                # No interval present in the other list, hence no intersection possible
-                return TimeIntervalList([], start_valid=self.valid_interval)
+        return TimeIntervalList(all_intersections, start_valid=common_valid_interval)
 
-            all_intersections = []
-            for other_interval_member in interval.intervals:
-                # While not very elegant, loop through the interval list to check
-                # for intersections
-                intersect_intervals = [
-                    interval_member.intersect(other_interval_member)
-                    for interval_member in self.intervals
-                    if interval_member.is_intersecting(other_interval_member)
-                ]
+    def union(self, interval):
+        """
+          Union operator for a time interval (or list) and this time interval list.
 
-                if len(intersect_intervals) > 0:
-                    # There can be only a single intersection
-                    all_intersections.append(intersect_intervals[0])
+          Returns a new interval list that is the Union of the requested interval
+          (or list) and this time interval list.
 
-            return TimeIntervalList(all_intersections, start_valid=self.valid_interval)
+          Parameters
+          ----------
+          interval : TimeInterval or TimeIntervalList
+              Time interval(s) to be checked
 
-        else:
-            raise TypeError(
-                f"Interval class ({interval.__class__}) should be either TimeInterval"
-                f"or TimeIntervalList."
-            )
+          Returns
+          -------
+          TimeInterval or TimeIntervalList
+             A new interval (or interval list) that is the Intersection of the interval and
+             the time interval list, or None if there is no intersection.
+
+          """
 
     def invert(self, replicate=False):
         """

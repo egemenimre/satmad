@@ -169,7 +169,7 @@ def test_interval_list_intersection(init_times, durations):
         "[ 2020-04-13T00:00:00.000  2020-04-13T00:05:00.000 ]\n"
     )
 
-    assert truth_txt == str(intervals.intersect(test_intervals))
+    assert truth_txt == str(intervals.intersect_list(test_intervals))
 
 
 def test_is_intersecting(init_times, durations):
