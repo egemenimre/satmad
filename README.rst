@@ -14,6 +14,7 @@ Current functionality is:
 
 -   Initialising an orbit with a TLE
 -   Propagating the orbit via SGP4 propagator
+-   Good infrastructure for time interval management and event finding
 -   Harnessing the extensive `Astropy <http://www.astropy.org>`_ functionalities
     (e.g. finding azimuth and elevation over a ground location and coordinate frame
     transformations)
