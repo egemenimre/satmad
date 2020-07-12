@@ -13,9 +13,13 @@ community, including (but not limited to) Cubesats.
 Current Status
 ---------------
 
-Current functionality is rather limited, but already you can start initialising TLEs
-(see :ref:`tle-intro` Section) and propagate the orbit using a SGP4 Analytical Propagator
-(see :ref:`sgp4-intro` Section).
+Current functionality is:
+
+-   Initialising an orbit with a TLE (see :ref:`tle-intro` Section)
+-   Propagating the orbit via SGP4 propagator (see :ref:`sgp4-intro` Section)
+-   Harnessing the extensive `Astropy <http://www.astropy.org>`_ functionalities
+    (e.g. finding azimuth and elevation over a ground location and coordinate frame
+    transformations)
 
 What's New?
 -----------
