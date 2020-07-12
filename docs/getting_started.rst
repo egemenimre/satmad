@@ -17,7 +17,7 @@ Do not install `satmad` using `sudo`.
 You can find the source code on GitHub: https://github.com/egemenimre/satmad
 
 .. _`PyPI`: https://pypi.org/project/satmad/
-.. _`conda-forge`: https://github.com/conda-forge/satmad-feedstock
+.. _`conda-forge`: https://anaconda.org/conda-forge/satmad
 
 Dependencies
 ------------

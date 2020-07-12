@@ -13,16 +13,21 @@ Check the source code here: https://github.com/egemenimre/satmad
 
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   about
-   getting_started
-   user_guide
-   examples
-   doc_index
-   references
+    about
+    getting_started
+    user_guide
+    examples
+    doc_index
+    references
 
+Changelog
+---------
+.. toctree::
+    :maxdepth: 2
 
+    changelog
 
 Indices and Tables
 ------------------

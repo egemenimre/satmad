@@ -17,6 +17,11 @@ Current functionality is rather limited, but already you can start initialising 
 (see :ref:`tle-intro` Section) and propagate the orbit using a SGP4 Analytical Propagator
 (see :ref:`sgp4-intro` Section).
 
+What's New?
+-----------
+
+Check the :ref:`changelog-latest` for the changelog and recently added functionalities.
+
 Future Functionality
 --------------------
 
