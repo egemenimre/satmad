@@ -9,6 +9,6 @@ Tutorials
 .. toctree::
     :maxdepth: 1
 
-    examples/satmad_first_steps.ipynb
-    examples/sso_analysis.ipynb
+    examples/tutorials/satmad_first_steps.ipynb
+    examples/tutorials/sso_analysis.ipynb
 
