@@ -4,13 +4,17 @@
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
-Base classes for analytical and numerical propagators.
+Base module for analytical and numerical propagators.
 
 """
 from abc import ABC
 
-from astropy import units as u
 from astropy.units import Quantity
+import numpy as np
+from astropy import units as u
+
+
+from satmad.coordinates.trajectory import Trajectory
 
 
 class AbstractPropagator(ABC):
@@ -47,3 +51,18 @@ class AbstractPropagator(ABC):
     def name(self) -> str:
         """Name of the propagator."""
         return self._name
+
+    def _generate_time_list(self, interval):
+        # generate number of steps (forced to rounded up int and added one to ensure
+        # time list covers the entire interval)
+        no_of_steps = np.ceil((interval.duration / self.stepsize).decompose()) + 1
+
+        # make sure there are enough elements for interpolation
+        if no_of_steps < Trajectory.reqd_min_elements():
+            no_of_steps = Trajectory.reqd_min_elements()
+
+        # output time list
+        time_list = interval.start + self.stepsize * np.arange(0, no_of_steps)
+        time_list.format = "isot"
+
+        return time_list

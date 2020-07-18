@@ -74,7 +74,7 @@ class SGP4Propagator(AbstractPropagator):
         )
 
         return SkyCoord(
-            rv_gcrs, representation_type="cartesian", differential_type="cartesian",
+            rv_gcrs, representation_type="cartesian", differential_type="cartesian"
         )
 
     def gen_trajectory(self, tle, interval):
@@ -93,18 +93,10 @@ class SGP4Propagator(AbstractPropagator):
             The output trajectory (in `GCRS`)
         """
 
-        # generate number of steps (forced to rounded up int)
-        no_of_steps = np.ceil((interval.duration / self.stepsize).decompose())
-
-        # make sure there are enough elements for interpolation
-        if no_of_steps < Trajectory.reqd_min_elements():
-            no_of_steps = Trajectory.reqd_min_elements()
-
-        # time list
-        time_list = interval.start + self.stepsize * np.arange(0, no_of_steps)
-        time_list.format = "isot"
-
         # ****** Generate the pos, vel vectors for each time instant ******
+
+        # generate the output timelist
+        time_list = self._generate_time_list(interval)
 
         # Run the propagation and init pos and vel vectors in TEME
         e, r_list, v_list = tle.satrec.sgp4_array(time_list.jd1, time_list.jd2)
