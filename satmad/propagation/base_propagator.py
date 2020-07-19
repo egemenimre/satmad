@@ -30,7 +30,7 @@ class AbstractPropagator(ABC):
     """
 
     def __init__(self, stepsize=60 * u.s, name="Propagator"):
-        self._name = name
+        self.name = name
         self._stepsize = stepsize
 
     @property
@@ -46,11 +46,6 @@ class AbstractPropagator(ABC):
         stepsize : TimeDelta or Quantity
         """
         self._stepsize = stepsize
-
-    @property
-    def name(self) -> str:
-        """Name of the propagator."""
-        return self._name
 
     def _generate_time_list(self, interval):
         # generate number of steps (forced to rounded up int and added one to ensure
