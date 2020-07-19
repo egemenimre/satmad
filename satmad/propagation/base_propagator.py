@@ -29,7 +29,7 @@ class AbstractPropagator(ABC):
         output stepsize for the propagator
     """
 
-    def __init__(self, name, stepsize=60 * u.s):
+    def __init__(self, stepsize=60 * u.s, name="Propagator"):
         self._name = name
         self._stepsize = stepsize
 

@@ -33,8 +33,8 @@ class SGP4Propagator(AbstractPropagator):
         output stepsize for the propagator
     """
 
-    def __init__(self, name="SGP4", stepsize=60 * u.s):
-        super().__init__(name, stepsize)
+    def __init__(self, stepsize=60 * u.s, name="SGP4"):
+        super().__init__(stepsize, name)
 
     @staticmethod
     def propagate(tle, time):
