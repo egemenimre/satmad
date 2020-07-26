@@ -12,3 +12,11 @@ Tutorials
     examples/tutorials/satmad_first_steps.ipynb
     examples/tutorials/sso_analysis.ipynb
 
+Analyses
+---------
+.. toctree::
+    :maxdepth: 1
+
+    examples/analysis/num_prop_performance_1.ipynb
+    examples/analysis/num_prop_performance_2.ipynb
+    examples/analysis/num_prop_performance_3.ipynb
