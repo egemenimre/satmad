@@ -9,10 +9,9 @@ Base module for analytical and numerical propagators.
 """
 from abc import ABC
 
-from astropy.units import Quantity
 import numpy as np
 from astropy import units as u
-
+from astropy.units import Quantity
 
 from satmad.coordinates.trajectory import Trajectory
 
