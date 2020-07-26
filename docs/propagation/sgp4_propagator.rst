@@ -33,6 +33,11 @@ generates a trajectory, starting from the TLE epoch and with a duration of 1.5 d
 .. code-block:: python
     :linenos:
 
+    from astropy import units as u
+    from satmad.propagation.tle import TLE
+    from satmad.propagation.sgp4_propagator import SGP4Propagator
+    from satmad.utils.timeinterval import TimeInterval
+
     # init TLE
     name = "VANGUARD 1"
     line1 = "1 00005U 58002B   00179.78495062  .00000023  00000-0  28098-4 0  4753"
