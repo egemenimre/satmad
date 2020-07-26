@@ -13,6 +13,7 @@ Orbits and Trajectories
     coordinates/trajectory
     propagation/tle
     propagation/propagators
+    propagation/force_models
 
 Time and Coordinates
 ^^^^^^^^^^^^^^^^^^^^^
