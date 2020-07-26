@@ -39,9 +39,10 @@ interpolation.
 Currently the following propagators are implemented in SatMAD:
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   sgp4_propagator
+    sgp4_propagator
+    numerical_propagation
 
 Reference/API
 -------------
