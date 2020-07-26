@@ -31,7 +31,7 @@ def two_body_accel(r, mu):
 
     .. note::
         This method is used in the Scipy ODE solver, therefore it does not accept
-        `Quantity` inputs for efficiency. Care must be taken with the units.
+        `Quantity` inputs. Care must be taken with the units.
 
 
     Parameters
