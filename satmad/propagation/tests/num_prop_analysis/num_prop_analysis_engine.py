@@ -152,7 +152,7 @@ def plot_runtimes(cases, title, logscale_plot=True):
     # ax.grid()
     # ax.xaxis.set_major_formatter(FormatStrFormatter("% 3.3f"))
     # ax.yaxis.set_major_formatter(FormatStrFormatter("% 3.3f"))
-    plt.title(f"Runtime for ODE Methods\n({title})")
+    plt.title(f"Runtime Analysis\n({title})")
     ax.set_ylabel("Runtime (s)")
 
     if logscale_plot:
