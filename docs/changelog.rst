@@ -25,13 +25,15 @@ Version 0.0.5 (27 Jul 2020)
 - Initialise basic numerical propagation (see :ref:`numprop-intro` Section)
 - Added operators (union, intersect etc.) functionality to :class:`.TimeIntervalList`
 
+
+Previous Versions
+-----------------
 Version 0.0.4 (11 Jul 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - First experimental release.
 
-Previous Versions
------------------
-
+Prior to 0.0.4
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 All versions before 0.04 have been wildily experimental.
 
