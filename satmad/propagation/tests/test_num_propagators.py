@@ -93,4 +93,4 @@ def test_num_propagator(rv_init_leo_gcrs):
     assert energy_diff_mean < 2.85e-12
 
     assert init_energy_diff_mean < 1.15e-12
-    assert final_energy_diff_mean < 5.00e-12
+    assert final_energy_diff_mean < 5.10e-12
