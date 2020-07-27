@@ -1,5 +1,5 @@
-User Guide
-==========
+Quick Introduction to SatMAD
+=============================
 
 Orbit Initialisation
 --------------------
