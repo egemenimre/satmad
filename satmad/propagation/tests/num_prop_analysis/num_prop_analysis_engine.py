@@ -10,6 +10,7 @@ Methods to analyse and measure numerical propagation performance.
 from time import perf_counter
 
 import numpy as np
+from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.visualization import quantity_support, time_support
@@ -77,11 +78,12 @@ def propagation_engine(
     return trajectory
 
 
-def energy_along_trajectory(coord_list: SkyCoord):
+def energy_along_trajectory(
+    coord_list: SkyCoord, mu=const.GM_earth.to_value(u.km ** 3 / u.s ** 2)
+):
     """Computes the absolute and relative (to initial) energy along the trajectory."""
 
     time_list = coord_list.obstime - coord_list[0].obstime
-    mu = (398600.5 * u.km ** 3 / u.s ** 2).value
 
     init_coords = coord_list[0]
     init_energy = two_body_energy(

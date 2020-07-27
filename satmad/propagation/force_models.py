@@ -8,7 +8,7 @@ Force models generally for use with the numerical propagators.
 
 """
 import numpy as np
-from astropy import units as u
+from astropy import constants as const
 
 
 def two_body_accel(r, mu):
@@ -52,7 +52,7 @@ def two_body_accel(r, mu):
     return a
 
 
-def two_body_energy(r, v, mu=398600.5 * u.km ** 3 / u.s ** 2):
+def two_body_energy(r, v, mu=const.GM_earth):
     r"""Two-body specific energy.
 
     The specific energy value is given by:
