@@ -11,13 +11,19 @@ Development Version
 
 The major functionalities under development are:
 
-- Add resample and operators (union, intersect etc.) functionality to :class:`.TimeIntervalList`
-- Initialise basic numerical propagation
+- Add resample functionality to :class:`.TimeIntervalList`
+
 
 .. _changelog-latest:
 
 Latest Version
 -----------------
+
+Version 0.0.5 (27 Jul 2020)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Initialise basic numerical propagation (see :ref:`numprop-intro` Section)
+- Added operators (union, intersect etc.) functionality to :class:`.TimeIntervalList`
 
 Version 0.0.4 (11 Jul 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
