@@ -89,8 +89,8 @@ def test_num_propagator(rv_init_leo_gcrs):
     # print(f"init mean energy diff : {init_energy_diff_mean}")
     # print(f"final mean energy diff: {final_energy_diff_mean}")
 
-    assert energy_diff_max < 4.30e-11
-    assert energy_diff_mean < 2.85e-12
+    assert energy_diff_max < 4.50e-11
+    assert energy_diff_mean < 2.95e-12
 
-    assert init_energy_diff_mean < 1.15e-12
-    assert final_energy_diff_mean < 5.10e-12
+    assert init_energy_diff_mean < 1.25e-12
+    assert final_energy_diff_mean < 5.20e-12
