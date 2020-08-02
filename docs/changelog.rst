@@ -12,6 +12,7 @@ Development Version
 The major functionalities under development are:
 
 - Add resample functionality to :class:`.TimeIntervalList`
+- Pass and Access finding with a simple elevation mask (e.g. Groundstation communication times)
 
 
 .. _changelog-latest:
@@ -22,7 +23,7 @@ Latest Version
 Version 0.0.5 (27 Jul 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Initialise basic numerical propagation (see :ref:`numprop-intro` Section)
+- Introduced basic numerical propagation (see :ref:`numprop-intro` Section)
 - Added operators (union, intersect etc.) functionality to :class:`.TimeIntervalList`
 
 
