@@ -10,7 +10,7 @@ The SatMAD package is on `PyPI`_ and you can install it simply by running::
 
 You can also install it via `conda-forge`_::
 
-    conda install -c conda-forge portion
+    conda install -c conda-forge satmad
 
 Do not install `satmad` using `sudo`.
 
