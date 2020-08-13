@@ -8,15 +8,14 @@ Force models generally for use with the numerical propagators.
 
 """
 import numpy as np
-from astropy import constants as const
 
 
 def two_body_accel(r, mu):
     r"""
     Two-body acceleration.
 
-    The acceleration is in in the inertial frame of the central body. For the
-    Earth this is GCRS.
+    The input vectors as well as the output acceleration is in in the inertial frame
+    of the central body. For the Earth this is GCRS.
 
     The acceleration value is given by:
 
@@ -37,14 +36,14 @@ def two_body_accel(r, mu):
     Parameters
     ----------
     r : ndarray
-        position vector with 3 elements (km)
+        inertial position vector with 3 elements (km)
     mu : float
         GM value (:math:`km^3 / s^2`)
 
     Returns
     -------
     float
-        acceleration (:math:`km / s^2`)
+        inertial acceleration (:math:`km / s^2`)
 
     """
     r_norm = np.linalg.norm(r)
@@ -52,8 +51,11 @@ def two_body_accel(r, mu):
     return a
 
 
-def two_body_energy(r, v, mu=const.GM_earth):
+def two_body_energy(r, v, mu):
     r"""Two-body specific energy.
+
+    The input vectors are in in the inertial frame of the central body.
+    For the Earth this is GCRS.
 
     The specific energy value is given by:
 
@@ -71,9 +73,9 @@ def two_body_energy(r, v, mu=const.GM_earth):
     Parameters
     ----------
     r : ndarray or Quantity
-        position vector with 3 elements (km)
+        inertial position vector with 3 elements (km)
     v : ndarray or Quantity
-        position vector with 3 elements (km/s)
+        inertial position vector with 3 elements (km/s)
     mu : float or Quantity
         GM value (:math:`km^3 / s^2`)
 
