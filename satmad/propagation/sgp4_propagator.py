@@ -18,12 +18,15 @@ from astropy.coordinates import (
 
 from satmad.coordinates.frames import TEME
 from satmad.coordinates.trajectory import Trajectory
+from satmad.core.celestial_bodies import EARTH
 from satmad.propagation.base_propagator import AbstractPropagator
 
 
 class SGP4Propagator(AbstractPropagator):
     """
     SGP4 Analytical propagator using `TEME` mean orbital elements.
+
+    While `central_body` of the propagator is `EARTH`, its constants are not used.
 
     Parameters
     ----------
@@ -34,7 +37,7 @@ class SGP4Propagator(AbstractPropagator):
     """
 
     def __init__(self, stepsize=60 * u.s, name="SGP4"):
-        super().__init__(stepsize, name)
+        super().__init__(stepsize, name, central_body=EARTH)
 
     @staticmethod
     def propagate(tle, time):

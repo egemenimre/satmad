@@ -14,6 +14,7 @@ from astropy import units as u
 from astropy.units import Quantity
 
 from satmad.coordinates.trajectory import Trajectory
+from satmad.core.celestial_bodies import EARTH
 
 
 class AbstractPropagator(ABC):
@@ -26,11 +27,14 @@ class AbstractPropagator(ABC):
         Name of the propagator
     stepsize : Quantity or TimeDelta
         output stepsize for the propagator
+    central_body : CelestialBody
+        Centre Celestial Body for the propagator
     """
 
-    def __init__(self, stepsize=60 * u.s, name="Propagator"):
+    def __init__(self, stepsize=60 * u.s, name="Propagator", central_body=EARTH):
         self.name = name
         self._stepsize = stepsize
+        self.central_body = central_body
 
     @property
     def stepsize(self) -> Quantity:

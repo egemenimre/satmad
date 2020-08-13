@@ -10,7 +10,6 @@ Base module for numerical propagators.
 from enum import Enum
 
 import numpy as np
-from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import (
     GCRS,
@@ -21,6 +20,7 @@ from astropy.coordinates import (
 from scipy.integrate import solve_ivp
 
 from satmad.coordinates.trajectory import Trajectory
+from satmad.core.celestial_bodies import EARTH
 from satmad.propagation.base_propagator import AbstractPropagator
 from satmad.propagation.force_models import two_body_accel
 
@@ -57,6 +57,8 @@ class NumericalPropagator(AbstractPropagator):
         relative tolerance value
     atol : float
         absolute tolerance value
+    central_body : CelestialBody
+        Centre Celestial Body for the propagator
     """
 
     def __init__(
@@ -66,8 +68,9 @@ class NumericalPropagator(AbstractPropagator):
         rtol=1e-12,
         atol=1e-14,
         name="",
+        central_body=EARTH,
     ):
-        super().__init__(stepsize, name)
+        super().__init__(stepsize, name, central_body)
 
         self._solver_type = solver_type
 
@@ -170,7 +173,7 @@ class NumericalPropagator(AbstractPropagator):
 __km3s2 = u.km ** 3 / u.s ** 2
 
 
-def _ode_diff_eqns(t, rv, mu=const.GM_earth):
+def _ode_diff_eqns(t, rv, mu=EARTH.mu):
     """
     Defines the Ordinary Differential Equations that govern the motion of the
     satellite. In practice, this method computes the instantaneous accelerations
