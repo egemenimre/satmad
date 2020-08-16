@@ -8,8 +8,9 @@ Defines a Celestial Body, which acts as the central repository of information fo
 the planets or similar Central Bodies.
 
 """
-from astropy import constants as const
 from astropy import units as u
+
+from satmad.core.celestial_constants import GM_moon, GM_earth, GM_sun
 
 
 class CelestialBody:
@@ -56,9 +57,12 @@ class CelestialBody:
 
 EARTH = CelestialBody(
     "Earth",
-    "mu: Astropy Default",
-    const.GM_earth.to(u.km ** 3 / u.s ** 2),
+    "Default Earth Model. ",
+    GM_earth.to(u.km ** 3 / u.s ** 2),
     inert_coord="gcrs",
     body_fixed_coord="itrs",
 )
-SUN = CelestialBody("Sun", "mu: Astropy Default", const.GM_sun.to(u.km ** 3 / u.s ** 2))
+SUN = CelestialBody("Sun", "Default Sun Model. ", GM_sun.to(u.km ** 3 / u.s ** 2))
+MOON = CelestialBody(
+    "Moon", "Default Moon Model. ", GM_moon.si.to(u.km ** 3 / u.s ** 2)
+)
