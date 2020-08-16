@@ -29,7 +29,7 @@ significantly more complicated, but the procedure is still the same.
 
 While the available propagation methods are those described by the
 `Scipy ODE solvers <https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html#scipy.integrate.solve_ivp>`_,
-we have shown with `extensive analyses <examples/tutorials/num_prop_performance_1.ipynb>`_ that DOP853
+we have shown with `extensive analyses <examples/analysis/num_prop_performance_1.ipynb>`_ that DOP853
 (Explicit Runge-Kutta Order 8(5,3) due to Dormand and Prince) gives the best results in terms of accuracy
 and computational performance. Hence, this is the default propagator.
 
