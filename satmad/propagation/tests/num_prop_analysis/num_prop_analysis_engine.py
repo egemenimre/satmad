@@ -10,7 +10,6 @@ Methods to analyse and measure numerical propagation performance.
 from time import perf_counter
 
 import numpy as np
-from astropy import constants as const
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.visualization import quantity_support, time_support
@@ -18,6 +17,7 @@ from matplotlib import pyplot as plt
 
 from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH
+from satmad.core.celestial_constants import GM_earth
 from satmad.propagation.force_models import two_body_energy
 from satmad.propagation.numerical_propagators import NumericalPropagator
 from satmad.propagation.sgp4_propagator import SGP4Propagator
@@ -85,7 +85,7 @@ def propagation_engine(
 
 
 def energy_along_trajectory(
-    coord_list: SkyCoord, mu=const.GM_earth.to_value(u.km ** 3 / u.s ** 2)
+    coord_list: SkyCoord, mu=GM_earth.to_value(u.km ** 3 / u.s ** 2)
 ):
     """Computes the absolute and relative (to initial) energy along the trajectory."""
 
