@@ -26,6 +26,6 @@ GM_moon = 4.902802711497899e12 * u.m ** 3 / u.s ** 2
 r"""Lunar  gravitational constant.
 
 The value is derived from "Moon-Earth mass ratio" times "Geocentric
-gravitational constant" (:math:`0.0123000371 \times 398600.64418`). 
+gravitational constant" (:math:`0.0123000371 \times 398600.64418`).
 
 (See IERS Technical Note No. 36 (2010) Table 1.1  [TCF1]_)."""
