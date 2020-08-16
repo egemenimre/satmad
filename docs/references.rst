@@ -1,5 +1,5 @@
-References
-===========
+Selected References
+===================
 
 Orbital Mechanics
 -----------------
@@ -13,5 +13,6 @@ Orbital Mechanics
 Time and Coordinate Frames
 --------------------------
 
-.. [TCF1] IERS Conventions (2010). Gérard Petit and Brian Luzum (eds.). (IERS Technical Note ; 36) Frankfurt am Main;
+.. [TCF1] `IERS Conventions (2010) <https://iers-conventions.obspm.fr/conventions_versions.php#official_target>`_.
+    Gérard Petit and Brian Luzum (eds.). (IERS Technical Note ; 36) Frankfurt am Main;
     Verlag des Bundesamts für Kartographie und Geodäsie, 2010. 179 pp., ISBN: 3-89888-989-6

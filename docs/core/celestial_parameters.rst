@@ -1,7 +1,7 @@
-Celestial Constants
-===================
-Celestial Constants in SatMAD are stored in this module. A significant part of these
-constants are from IERS Technical Note No. 36 [TCF1]_.
+Celestial Parameters
+====================
+Celestial Parameters in SatMAD are stored in this module. A significant part of these
+parameters are from IERS Technical Note No. 36 [TCF1]_.
 
 
 Reference/API
