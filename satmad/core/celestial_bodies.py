@@ -10,7 +10,7 @@ the planets or similar Central Bodies.
 """
 from astropy import units as u
 
-from satmad.core.celestial_constants import GM_moon, GM_earth, GM_sun
+from satmad.core.celestial_constants import GM_earth, GM_moon, GM_sun
 
 
 class CelestialBody:
@@ -62,7 +62,12 @@ EARTH = CelestialBody(
     inert_coord="gcrs",
     body_fixed_coord="itrs",
 )
+"""Default Earth Model."""
+
 SUN = CelestialBody("Sun", "Default Sun Model. ", GM_sun.to(u.km ** 3 / u.s ** 2))
+"""Default Sun Model."""
+
 MOON = CelestialBody(
     "Moon", "Default Moon Model. ", GM_moon.si.to(u.km ** 3 / u.s ** 2)
 )
+"""Default Moon Model."""
