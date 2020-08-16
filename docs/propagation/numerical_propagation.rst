@@ -37,7 +37,7 @@ Usage
 ------
 
 The Numerical Propagator is initialised with an output stepsize (e.g. 120 seconds for a Low-Earth Orbit satellite)
-as well as relative and absolute tolerances that deterimine the propagation error.
+as well as relative and absolute tolerances that determine the propagation error.
 How to choose these tolerances have been investigated here in
 `this notebook <examples/analysis/num_prop_performance_2.ipynb>`_.
 
