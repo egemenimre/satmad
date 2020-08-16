@@ -8,9 +8,9 @@ information for that body.
 There are default celestial bodies such as `EARTH`, `MOON` and `SUN` for convenience.
 A simple usage example is:
 
-    >>> from satmad.core.celestial_bodies import EARTH
-    >>> EARTH.mu
-    <Quantity 398600.4418 km3 / s2>
+    >>> from satmad.core.celestial_bodies import SUN
+    >>> SUN.mu
+    <Quantity 1.32712442e+11 km3 / s2>
 
 
 Reference/API
