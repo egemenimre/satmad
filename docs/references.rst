@@ -16,3 +16,10 @@ Time and Coordinate Frames
 .. [TCF1] `IERS Conventions (2010) <https://iers-conventions.obspm.fr/conventions_versions.php#official_target>`_.
     Gérard Petit and Brian Luzum (eds.). (IERS Technical Note ; 36) Frankfurt am Main;
     Verlag des Bundesamts für Kartographie und Geodäsie, 2010. 179 pp., ISBN: 3-89888-989-6
+
+.. [TCF2] `Report of the IAU Working Group on Cartographic Coordinates and Rotational Elements: 2015
+    <https://astrogeology.usgs.gov/search/map/Docs/WGCCRE/WGCCRE2015reprint>`_.
+    Archinal, B. A., Acton, C. H., A'Hearn, M. F., Conrad, A., Consolmagno, G. J., Duxbury, T., Hestroffer, D.,
+    Hilton, J. L., Kirk, R. L., Klioner, S. A., McCarthy, D., Meech, K., Oberst, J., Ping, J., Seidelmann, P. K.,
+    Tholen, D. J., Thomas, P. C., Williams, I. P.
+    Celestial Mechanics and Dynamical Astronomy, Volume 130, Issue 3, article id. 22, 46 pp., 2018.
