@@ -1,11 +1,14 @@
 Celestial Bodies
 ==================
-Celestial bodies in SatMAD are defined with the :class:`.CelestialBody` class. A celestial body
-stores its relevant values (e.g :math:`GM` constant) for various calculations such as force models
-within orbit propagation. As such, each `CelestialBody` object is a central repository of
-information for that body.
 
-There are default celestial bodies such as `EARTH`, `MOON` and `SUN` for convenience.
+A Celestial Body is an object in space around which another object can rotate. As such, it should have certain
+properties to enable operations such as coordinate transformations and propagation.
+
+This module defines the default Celestial Bodies, which are instances of the :class:`.CelestialBody` class.
+These  default celestial bodies are currently `EARTH`, `MOON` and `SUN`. The properties of these Celestial
+bodies are defined using certain standards and established values (e.g. IERS Technical Note No. 36 [TCF1]_).
+However, they are different from the standard values offered by Astropy.
+
 A simple usage example is:
 
     >>> from satmad.core.celestial_bodies import SUN
@@ -14,15 +17,6 @@ A simple usage example is:
     >>> from satmad.core.celestial_bodies import EARTH
     >>> EARTH.ellipsoid.re
     <Quantity 6378137. m>
-
-Some of the constants used are given in :ref:`celestial_params-intro`.
-
-A `CelestialBody` object should include, as a minimum, `name`, `info` and `mu` (Gravitational constant). In addition,
-it can have an `ellipsoid` (e.g. GRS80 for the Earth) as well as default coordinate definitions `inert_coord` and
-`body_fixed_coord`. The inertial coordinate definition (`inert_coord`) is required to be able to run a propagation
-around this central body. For the Earth, this is set to GCRS. The body fixed coordinate (`body_fixed_coord`) is
-required for conversions between the inertial and body fixed coordinate frames (for example, to be able to compute
-where the satellite sensor is pointing at on the ground). For the Earth, this is set to ITRS.
 
 Reference/API
 -------------
