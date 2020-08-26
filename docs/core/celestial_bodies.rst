@@ -11,7 +11,18 @@ A simple usage example is:
     >>> from satmad.core.celestial_bodies import SUN
     >>> SUN.mu
     <Quantity 1.32712442e+11 km3 / s2>
+    >>> from satmad.core.celestial_bodies import EARTH
+    >>> EARTH.ellipsoid.re
+    <Quantity 6378137. m>
 
+Some of the constants used are given in :ref:`celestial_params-intro`.
+
+A `CelestialBody` object should include, as a minimum, `name`, `info` and `mu` (Gravitational constant). In addition,
+it can have an `ellipsoid` (e.g. GRS80 for the Earth) as well as default coordinate definitions `inert_coord` and
+`body_fixed_coord`. The inertial coordinate definition (`inert_coord`) is required to be able to run a propagation
+around this central body. For the Earth, this is set to GCRS. The body fixed coordinate (`body_fixed_coord`) is
+required for conversions between the inertial and body fixed coordinate frames (for example, to be able to compute
+where the satellite sensor is pointing at on the ground). For the Earth, this is set to ITRS.
 
 Reference/API
 -------------
