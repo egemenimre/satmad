@@ -31,5 +31,5 @@ Utilities
 
     utils/discrete_time_events
     utils/interpolators
+    core/central_body
     core/celestial_bodies
-    core/celestial_parameters
