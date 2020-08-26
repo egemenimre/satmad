@@ -9,51 +9,73 @@ the planets or similar Central Bodies.
 
 """
 from astropy import units as u
+from numpy import inf
 
-from satmad.core.celestial_constants import GM_earth, GM_moon, GM_sun
+from satmad.core.central_body import CelestialBody, CelestialBodyEllipsoid
 
+# **************** GM values ****************
 
-class CelestialBody:
-    """
-    Container for the various Celestial Bodies.
+GM_earth = 3.986004418e14 * u.m ** 3 / u.s ** 2
+"""Geocentric gravitational constant
+(TCG-compatible value).
 
-    Parameters
-    ----------
-    name : str
-        Name of the body
-    info : str
-        Info on the constants etc.
-    mu : Quantity
-        `GM` value of the Celestial body
-    inert_coord : str
-        Default Inertial Coordinate to run the propagations (e.g. "gcrs" for Earth)
-    body_fixed_coord : str
-        Default Central Body Fixed Coordinate to run the propagations (e.g. "itrs" for
-        Earth)
-    """
+(See IERS Technical Note No. 36 (2010) Table 1.1 [TCF1]_)"""
 
-    @u.quantity_input(mu=u.km ** 3 / u.s ** 2)
-    def __init__(self, name, info, mu, **kwargs):
-        self.name = name
-        self.info = info
+GM_sun = 1.32712442099e20 * u.m ** 3 / u.s ** 2
+"""Heliocentric gravitational constant
+(TCB-compatible value, computed from the TDB-compatible value).
 
-        self.mu = mu
+(See IERS Technical Note No. 36 (2010) Table 1.1  [TCF1]_)"""
 
-        self.inert_coord = kwargs.get("inert_coord")
-        self.body_fixed_coord = kwargs.get("body_fixed_coord")
+GM_moon = 4.902802711497899e12 * u.m ** 3 / u.s ** 2
+r"""Lunar  gravitational constant.
 
-    def __str__(self) -> str:
-        out = f"Name: {self.name}\n"
+The value is derived from "Moon-Earth mass ratio" times "Geocentric
+gravitational constant" (:math:`0.0123000371 \times 398600.64418`).
 
-        out += f"{self.info}\n"
+(See IERS Technical Note No. 36 (2010) Table 1.1  [TCF1]_)."""
 
-        out += f"mu: {self.mu}\n"
+# **************** Ellipsoid Definitions ****************
 
-        out += f"Default inertial coord: {self.inert_coord}\n"
-        out += f"Default body fixed coord: {self.body_fixed_coord}\n"
+EARTH_ELLIPSOID_IERS2003 = CelestialBodyEllipsoid(
+    "Earth Ellipsoid IERS 2003",
+    6378136.6 * u.m,
+    298.25642 * u.dimensionless_unscaled,
+    mu=3.986004418 * u.m ** 3 / u.s ** 2,
+    j2=1.0826359e-3 * u.dimensionless_unscaled,
+)
+"""Earth Ellipsoid defined in IERS 2010 Numerical Standards.
 
-        return out
+(See IERS Technical Note No. 36 (2010) Table 1.1  [TCF1]_)."""
 
+EARTH_ELLIPSOID_GRS80 = CelestialBodyEllipsoid(
+    "Earth Ellipsoid GRS80",
+    6378137 * u.m,
+    298.257222101 * u.dimensionless_unscaled,
+    mu=3.986005e14 * u.m ** 3 / u.s ** 2,
+    j2=1.08263e-3 * u.dimensionless_unscaled,
+    om=7.292115e-5 * u.rad / u.s,
+)
+"""Earth Ellipsoid defined in Geodetic Reference System GRS80.
+
+(See IERS Technical Note No. 36 (2010) Table 1.2  [TCF1]_)."""
+
+EARTH_ELLIPSOID_WGS84 = CelestialBodyEllipsoid(
+    "Earth Ellipsoid WGS84", 6378137 * u.m, 298.257223563 * u.dimensionless_unscaled
+)
+"""Earth Ellipsoid defined in World Geodetic System WGS84.
+
+(See `WGS84 definition <https://earth-info.nga.mil/GandG/publications/tr8350.2/tr8350_2.html>`_)."""
+
+MOON_ELLIPSOID_IAUWG2015 = CelestialBodyEllipsoid(
+    "Moon Ellipsoid IAU WG 2015", 1737400 * u.m, inf * u.dimensionless_unscaled
+)
+"""Moon Ellipsoid - flattening is zero as the reference value means a perfect sphere.
+
+(See Report of the IAU Working Group on Cartographic Coordinates and Rotational Elements
+(2015) Table 5  [TCF2]_)."""
+
+# **************** Celestial Body Definitions ****************
 
 EARTH = CelestialBody(
     "Earth",
@@ -61,13 +83,19 @@ EARTH = CelestialBody(
     GM_earth.to(u.km ** 3 / u.s ** 2),
     inert_coord="gcrs",
     body_fixed_coord="itrs",
+    ellipsoid=EARTH_ELLIPSOID_GRS80,
 )
 """Default Earth Model."""
 
-SUN = CelestialBody("Sun", "Default Sun Model. ", GM_sun.to(u.km ** 3 / u.s ** 2))
+SUN = CelestialBody(
+    "Sun", "Default Sun Model. ", GM_sun.to(u.km ** 3 / u.s ** 2), inert_coord="hcrs"
+)
 """Default Sun Model."""
 
 MOON = CelestialBody(
-    "Moon", "Default Moon Model. ", GM_moon.si.to(u.km ** 3 / u.s ** 2)
+    "Moon",
+    "Default Moon Model. ",
+    GM_moon.to(u.km ** 3 / u.s ** 2),
+    ellipsoid=MOON_ELLIPSOID_IAUWG2015,
 )
 """Default Moon Model."""
