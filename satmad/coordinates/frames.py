@@ -12,7 +12,9 @@ from astropy import _erfa as erfa
 from astropy import units as u
 from astropy.coordinates import (
     GCRS,
+    ICRS,
     ITRS,
+    AffineTransform,
     BaseCoordinateFrame,
     CartesianDifferential,
     CartesianRepresentation,
@@ -21,6 +23,8 @@ from astropy.coordinates import (
     StaticMatrixTransform,
     TimeAttribute,
     frame_transform_graph,
+    get_body_barycentric,
+    get_body_barycentric_posvel,
 )
 from astropy.coordinates import representation as r
 from astropy.coordinates.builtin_frames.utils import (
@@ -29,6 +33,8 @@ from astropy.coordinates.builtin_frames.utils import (
     get_polar_motion,
 )
 from astropy.coordinates.matrix_utilities import rotation_matrix
+
+from satmad.core.celestial_bodies import MOON
 
 _w = np.array([0, 0, 7.292115e-5]) / u.s
 """Nominal mean angular velocity of the Earth [rad/s] as per GRS 80.
@@ -44,6 +50,98 @@ _FRAME_BIAS_MATRIX = np.array(
 """This is the fixed 3x3 frame bias matrix that does the conversion between the
  J2000 and GCRS frames.
 """
+
+
+class CelestialBodyCRS(BaseCoordinateFrame):
+    """
+    A coordinate frame in the generic Celestial Reference System (CRS). This CRS is
+    derived from ICRS by simply carrying the origin to the origin of the celestial body.
+    A specific example is GCRS, where the origin is at the centre of the Earth.
+
+    """
+
+    obstime = TimeAttribute(default=DEFAULT_OBSTIME)
+
+    default_representation = r.CartesianRepresentation
+    default_differential = r.CartesianDifferential
+
+    def __new__(cls, *args, **kwargs):
+        frame_transform_graph.transform(AffineTransform, ICRS, cls)(icrs_to_cb_crs)
+        frame_transform_graph.transform(AffineTransform, cls, ICRS)(cb_crs_to_icrs)
+        return super().__new__(cls)
+
+
+_NEED_ORIGIN_HINT = (
+    "The input {0} coordinates do not have length units. This "
+    "probably means you created coordinates with lat/lon but "
+    "no distance.  Heliocentric<->ICRS transforms cannot "
+    "function in this case because there is an origin shift."
+)
+
+
+def cb_crs_to_icrs(cb_crs_coord, icrs_frame):
+    """Conversion from Celestial Reference System of a Central Body to ICRS."""
+
+    if not u.m.is_equivalent(cb_crs_coord.cartesian.x.unit):
+        raise u.UnitsError(_NEED_ORIGIN_HINT.format(cb_crs_coord.__class__.__name__))
+
+    if cb_crs_coord.data.differentials:
+        # Calculate the barycentric position and velocity (of a solar system body).
+        # Uses default ephemeris
+        r_icrs, v_icrs = get_body_barycentric_posvel(
+            cb_crs_coord.body.name, cb_crs_coord.obstime, ephemeris="builtin"
+        )
+
+        v_icrs = CartesianDifferential.from_cartesian(v_icrs)
+
+        # Prepare final coord vector with velocity
+        icrs_coord = r_icrs.with_differentials(v_icrs)
+    else:
+        # Calculate the barycentric position ONLY (of a solar system body).
+        # Uses default ephemeris. This is faster than the one above with velocities for
+        # JPL ephemerides.
+        icrs_coord = get_body_barycentric(
+            cb_crs_coord.body.name, cb_crs_coord.obstime, ephemeris="builtin"
+        )
+
+    # Return transformation matrix (None) and translation vector (with velocities)
+    return None, icrs_coord
+
+
+def icrs_to_cb_crs(icrs_coord, cb_crs_frame):
+    """Conversion from ICRS to Celestial Reference System of a Central Body."""
+
+    if not u.m.is_equivalent(icrs_coord.cartesian.x.unit):
+        raise u.UnitsError(_NEED_ORIGIN_HINT.format(icrs_coord.__class__.__name__))
+
+    if icrs_coord.data.differentials:
+        # Calculate the barycentric position and velocity (of a solar system body).
+        # Uses default ephemeris
+        r_icrs, v_icrs = get_body_barycentric_posvel(
+            cb_crs_frame.body.name, cb_crs_frame.obstime, ephemeris="builtin"
+        )
+
+        v_icrs = CartesianDifferential.from_cartesian(v_icrs)
+
+        # Prepare final coord vector with velocity
+        cb_crs_coord = (-r_icrs).with_differentials(-v_icrs)
+    else:
+        # Calculate the barycentric position ONLY (of a solar system body).
+        # Uses default ephemeris. This is faster than the one above with velocities for
+        # JPL ephemerides.
+        cb_crs_coord = -get_body_barycentric(
+            cb_crs_frame.body.name, cb_crs_frame.obstime, ephemeris="builtin"
+        )
+
+    # Return transformation matrix (None) and translation vector (with velocities)
+    return None, cb_crs_coord
+
+
+class MoonCRS(CelestialBodyCRS):
+    """Moon Celestial Reference System. This is simply the ICRS shifted to the
+    centre of the Moon."""
+
+    body = MOON
 
 
 # ******  Mean Pole and Equinox at J2000.0 Reference System (J2000) ******
