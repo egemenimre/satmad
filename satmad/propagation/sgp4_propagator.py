@@ -11,12 +11,12 @@ import numpy as np
 from astropy import units as u
 from astropy.coordinates import (
     GCRS,
+    TEME,
     CartesianDifferential,
     CartesianRepresentation,
     SkyCoord,
 )
 
-from satmad.coordinates.frames import TEME
 from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH
 from satmad.propagation.base_propagator import AbstractPropagator
