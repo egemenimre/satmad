@@ -150,9 +150,7 @@ class TLE:
         self._name = name
 
     @classmethod
-    def from_tle(
-        cls, line1, line2, name="No Name",
-    ):
+    def from_tle(cls, line1, line2, name="No Name"):
         """
         Initialises the TLE from two strings.
 
