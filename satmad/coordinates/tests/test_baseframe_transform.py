@@ -11,6 +11,7 @@ from astropy import units as u
 from astropy.coordinates import (
     CIRS,
     GCRS,
+    HCRS,
     ICRS,
     ITRS,
     CartesianDifferential,
@@ -20,7 +21,7 @@ from astropy.time import Time
 from pytest import approx
 
 from satmad.coordinates.frames import J2000, TEME, TIRS, CelestialBodyCRS
-from satmad.core.celestial_bodies import EARTH
+from satmad.core.celestial_bodies import EARTH, SUN
 
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
 
@@ -301,7 +302,11 @@ class _EarthCRS(CelestialBodyCRS):
     body = EARTH
 
 
-def test_cb_crs_to_icrs():
+class _SunCRS(CelestialBodyCRS):
+    body = SUN
+
+
+def test_cb_crs_to_icrs_earth():
     """Check the basic quasi-round-trip accuracy for the generic Central Body Celestial
     Reference System, using Earth (equal to GCRS). Converts GCRS to ICRS, then ICRS to
     Earth CRS. However there is a difference, possibly due to the difference between
@@ -319,6 +324,37 @@ def test_cb_crs_to_icrs():
 
     # print(f"r {rv_gcrs.name} diff      :  {r_diff}")
     # print(f"v {rv_gcrs.name} diff      :  {v_diff}")
+
+    assert approx(r_diff.to_value(u.mm), abs=allowable_pos_diff.to_value(u.mm)) == 0.0
+    assert (
+        approx(v_diff.to_value(u.mm / u.s), abs=allowable_vel_diff.to_value(u.mm / u.s))
+        == 0.0
+    )
+
+
+def test_cb_crs_to_icrs_sun():
+    """Check the basic quasi-round-trip accuracy for the generic Central Body Celestial
+    Reference System, using Sun (equal to HCRS). Converts HCRS to ICRS, then ICRS to
+    Sun CRS."""
+    allowable_pos_diff = 5e-5 * u.mm
+    allowable_vel_diff = 0.0001 * u.mm / u.s
+
+    rv_hcrs_true = HCRS(
+        r_gcrs_true.with_differentials(v_gcrs_true),
+        obstime=time,
+        representation_type="cartesian",
+        differential_type="cartesian",
+    )
+
+    rv_icrs = rv_hcrs_true.transform_to(ICRS)
+
+    rv_hcrs = rv_icrs.transform_to(_SunCRS(obstime=rv_hcrs_true.obstime))
+
+    r_diff = pos_err(rv_hcrs, rv_gcrs_true)
+    v_diff = vel_err(rv_hcrs, rv_gcrs_true)
+
+    # print(f"r {rv_hcrs.name} diff      :  {r_diff}")
+    # print(f"v {rv_hcrs.name} diff      :  {v_diff}")
 
     assert approx(r_diff.to_value(u.mm), abs=allowable_pos_diff.to_value(u.mm)) == 0.0
     assert (
