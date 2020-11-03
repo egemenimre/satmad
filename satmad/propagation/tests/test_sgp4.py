@@ -90,7 +90,7 @@ def test_propagation(init_tle_vgd):
     # print(v_diff.to(u.mm / u.s))
 
     assert r_diff.to(u.mm) < 1700 * u.mm
-    assert v_diff.to(u.mm / u.s) < 0.71 * u.mm / u.s
+    assert v_diff.to(u.mm / u.s) < 0.88 * u.mm / u.s
 
 
 def rv_diff(rv, rv_true):
@@ -106,7 +106,7 @@ def rv_diff(rv, rv_true):
 
 def test_decay(init_tle_decay):
     """Tests satellite altitude below threshold - satellite has decayed.
-        - should raise `SGP4SatDecayedError`."""
+    - should raise `SGP4SatDecayedError`."""
     with pytest.raises(SGP4SatDecayedError):
         # init TLE
         tle = init_tle_decay
@@ -118,7 +118,7 @@ def test_decay(init_tle_decay):
 
 def test_crashed(init_tle_decay):
     """Tests satellite altitude below earth radius - satellite has crashed.
-        - should raise `SGP4GeneralError`."""
+    - should raise `SGP4GeneralError`."""
     with pytest.raises(SGP4GeneralError):
         # init TLE
         tle = init_tle_decay

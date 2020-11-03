@@ -14,13 +14,14 @@ from astropy.coordinates import (
     HCRS,
     ICRS,
     ITRS,
+    TEME,
     CartesianDifferential,
     CartesianRepresentation,
 )
 from astropy.time import Time
 from pytest import approx
 
-from satmad.coordinates.frames import J2000, TEME, TIRS, CelestialBodyCRS
+from satmad.coordinates.frames import J2000, TIRS, CelestialBodyCRS
 from satmad.core.celestial_bodies import EARTH, SUN
 
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
@@ -170,7 +171,7 @@ def test_itrs_roundtrip():
     transforming back yields the same output."""
     # test_frame = "ITRS"
     allowable_pos_diff = 1.5e-6 * u.mm
-    allowable_vel_diff = 2.2e-9 * u.mm / u.s
+    allowable_vel_diff = 2.8e-6 * u.mm / u.s
 
     rv_teme = rv_itrs_true.transform_to(TEME(obstime=time))
     rv_itrs_from_teme = rv_teme.transform_to(ITRS(obstime=time))
@@ -178,8 +179,8 @@ def test_itrs_roundtrip():
     r_diff = pos_err(rv_itrs_from_teme, rv_itrs_true)
     v_diff = vel_err(rv_itrs_from_teme, rv_itrs_true)
 
-    # print(f"r {test_frame} diff      :  {r_diff}")
-    # print(f"v {test_frame} diff      :  {v_diff}")
+    # print(f"r {rv_itrs_true.name} diff      :  {r_diff}")
+    # print(f"v {rv_itrs_true.name} diff      :  {v_diff}")
 
     assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
     assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
@@ -230,15 +231,15 @@ def test_teme_to_tirs():
     """Check the coordinate transform accuracy."""
     # test_frame = "TIRS"
     allowable_pos_diff = 300 * u.mm
-    allowable_vel_diff = 0.18 * u.mm / u.s
+    allowable_vel_diff = 0.20 * u.mm / u.s
 
     rv_tirs = rv_teme_true.transform_to(TIRS(obstime=time))
 
     r_diff = pos_err(rv_tirs, rv_tirs_true)
     v_diff = vel_err(rv_tirs, rv_tirs_true)
 
-    # print(f"r {test_frame} diff      :  {r_diff}")
-    # print(f"v {test_frame} diff      :  {v_diff}")
+    # print(f"r {rv_tirs.name} diff      :  {r_diff}")
+    # print(f"v {rv_tirs.name} diff      :  {v_diff}")
 
     assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
     assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
@@ -248,15 +249,15 @@ def test_itrs_to_teme():
     """Check the coordinate transform accuracy."""
     # test_frame = "TEME"
     allowable_pos_diff = 300 * u.mm
-    allowable_vel_diff = 0.21 * u.mm / u.s
+    allowable_vel_diff = 0.23 * u.mm / u.s
 
     rv_teme = rv_itrs_true.transform_to(TEME(obstime=time))
 
     r_diff = pos_err(rv_teme, rv_teme_true)
     v_diff = vel_err(rv_teme, rv_teme_true)
 
-    # print(f"r {test_frame} diff      :  {r_diff}")
-    # print(f"v {test_frame} diff      :  {v_diff}")
+    # print(f"r {rv_teme.name} diff      :  {r_diff}")
+    # print(f"v {rv_teme.name} diff      :  {v_diff}")
 
     assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
     assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
