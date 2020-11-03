@@ -107,7 +107,7 @@ The parameters have their quantities attached, so it is possible to easily conve
     >>> tle.inclination.to(u.deg)
     <Quantity 51.6454 deg>
 
-Please see the example `Analysis of a Repeating Sun-Synchronous Orbit <examples/tutorials/sso_analysis.ipynb>`_
+Please see the example `Analysis of a Repeating Sun-Synchronous Orbit <../examples/tutorials/sso_analysis.ipynb>`_
 for more information. See [OM2]_ for more information on Sun-Synchronous Orbits.
 
 
