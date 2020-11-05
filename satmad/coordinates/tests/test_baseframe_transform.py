@@ -335,24 +335,24 @@ def test_cb_crs_to_icrs_earth():
 
 def test_cb_crs_to_icrs_sun():
     """Check the basic quasi-round-trip accuracy for the generic Central Body Celestial
-    Reference System, using Sun (equal to HCRS). Converts HCRS to ICRS, then ICRS to
-    Sun CRS."""
+    Reference System, using Sun (equal to HCRS). Converts Sun CRS to ICRS, then ICRS to
+    HCRS."""
     allowable_pos_diff = 5e-5 * u.mm
     allowable_vel_diff = 0.0001 * u.mm / u.s
 
-    rv_hcrs_true = HCRS(
+    rv_suncrs_true = _SunCRS(
         r_gcrs_true.with_differentials(v_gcrs_true),
         obstime=time,
         representation_type="cartesian",
         differential_type="cartesian",
     )
 
-    rv_icrs = rv_hcrs_true.transform_to(ICRS)
+    rv_icrs = rv_suncrs_true.transform_to(ICRS)
 
-    rv_hcrs = rv_icrs.transform_to(_SunCRS(obstime=rv_hcrs_true.obstime))
+    rv_hcrs = rv_icrs.transform_to(HCRS(obstime=rv_suncrs_true.obstime))
 
-    r_diff = pos_err(rv_hcrs, rv_gcrs_true)
-    v_diff = vel_err(rv_hcrs, rv_gcrs_true)
+    r_diff = pos_err(rv_hcrs, rv_suncrs_true)
+    v_diff = vel_err(rv_hcrs, rv_suncrs_true)
 
     # print(f"r {rv_hcrs.name} diff      :  {r_diff}")
     # print(f"v {rv_hcrs.name} diff      :  {v_diff}")
