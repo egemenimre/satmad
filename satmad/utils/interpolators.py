@@ -106,7 +106,7 @@ class CartInterpolator3D:
         ValueError
             If the requested `t` value is out of bounds for the interpolator
             (if `extrapolate_action` is set to `raise`)
-         """
+        """
 
         # t limit check is carried out within the interpolators themselves
 
