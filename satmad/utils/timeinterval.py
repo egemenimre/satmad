@@ -647,23 +647,23 @@ class TimeIntervalList:
 
     def intersect(self, interval):
         """
-         Intersection operator for a time interval and this time interval list.
+        Intersection operator for a time interval and this time interval list.
 
-         Returns a new interval that is the Intersection of the interval and
-         the time interval list, or None if there is no intersection.
+        Returns a new interval that is the Intersection of the interval and
+        the time interval list, or None if there is no intersection.
 
-         Parameters
-         ----------
-         interval : TimeInterval
-             Time interval to be checked
+        Parameters
+        ----------
+        interval : TimeInterval
+            Time interval to be checked
 
-         Returns
-         -------
-         TimeInterval
-            A new interval that is the Intersection of the interval and
-            the time interval list, or None if there is no intersection.
+        Returns
+        -------
+        TimeInterval
+           A new interval that is the Intersection of the interval and
+           the time interval list, or None if there is no intersection.
 
-         """
+        """
         if len(self.intervals) == 0:
             # No interval present in the list, hence no intersection possible
             return None
@@ -685,24 +685,24 @@ class TimeIntervalList:
 
     def intersect_list(self, interval_list):
         """
-         Intersection operator for a time interval list and this time interval list.
+        Intersection operator for a time interval list and this time interval list.
 
-         Returns a new interval list that is the Intersection of `interval_list` and
-         this time interval list, or None if there is no intersection even in the
-         validity intervals.
+        Returns a new interval list that is the Intersection of `interval_list` and
+        this time interval list, or None if there is no intersection even in the
+        validity intervals.
 
-         Parameters
-         ----------
-         interval_list : TimeIntervalList
-             Time interval list to be checked
+        Parameters
+        ----------
+        interval_list : TimeIntervalList
+            Time interval list to be checked
 
-         Returns
-         -------
-         TimeIntervalList
-            A new interval list that is the Intersection of `interval_list` and
-            this time interval list, or None if there is no intersection.
+        Returns
+        -------
+        TimeIntervalList
+           A new interval list that is the Intersection of `interval_list` and
+           this time interval list, or None if there is no intersection.
 
-         """
+        """
         if not self.valid_interval.is_intersecting(interval_list.valid_interval):
             # Validity intervals do not intersect, hence no intersection possible
             return None
@@ -724,23 +724,23 @@ class TimeIntervalList:
 
     def union(self, interval):
         """
-         Union operator for a time interval and this time interval list.
+        Union operator for a time interval and this time interval list.
 
-         Returns a new interval that is the Union of the interval and
-         the time interval list, or None if there is no intersection.
+        Returns a new interval that is the Union of the interval and
+        the time interval list, or None if there is no intersection.
 
-         Parameters
-         ----------
-         interval : TimeInterval
-             Time interval to be checked
+        Parameters
+        ----------
+        interval : TimeInterval
+            Time interval to be checked
 
-         Returns
-         -------
-         TimeInterval
-            A new interval that is the Union of the interval and
-            the time interval list, or None if there is no intersection.
+        Returns
+        -------
+        TimeInterval
+           A new interval that is the Union of the interval and
+           the time interval list, or None if there is no intersection.
 
-         """
+        """
         if len(self.intervals) == 0:
             # No interval present in the list, hence no intersection possible
             return None
@@ -762,24 +762,24 @@ class TimeIntervalList:
 
     def union_list(self, interval_list):
         """
-         Union operator for a time interval list and this time interval list.
+        Union operator for a time interval list and this time interval list.
 
-         Returns a new interval list that is the Union of `interval_list` and
-         this time interval list, or None if there is no intersection even in the
-         validity intervals.
+        Returns a new interval list that is the Union of `interval_list` and
+        this time interval list, or None if there is no intersection even in the
+        validity intervals.
 
-         Parameters
-         ----------
-         interval_list : TimeIntervalList
-             Time interval list to be checked
+        Parameters
+        ----------
+        interval_list : TimeIntervalList
+            Time interval list to be checked
 
-         Returns
-         -------
-         TimeIntervalList
-            A new interval list that is the Union of `interval_list` and
-            this time interval list, or None if there is no intersection.
+        Returns
+        -------
+        TimeIntervalList
+           A new interval list that is the Union of `interval_list` and
+           this time interval list, or None if there is no intersection.
 
-         """
+        """
         if not self.valid_interval.is_intersecting(interval_list.valid_interval):
             # Validity intervals do not intersect, hence no intersection possible
             return None
