@@ -104,9 +104,10 @@ class TLE:
         # init internal satrec object
         self._satrec: Satrec = Satrec()
 
-        # recreate the epoch composite
+        # recreate the epoch for use with Satrec
         self.__create_epoch_composite(epoch)
-        epoch_yydd = self._satrec.epochyr * 1000 + self._satrec.epochdays
+        # epoch_yydd = self._satrec.epochyr * 1000 + self._satrec.epochdays
+        epoch_satrec = epoch.jd - 2433281.5
 
         # check inclination range
         inclination_val = _force_angles_to_rad(inclination)
@@ -122,7 +123,7 @@ class TLE:
             TLE._grav_model,
             TLE._ops_mode,
             sat_num,
-            epoch_yydd,
+            epoch_satrec,
             bstar,
             n_dot,
             n_dotdot,
