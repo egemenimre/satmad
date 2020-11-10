@@ -154,7 +154,7 @@ def test_trajectory_export():
 
     pvt = prop_output["traj"].coord_list[10]
 
-    print(ts)
+    # print(ts)
     # print(ts["time", "v_X"])
 
     assert (ts.time[10] - pvt.obstime) < 17 * u.us
