@@ -20,6 +20,12 @@ The major functionalities under development are:
 Latest Version
 -----------------
 
+Version 0.0.6 (10 Nov 2020)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Deleted the TEME Coordinate System in favour of the native Astropy version.
+- Added user defined inertial coordinate systems (:class:`.CelestialBodyCRS`)
+
 Version 0.0.5 (27 Jul 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
