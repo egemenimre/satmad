@@ -43,7 +43,7 @@ class NumericalPropagator(AbstractPropagator):
     Numerical orbit propagator based on Scipy ODE Solvers.
 
     Analysis shows that `DOP853` is currently the best (and default) choice for
-    accuracy and runtime perfromance.
+    accuracy and runtime performance.
 
     Parameters
     ----------
@@ -85,6 +85,9 @@ class NumericalPropagator(AbstractPropagator):
         Generates the trajectory (time and coordinate information) for the given
         interval with the internal output stepsize.
 
+        If the initial coordinate is in a different frame than the propagation frame,
+        it is automatically converted to the proper frame for propagation.
+
         Parameters
         ----------
         init_coords : SkyCoord
@@ -102,10 +105,19 @@ class NumericalPropagator(AbstractPropagator):
         # Propagate the orbit
         if init_coords.isscalar:
             # Single SkyCoord element available
-            coords_list = self._run_propagation(init_coords, time_list)
+            init_coords_converted = init_coords
         else:
-            # Multiple SkyCoord element available, use first
-            coords_list = self._run_propagation(init_coords[0], time_list)
+            # Multiple SkyCoord elements available, use first
+            init_coords_converted = init_coords[0]
+
+        # Check for the initial coordinate system, convert if necessary
+        if self.central_body.inert_coord != init_coords_converted.frame.name:
+            init_coords_converted = init_coords_converted.transform_to(
+                self.central_body.inert_coord
+            )
+
+        # Run propagation
+        coords_list = self._run_propagation(init_coords_converted, time_list)
 
         # generate the trajectory
         return Trajectory(coords_list)

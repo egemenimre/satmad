@@ -12,6 +12,7 @@ import pytest
 from astropy import units as u
 from astropy.coordinates import (
     GCRS,
+    ITRS,
     CartesianDifferential,
     CartesianRepresentation,
     SkyCoord,
@@ -52,7 +53,8 @@ def test_num_propagator(rv_init_leo_gcrs):
     """Tests the basic numerical propagation accuracy in terms of energy."""
 
     # Set up propagation config
-    rv_init = rv_init_leo_gcrs
+    # Start with ITRS to test coord transform on propagator entry
+    rv_init = rv_init_leo_gcrs.transform_to(ITRS)
     stepsize = 60 * u.s
     solver_type = ODESolverType.DOP853
     rtol = 1e-13
