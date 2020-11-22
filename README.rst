@@ -76,7 +76,7 @@ the terms of the GNU GPL v3+ license.
     :alt: Powered by Astropy Badge
 
 .. |CircleCI Status| image::  https://img.shields.io/circleci/build/github/egemenimre/satmad/master?logo=circleci&label=CircleCI
-    :target: https://circleci.com/gh/satmad/satmad
+    :target: https://circleci.com/gh/egemenimre/satmad
     :alt: SatMAD CircleCI Status
 
 .. |Codecov Status| image::  https://codecov.io/gh/egemenimre/satmad/branch/master/graph/badge.svg
