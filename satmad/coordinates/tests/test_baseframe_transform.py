@@ -17,6 +17,7 @@ from astropy.coordinates import (
     TEME,
     CartesianDifferential,
     CartesianRepresentation,
+    SkyCoord,
 )
 from astropy.time import Time
 from pytest import approx
@@ -316,7 +317,7 @@ def test_cb_crs_to_icrs_earth():
     allowable_pos_diff = 800 * u.m
     allowable_vel_diff = 0.510 * u.m / u.s
 
-    rv_icrs = rv_gcrs_true.transform_to(ICRS)
+    rv_icrs = SkyCoord(rv_gcrs_true).transform_to(ICRS)
 
     rv_gcrs = rv_icrs.transform_to(_EarthCRS(obstime=rv_gcrs_true.obstime))
 
@@ -337,19 +338,20 @@ def test_cb_crs_to_icrs_sun():
     """Check the basic quasi-round-trip accuracy for the generic Central Body Celestial
     Reference System, using Sun (equal to HCRS). Converts Sun CRS to ICRS, then ICRS to
     HCRS."""
-    allowable_pos_diff = 5e-5 * u.mm
+    allowable_pos_diff = 5e-4 * u.mm
     allowable_vel_diff = 0.0001 * u.mm / u.s
 
-    rv_suncrs_true = _SunCRS(
+    rv_suncrs_true = SkyCoord(
         r_gcrs_true.with_differentials(v_gcrs_true),
         obstime=time,
+        frame=_SunCRS,
         representation_type="cartesian",
         differential_type="cartesian",
     )
 
-    rv_icrs = rv_suncrs_true.transform_to(ICRS)
+    rv_icrs = (rv_suncrs_true).transform_to(ICRS)
 
-    rv_hcrs = rv_icrs.transform_to(HCRS(obstime=rv_suncrs_true.obstime))
+    rv_hcrs = (rv_icrs).transform_to(HCRS(obstime=rv_suncrs_true.obstime))
 
     r_diff = pos_err(rv_hcrs, rv_suncrs_true)
     v_diff = vel_err(rv_hcrs, rv_suncrs_true)
