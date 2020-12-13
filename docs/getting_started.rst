@@ -24,6 +24,7 @@ Dependencies
 - NumPy and SciPy are used for the underlying mathematical algorithms
 - Matplotlib is used for plots
 - Astropy handles all time and reference frame computations
+- PyERFA handles lower level coordinate and time transformations
 - Portion handles the time interval mechanics
 - python-sgp4 provides the TLE manipulation and SGP4 propagation engine
 - Pytest provides the testing framework

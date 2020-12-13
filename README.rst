@@ -54,6 +54,8 @@ Requirements
 -   NumPy and SciPy are used for the underlying mathematical algorithms
 -   Matplotlib is used for plots
 -   Astropy handles all time and reference frame computations
+-   `PyERFA <https://github.com/liberfa/pyerfa>`_ handles lower level coordinate and time
+    transformations
 -   `Portion <https://github.com/AlexandreDecan/portion>`_ handles the
     time interval mechanics
 -   `Sgp4 <https://pypi.org/project/sgp4>`_ provides the TLE manipulation
