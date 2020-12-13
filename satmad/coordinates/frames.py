@@ -7,8 +7,8 @@
 Coordinate systems and frames defined by `satmad`.
 
 """
+import erfa
 import numpy as np
-from astropy import _erfa as erfa
 from astropy import units as u
 from astropy.coordinates import (
     GCRS,
