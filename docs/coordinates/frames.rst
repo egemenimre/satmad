@@ -29,19 +29,12 @@ by simply subclassing :class:`.CelestialBodyCRS`.
 While Sun and Moon are pre-defined, it is possible to define planets like Jupiter or moons like Io or Ceres
 by simply defining them as an instance of the :class:`.CelestialBody` class.
 
-Earth Based Additional Frames (J2000 and TIRS)
+Earth Based Additional Frames (J2000)
 ----------------------------------------------
 
 The built-in frames offered by `Astropy <https://docs.astropy.org/en/latest/coordinates/index.html>`_
 do not include some frames that are used in satellite applications. To bridge this gap, this package
-offers Terrestrial Intermediate Reference System (:class:`.TIRS`) and
-Mean Pole and Equinox at J2000.0 Reference System (:class:`.J2000`).
-
-The definitions and conversions for :class:`.TIRS` are from IERS Conventions 2010,
-Chapter 5 [TCF1]_. Put simply, when the TIRS coordinate is multiplied by the Polar Motion Matrix, the final
-coordinates are in ITRS:
-
-.. math:: \vec{r}_{ITRS} = W \times \vec{r}_{TIRS}
+offers Mean Pole and Equinox at J2000.0 Reference System (:class:`.J2000`).
 
 :class:`.J2000` coordinate frame is similar to GCRS but rotated by a constant frame bias
 [TCF1]_:
@@ -52,8 +45,7 @@ This rotation is applicable only to the equinox based approach, and is only an a
 The difference between GCRS and J2000 is less than 1m for the Low Earth Orbit, therefore these two
 can be used interchangeably with a small error.
 
-The :class:`.J2000` and :class:`.TIRS` classes
-are similar to (and compatible with) the `Astropy Built-in Frames
+The :class:`.J2000` class is similar to (and compatible with) the `Astropy Built-in Frames
 <https://docs.astropy.org/en/latest/coordinates/index.html#built-in-frame-classes>`_.
 
 .. code-block:: python
