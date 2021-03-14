@@ -349,9 +349,9 @@ def test_cb_crs_to_icrs_sun():
         differential_type="cartesian",
     )
 
-    rv_icrs = (rv_suncrs_true).transform_to(ICRS)
+    rv_icrs = rv_suncrs_true.transform_to(ICRS)
 
-    rv_hcrs = (rv_icrs).transform_to(HCRS(obstime=rv_suncrs_true.obstime))
+    rv_hcrs = rv_icrs.transform_to(HCRS(obstime=rv_suncrs_true.obstime))
 
     r_diff = pos_err(rv_hcrs, rv_suncrs_true)
     v_diff = vel_err(rv_hcrs, rv_suncrs_true)
