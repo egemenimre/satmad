@@ -13,6 +13,7 @@ The major functionalities under development are:
 
 - Add resample functionality to :class:`.TimeIntervalList`
 - Pass and Access finding with a simple elevation mask (e.g. Groundstation communication times)
+- :class:`.GroundLocation` to model the Ground Locations (e.g. groundstations) on any planet.
 
 
 .. _changelog-latest:
