@@ -257,6 +257,48 @@ class GroundLocation(u.Quantity):
         """Convert to a tuple with X, Y, and Z as quantities"""
         return self.x, self.y, self.z
 
+    def to_body_fixed_coords(self, celestial_body, obstime=None):
+        """
+        Generates a Central Body Fixed object (e.g. `~astropy.coordinates.ITRS` object)
+        with the location of this object at the requested ``obstime``.
+
+        The `celestial_body` object should have its `body_fixed_coord` defined, as the
+        resulting object will be of this type. For example, if the celestial body is
+        Earth, the resulting object is of the type ITRS.
+
+        Parameters
+        ----------
+        celestial_body : CelestialBody
+            The Celestial Body where the object is defined.
+        obstime : `~astropy.time.Time` or None
+            The ``obstime`` to apply to the new object, or
+            if None, the default ``obstime`` will be used.
+
+        Returns
+        -------
+        body_fixed
+            The new object in the body fixed frame
+
+        Raises
+        ------
+
+        """
+        # Broadcast for a single position at multiple times, but don't attempt
+        # to be more general here.
+        if obstime and self.size == 1 and obstime.shape:
+            self = np.broadcast_to(self, obstime.shape, subok=True)
+
+        try:
+            return celestial_body.body_fixed_coord_frame(
+                x=self.x, y=self.y, z=self.z, obstime=obstime
+            )
+        except TypeError:
+            raise TypeError(
+                "Failed converting Geodetic coordinates to body fixed coordinates. "
+                "Celestial Body does not have a body fixed coordinate system defined, "
+                "e.g. ITRS for Earth."
+            )
+
     @property
     def x(self):
         """The X component of the geocentric coordinates."""

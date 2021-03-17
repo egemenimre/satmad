@@ -7,13 +7,66 @@
 Ground Location class tests.
 
 """
+import numpy as np
 import pytest
 from astropy import units as u
-from astropy.coordinates import EarthLocation, Latitude, Longitude
+from astropy.coordinates import (
+    ITRS,
+    CartesianRepresentation,
+    EarthLocation,
+    Latitude,
+    Longitude,
+)
+from astropy.time import Time, TimeDelta
 from pytest import approx
 
-from satmad.core.celestial_bodies import EARTH_ELLIPSOID_WGS84
+from satmad.core.celestial_bodies import EARTH, EARTH_ELLIPSOID_WGS84, MOON
 from satmad.core.ground_location import GeodeticLocation, GroundLocation
+
+
+def test_get_body_fixed():
+    """Tests the body fixed coords output for multiple times."""
+    time = Time("2020-04-10T00:00:00", scale="utc") + np.arange(1, 4) * TimeDelta(
+        1, format="jd"
+    )
+
+    gnd_loc = GroundLocation(
+        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH.ellipsoid
+    )
+
+    gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(EARTH, obstime=time)
+
+    r_itrs_true = ITRS(
+        CartesianRepresentation(
+            np.asarray(
+                [
+                    [6068714.27712043, 1070078.065267, 1640138.96300037],
+                    [6068714.27712043, 1070078.065267, 1640138.96300037],
+                    [6068714.27712043, 1070078.065267, 1640138.96300037],
+                ]
+            ).transpose(),
+            unit=u.m,
+        ),
+        obstime=time,
+        representation_type="cartesian",
+        differential_type="cartesian",
+    )
+
+    # print(gnd_loc_body_fixed)
+
+    assert str(gnd_loc_body_fixed) == str(r_itrs_true)
+
+
+def test_get_body_fixed_no_coords():
+    """Tests the body fixed coords output but the celestial body has no
+    body fixed coordinates defined."""
+    with pytest.raises(TypeError):
+
+        gnd_loc = GroundLocation(
+            10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=MOON.ellipsoid
+        )
+
+        gnd_loc.to_body_fixed_coords(MOON)
 
 
 def test_copy():
