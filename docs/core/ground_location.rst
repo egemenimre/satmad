@@ -18,6 +18,12 @@ ensures the latitude and longitude angles wrap correctly.
 .. code-block:: python
     :linenos:
 
+    from astropy import units as u
+    from astropy.coordinates import Latitude, Longitude
+
+    from satmad.core.celestial_bodies import MOON_ELLIPSOID_IAUWG2015
+    from satmad.core.ground_location import GeodeticLocation, GroundLocation
+
     # Ground location on the Moon, defined with lat/lon
     gnd_loc_moon = GroundLocation(10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=MOON_ELLIPSOID_IAUWG2015)
 
@@ -33,7 +39,36 @@ Once initialised, the :class:`.GroundLocation` object can yield its geodetic pos
 
 Similarly, it can yield its geocentric cartesian position with the `geocentric` parameter or
 `to_geocentric()` method. This geocentric position is equal to the position in the Central Body Fixed frame,
-for example, ITRS for the Earth. The result is a three-element tuple of cartesian position.
+for example, ITRS for the Earth. The result is a three-element tuple of cartesian position. Perhaps more useful version
+of this is the `to_body_fixed_coords()` method, where the Geodetic Position is converted to a geocentric coordinates
+object as used by astropy (such as `ITRS` class for Earth). For this, one or more time values are to be provided,
+as well as a Celestial Body, whose internal `body_fixed_coord` is used to generate the resulting object. If there is no
+body fixed coordinates are defined for the Celestial Body, then a `TypeError` will be raised.
+
+
+.. code-block:: python
+    :linenos:
+
+    import numpy as np
+
+    from astropy import units as u
+    from astropy.time import Time, TimeDelta
+
+    from satmad.core.celestial_bodies import EARTH
+    from satmad.core.ground_location import GroundLocation
+
+    # Generate three time values, one day apart
+    time = Time("2020-04-10T00:00:00", scale="utc") + np.arange(1, 4) * TimeDelta(1, format="jd")
+
+    # Generate the Ground Location with the default Earth ellipsoid
+    gnd_loc = GroundLocation(10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH.ellipsoid)
+
+    # Generate the ground locations in body fixed frame (in this instance ITRS)
+    gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(EARTH, obstime=time)
+
+    print(gnd_loc_body_fixed)
+
+
 
 Reference/API
 -------------
