@@ -9,6 +9,7 @@ an object can rotate.
 
 """
 from astropy import units as u
+from astropy.coordinates import frame_transform_graph
 
 
 class CelestialBodyEllipsoid:
@@ -96,3 +97,15 @@ class CelestialBody:
         out += f"Default body fixed coord: {self.body_fixed_coord}\n"
 
         return out
+
+    @property
+    def inert_coord_frame(self):
+        """Gets the underlying inertial coordinate frame class (e.g. GCRS for Earth)
+        or None if no such class exists."""
+        return frame_transform_graph.lookup_name(self.inert_coord)
+
+    @property
+    def body_fixed_coord_frame(self):
+        """Gets the underlying body fixed coordinate frame class (e.g. ITRS for Earth)
+        or None if no such class exists."""
+        return frame_transform_graph.lookup_name(self.body_fixed_coord)
