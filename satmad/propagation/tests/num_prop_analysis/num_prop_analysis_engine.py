@@ -61,7 +61,14 @@ def init_rv(tle, epoch):
 
 
 def propagation_engine(
-    rv_init, stepsize, solver_type, init_time_offset, duration, rtol, atol
+    rv_init,
+    stepsize,
+    solver_type,
+    init_time_offset,
+    duration,
+    rtol,
+    atol,
+    central_body=EARTH,
 ):
     """Initialises and runs the propagation engine to yield the resulting trajectory."""
 
@@ -72,7 +79,7 @@ def propagation_engine(
         rtol=rtol,
         atol=atol,
         name="",
-        central_body=EARTH,
+        central_body=central_body,
     )
 
     prop_start = rv_init.obstime + init_time_offset
