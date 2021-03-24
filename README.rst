@@ -14,7 +14,7 @@ Current functionality is:
 
 -   Initialising an orbit with a TLE
 -   Propagating the orbit analytically via the SGP4 propagator
--   Propagating the orbit numerically via the Scipy ODE Solvers (two-body force model)
+-   Propagating an orbit numerically via the Scipy ODE Solvers (two-body force model) around the Earth or another planet
 -   Good infrastructure for time interval management and event finding
 -   Harnessing the extensive `Astropy <http://www.astropy.org>`_ functionalities
     (e.g. finding azimuth and elevation over a ground location and coordinate frame

@@ -13,13 +13,20 @@ The major functionalities under development are:
 
 - Add resample functionality to :class:`.TimeIntervalList`
 - Pass and Access finding with a simple elevation mask (e.g. Groundstation communication times)
-- :class:`.GroundLocation` to model the Ground Locations (e.g. groundstations) on any planet.
+
 
 
 .. _changelog-latest:
 
 Latest Version
 -----------------
+
+Version 0.0.7 (24 Mar 2021)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Added :class:`.GroundLocation` to model the Ground Locations (e.g. groundstations) on any planet.
+- Initialised non-Earth-bound propagation
+- Modified the dependencies to point to the new `pyERFA` library
 
 Version 0.0.6 (10 Nov 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
