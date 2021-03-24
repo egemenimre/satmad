@@ -147,7 +147,7 @@ class NumericalPropagator(AbstractPropagator):
         ]
 
         solver = solve_ivp(
-            _ode_diff_eqns,
+            self._ode_diff_eqns,
             (t_list_epoch[0], t_list_epoch[-1]),
             rv_init,
             method=self._solver_type.value,
@@ -181,43 +181,42 @@ class NumericalPropagator(AbstractPropagator):
         )
         return coords_list
 
+    def _ode_diff_eqns(self, t, rv):
+        """
+        Defines the Ordinary Differential Equations that govern the motion of the
+        satellite. In practice, this method computes the instantaneous accelerations
+        acting on the satellite.
 
-__km3s2 = u.km ** 3 / u.s ** 2
+        Note that the input `rv` store the position and velocity vectors in the
+        inertial frame of the central body. For the Earth this is GCRS.
+
+        This method is used by the scipy `solve_ivp()` solver to evaluate the differential
+        equations at a given time.
+
+        Parameters
+        ----------
+        t : Time
+            Time where the accelerations are defined
+        rv : ndarray
+            array of 6 values, the first three is the position vector (km) and
+            the second three is the velocity vector (km/s)
+
+        Returns
+        -------
+        ndarray
+            The array with velocity and acceleration information.
+        """
+
+        r = rv[:3]
+        v = rv[3:]
+
+        mu = self.central_body.mu
+
+        # two-body acceleration
+        a = two_body_accel(r, mu.to_value(_km3s2))
+
+        # concat the two lists using PEP-448 unpack
+        return [*v, *a]
 
 
-def _ode_diff_eqns(t, rv, mu=EARTH.mu):
-    """
-    Defines the Ordinary Differential Equations that govern the motion of the
-    satellite. In practice, this method computes the instantaneous accelerations
-    acting on the satellite.
-
-    Note that the input `rv` store the position and velocity vectors in the
-    inertial frame of the central body. For the Earth this is GCRS.
-
-    This method is used by the scipy `solve_ivp()` solver to evaluate the differential
-    equations at a given time.
-
-    Parameters
-    ----------
-    t : Time
-        Time where the accelerations are defined
-    rv : ndarray
-        array of 6 values, the first three is the position vector (km) and
-        the second three is the velocity vector (km/s)
-    mu : Quantity
-        GM value in :math:`km^3 / s^2`
-
-    Returns
-    -------
-    ndarray
-        The array with velocity and acceleration information.
-    """
-
-    r = rv[:3]
-    v = rv[3:]
-
-    # two-body acceleration
-    a = two_body_accel(r, mu.to_value(__km3s2))
-
-    # concat the two lists using PEP-448 unpack
-    return [*v, *a]
+_km3s2 = u.km ** 3 / u.s ** 2
