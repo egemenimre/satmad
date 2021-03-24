@@ -97,5 +97,6 @@ MOON = CelestialBody(
     "Default Moon Model. ",
     GM_moon.to(u.km ** 3 / u.s ** 2),
     ellipsoid=MOON_ELLIPSOID_IAUWG2015,
+    inert_coord="mooncrs",
 )
 """Default Moon Model."""
