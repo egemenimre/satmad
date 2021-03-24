@@ -18,15 +18,15 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "satmad"
-copyright = "2020, Egemen Imre"
+copyright = "2021, Egemen Imre"
 author = "Egemen Imre"
 
 # Version Info
 # ------------
 # The short X.Y version.
-version = "0.0.6"
+version = "0.0.7"
 # The full version, including alpha/beta/rc tags.
-release = "0.0.6"
+release = "0.0.7"
 
 # -- General configuration ---------------------------------------------------
 # By default, highlight as Python 3.
