@@ -97,6 +97,72 @@ from 1 hour after the initial state and ending 1 day later.
     print(trajectory)
 
 
+Propagating an orbit around some other planet or celestial body is carried out in a similar fashion. The satellite has
+to be initialised around the celestial body (e.g. inertial frame around Moon) and the propagator has to be set up
+accordingly (with a force model for the Moon).
+
+The following code initialises a satellite around Moon (frame set to `MoonCRS` or the ICRF centred at Moon), sets up
+the numerical propagator and propagates the satellite around the Moon starting 0.5 days after the initial condition
+and for a duration of 3 days.
+
+.. code-block:: python
+    :linenos:
+
+    from astropy import units as u
+
+    from astropy.coordinates import (
+        CartesianDifferential,
+        CartesianRepresentation,
+        SkyCoord
+    )
+    from astropy.time import Time
+
+    from satmad.core.celestial_bodies import MOON
+    from satmad.coordinates.frames import MoonCRS
+    from satmad.propagation.numerical_propagators import NumericalPropagator, ODESolverType
+    from satmad.utils.timeinterval import TimeInterval
+
+    # Initialises a Moon low-orbit satellite.
+    time = Time("2020-01-01T11:00:00.000", scale="utc")
+
+    v_moon_crs = CartesianDifferential([1, -1, 0.6], unit=u.km / u.s)
+    r_moon_crs = CartesianRepresentation([1000, 1000, 2000], unit=u.km)
+    rv_init = SkyCoord(
+        r_moon_crs.with_differentials(v_moon_crs),
+        obstime=time,
+        frame=MoonCRS,
+        representation_type="cartesian",
+        differential_type="cartesian",
+    )
+
+    # Set up propagation config
+    stepsize = 60 * u.s
+    solver_type = ODESolverType.DOP853
+    rtol = 1e-13
+    atol = 1e-15
+    init_time_offset = 0.5 * u.day
+    duration = 3.00 * u.day
+
+    # init propagator
+    prop = NumericalPropagator(
+        stepsize,
+        solver_type=solver_type,
+        rtol=rtol,
+        atol=atol,
+        name="",
+        central_body=MOON,
+    )
+
+    prop_start = rv_init.obstime + init_time_offset
+    prop_duration = duration
+
+    # run the propagation
+    trajectory = prop.gen_trajectory(rv_init, TimeInterval(prop_start, prop_duration))
+
+    # print the final element
+    print(trajectory.coord_list[-1])
+
+
 Reference/API
 -------------
 .. automodule:: satmad.propagation.numerical_propagators
