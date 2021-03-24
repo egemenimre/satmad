@@ -18,12 +18,109 @@ from astropy.coordinates import (
     SkyCoord,
 )
 from astropy.time import Time
+from pytest import approx
 
+from satmad.coordinates.frames import MoonCRS
+from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
+from satmad.core.central_body import CelestialBody, CelestialBodyEllipsoid
 from satmad.propagation.numerical_propagators import ODESolverType
 from satmad.propagation.tests.num_prop_analysis.num_prop_analysis_engine import (
     energy_along_trajectory,
     propagation_engine,
 )
+
+
+@pytest.fixture
+def rv_init_moon_crs():
+    """Initialises a Moon low-orbit satellite."""
+    time = Time("2020-01-01T11:00:00.000", scale="utc")
+
+    # GMAT test case
+    v_moon_crs = CartesianDifferential([1, -1, 0.6], unit=u.km / u.s)
+    r_moon_crs = CartesianRepresentation([1000, 1000, 2000], unit=u.km)
+    rv_init = SkyCoord(
+        r_moon_crs.with_differentials(v_moon_crs),
+        obstime=time,
+        frame=MoonCRS,
+        representation_type="cartesian",
+        differential_type="cartesian",
+    )
+
+    return rv_init
+
+
+_MOONGMAT = CelestialBody(
+    "Moon",
+    "Default Moon Model. ",
+    4.90280105600000e12 * u.m ** 3 / u.s ** 2,
+    ellipsoid=CelestialBodyEllipsoid(
+        "Moon Ellipsoid as defined by GMAT",
+        1738.2 * u.km,
+        np.inf * u.dimensionless_unscaled,
+    ),
+    inert_coord="mooncrs",
+)
+"""This is the Moon as defined by GMAT"""
+
+
+def test_num_propagator_moon(rv_init_moon_crs):
+    """This tests the final position and velocity against GMAT using a pure Keplerian
+    5 day propagation.
+
+    GMAT Propagator is Dormand-Prince 853, with an Accuracy of 1e-13."""
+
+    allowable_pos_diff = 13 * u.mm
+    allowable_vel_diff = 0.0055 * u.mm / u.s
+
+    # Set up propagation config
+    stepsize = 60 * u.s
+    solver_type = ODESolverType.DOP853
+    rtol = 1e-13
+    atol = 1e-15
+    init_time_offset = 0.0 * u.day
+    duration = 10.00 * u.day
+
+    # run propagation and get trajectory
+    trajectory = propagation_engine(
+        rv_init_moon_crs,
+        stepsize,
+        solver_type,
+        init_time_offset,
+        duration,
+        rtol,
+        atol,
+        central_body=_MOONGMAT,
+    )
+    # no interpolation, just take final element
+    rv_fin = trajectory.coord_list[-1]
+
+    # GMAT test case - final point
+    time = Time("2020-01-11T11:00:00.000", scale="utc")
+
+    v_moon_crs_gmat = CartesianDifferential(
+        [6.159801708156309e-01, -1.128605958878207e00, 1.075005007078085e-02],
+        unit=u.km / u.s,
+    )
+    r_moon_crs_gmat = CartesianRepresentation(
+        [1.870952777669765e03, -1.811234513779054e02, 2.305452195816935e03],
+        unit=u.km,
+    )
+    rv_fin_gmat = SkyCoord(
+        r_moon_crs_gmat.with_differentials(v_moon_crs_gmat),
+        obstime=time,
+        frame=MoonCRS,
+        representation_type="cartesian",
+        differential_type="cartesian",
+    )
+
+    r_diff = pos_err(rv_fin, rv_fin_gmat)
+    v_diff = vel_err(rv_fin, rv_fin_gmat)
+
+    print(f"r diff      :  {r_diff}")
+    print(f"v diff      :  {v_diff}")
+
+    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
+    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
 
 
 @pytest.fixture
