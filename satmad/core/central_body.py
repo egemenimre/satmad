@@ -57,7 +57,7 @@ class CelestialBodyEllipsoid:
 
 class CelestialBody:
     """
-    Container for the various Celestial Bodies.
+    Container class for Celestial Bodies and related information.
 
     Parameters
     ----------
