@@ -69,7 +69,7 @@ License
 This project is Copyright (c) Egemen Imre and licensed under
 the terms of the GNU GPL v3+ license.
 
-.. |Documentation Status| image:: https://readthedocs.org/projects/satmad/badge/?version=latest&token=645e1945f952813df0bb16427c4cf410850811214e4c7b6269e869291d7d8cc4
+.. |Documentation Status| image:: https://readthedocs.org/projects/satmad/badge/?version=latest
     :target: https://satmad.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
