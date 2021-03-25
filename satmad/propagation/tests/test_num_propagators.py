@@ -24,7 +24,7 @@ from satmad.coordinates.frames import MoonCRS
 from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
 from satmad.core.central_body import CelestialBody, CelestialBodyEllipsoid
 from satmad.propagation.numerical_propagators import ODESolverType
-from satmad.propagation.tests.num_prop_analysis.num_prop_analysis_engine import (
+from satmad.propagation.tests.num_prop_analysis_engine import (
     energy_along_trajectory,
     propagation_engine,
 )
