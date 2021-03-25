@@ -28,6 +28,11 @@ Version 0.0.7 (24 Mar 2021)
 - Initialised non-Earth-bound propagation
 - Modified the dependencies to point to the new `pyERFA` library
 
+
+
+Previous Versions
+-----------------
+
 Version 0.0.6 (10 Nov 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -40,9 +45,6 @@ Version 0.0.5 (27 Jul 2020)
 - Introduced basic numerical propagation (see :ref:`numprop-intro` Section)
 - Added operators (union, intersect etc.) functionality to :class:`.TimeIntervalList`
 
-
-Previous Versions
------------------
 Version 0.0.4 (11 Jul 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
