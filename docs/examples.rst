@@ -8,7 +8,7 @@ Jupyter notebook versions of these at the
 In addition to the examples in this section, there is a repository of tutorials, how-to guides
 and analyses in a dedicated project called SatMAD Applications,
 `available at Github <https://github.com/egemenimre/satmad_applications>`_ (for Jupyter notebooks)
-and `in plain document format at Readthedocs <https://satmad-applications.readthedocs.io/>`_.
+and `in plain document format <https://satmad-applications.readthedocs.io/>`_.
 
 
 Tutorials
