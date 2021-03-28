@@ -16,6 +16,8 @@ from sgp4.exporter import export_tle
 from sgp4.model import WGS72, Satrec
 
 # precompile the unit as constant
+from satmad.core.celestial_bodies import EARTH_ELLIPSOID_WGS84
+
 _DAY_TO_SEC = (1.0 * u.day).to(u.s)
 
 
@@ -199,6 +201,7 @@ class TLE:
     ):
         """
         Initialises a geostationary satellite TLE.
+
         Due to the nature of the Earth's geopotential, the orbit may drift off
         by some degrees within weeks.
 
@@ -224,8 +227,8 @@ class TLE:
 
         Returns
         -------
-          TLE
-                `TLE` object initialised with the required GEO parameters.
+        TLE
+            `TLE` object initialised with the required GEO parameters.
         """
         # init GEO specific values - period is one sidereal day
         mean_motion = 2 * np.pi / (1.0 * u.sday).to_value(u.s)
@@ -239,6 +242,127 @@ class TLE:
         eccentricity = 1e-9  # cannot be zero
         arg_perigee = 0.0 * u.deg
         mean_anomaly = 0.0 * u.deg
+
+        tle = TLE(
+            epoch,
+            inclination,
+            raan,
+            eccentricity,
+            arg_perigee,
+            mean_anomaly,
+            mean_motion,
+            bstar,
+            n_dot,
+            n_dotdot=0.0,
+            name=name,
+            intl_designator=intl_designator,
+            sat_num=sat_num,
+            classification=classification,
+            rev_nr=rev_nr,
+            el_nr=el_nr,
+        )
+
+        return tle
+
+    @classmethod
+    def init_sso(
+        cls,
+        epoch,
+        altitude,
+        ltan,
+        eccentricity=1e-9,
+        arg_perigee=0 * u.deg,
+        mean_anomaly=0.0 * u.deg,
+        earth_radius=EARTH_ELLIPSOID_WGS84.re,
+        bstar=0,
+        name="No Name",
+        intl_designator="12345A",
+        sat_num=99999,
+        classification="U",
+        rev_nr=0,
+        el_nr=1,
+    ):
+        """
+        Initialises a sun-synchronous Earth orbit TLE.
+
+        Sets the inclination in accordance with the target node rotation rate that
+        satisfies sun-synchronous conditions up to J2. Sets the RAAN in accordance
+        with the requested Local Time of the Ascending Node (LTAN).
+
+        Target node rotation rate is 360 deg / 365.2421897 days (See
+        Fundamentals of Astrodynamics Vallado 4th ed pg. 863)
+
+        Parameters
+        ----------
+        epoch : Time
+            Epoch Time corresponding to the orbital elements (nominally very near
+            the time of true ascending node passage)
+        altitude : float or Quantity
+            altitude above `earth_radius` around Equator [km]
+        ltan : float or Quantity
+            Local Time of the Ascending Node defined as [0, 24) or a hour angle
+        earth_radius :  float or Quantity
+            Earth radius at equator - defines the semimajor axis together with the
+            `altitude` parameter [km]
+        eccentricity : float
+            mean eccentricity of the orbit [dimensionless]
+        arg_perigee : float or Quantity
+            TEME mean argument of perigee [rad]
+        mean_anomaly : float or Quantity
+            mean anomaly of the orbit [rad]
+        bstar : float or Quantity
+            sgp4 type drag coefficient [1 / earth radius] (see TLE class documentation)
+        name : str
+            Common name of the satellite
+        intl_designator : str
+            international designator on card 1 (up to 8 characters) (see class definition)
+        sat_num : int
+            satellite catalog number (see TLE class documentation)
+        classification : str
+            Classification (`U` for Unclassified, `C` for Classified, `S` for Secret)
+        rev_nr : int
+            Revolution number of the object at Epoch Time [revolutions]
+        el_nr : int
+            Element set number. Incremented when a new TLE is generated for this object.
+
+        Returns
+        -------
+        TLE
+            `TLE` object initialised with the required SSO parameters.
+        """
+        sma = altitude + earth_radius
+        # mean motion - convert to float
+        mean_motion = np.sqrt(TLE._mu / sma ** 3).value
+
+        # mean motion assumed constant
+        n_dot = 0
+
+        if eccentricity < 1e-9:
+            eccentricity = 1e-9  # cannot be zero or negative
+
+        # target omega_dot value for sun sync
+        om_dot_sun_sync = 360.0 / 365.2421897 * u.deg / u.day
+
+        # use consistent set of units (defaults from TLE object)
+        inclination = (
+            np.arccos(
+                (
+                    (-2 * sma ** 3.5 * om_dot_sun_sync * (1 - eccentricity ** 2) ** 2)
+                    / (3 * TLE._earth_radius ** 2 * TLE._j2 * np.sqrt(TLE._mu))
+                )
+                .decompose()
+                .to_value(u.rad)
+            )
+            * u.rad
+        )
+
+        # compute RAAN
+        raan = (
+            epoch.sidereal_time("mean", 0)
+            + ((0.5 - epoch.jd2) + ltan / 24) * 360 * u.deg
+        )
+
+        raan = _force_angle_range(raan)
 
         tle = TLE(
             epoch,
@@ -717,10 +841,11 @@ def _force_angle_range(angle_rad, min_range=0, max_range=2 * np.pi):
 
     angle = _force_angles_to_rad(angle_rad)
 
-    if max_range < angle:
-        angle = angle - 2 * np.pi
+    while not (min_range <= angle < max_range):
+        if max_range < angle:
+            angle = angle - 2 * np.pi
 
-    if angle_rad < min_range:
-        angle = angle + 2 * np.pi
+        if angle < min_range:
+            angle = angle + 2 * np.pi
 
     return angle

@@ -31,6 +31,7 @@ def tle_sso():
     name = "SENTINEL 2A"
     line1 = "1 40697U 15028A   20164.50828565  .00000010  00000-0  20594-4 0  9999"
     line2 = "2 40697  98.5692 238.8182 0001206  86.9662 273.1664 14.30818200259759"
+
     return TLEData(line1, line2, name)
 
 
@@ -128,6 +129,47 @@ def test_init_geo(init_tle_geo):
     )
 
     assert str(tle_geo) == str(tle)
+
+
+def test_init_sso(init_tle_sso):
+    """Test init Sun-synchronous satellite."""
+    tle_sso = init_tle_sso
+
+    epoch = tle_sso.epoch
+    alt = tle_sso.sm_axis() - tle_sso._earth_radius
+
+    # Sentinel-2A has an LTAN of 22:30
+    ltan = 22.5
+
+    tle = TLE.init_sso(
+        epoch,
+        alt,
+        ltan,
+        eccentricity=tle_sso.eccentricity,
+        arg_perigee=tle_sso.arg_perigee,
+        mean_anomaly=tle_sso.mean_anomaly,
+        earth_radius=tle_sso._earth_radius,
+    )
+
+    # print(tle_sso)
+    # print(tle)
+
+    # print(tle_sso.node_rotation_rate())
+    # print(tle.node_rotation_rate())
+
+    # print(tle_sso.raan.to(u.deg))
+    # print(tle.raan.to(u.deg))
+
+    assert tle.sm_axis().to_value(u.m) == approx(
+        tle_sso.sm_axis().to_value(u.m), abs=(5e-3 * u.mm).to_value(u.m)
+    )
+    assert tle.inclination.to_value(u.deg) == approx(
+        tle_sso.inclination.to_value(u.deg), abs=(14e-3 * u.deg).to_value()
+    )
+
+    assert tle.raan.to_value(u.deg) == approx(
+        tle_sso.raan.to_value(u.deg), abs=(36e-3 * u.deg).to_value()
+    )
 
 
 def test_tle_init_incl_out_of_bounds(init_tle_leo):
