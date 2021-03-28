@@ -83,12 +83,29 @@ Another way to initialise the TLE is by orbit type. For example, initialising a
 geostationary satellite TLE is as easy as defining a reference time and a target longitude:
 
     >>> from astropy import units as u
+    >>> from satmad.propagation.tle import TLE
     >>> tle_geo = TLE.init_geo(Time("2020-06-10T12:13:14.000"), 42 * u.deg)
     >>> print(tle_GEO)
     No Name
     1 99999U 12345A   20162.50918981  .00000000  00000-0  00000+0 0    15
     2 99999   0.0000 124.6202 0000000   0.0000   0.0000  1.00273791    04
 
+Similarly, a circular sun-synchronous orbit at 800 km reference altitude (at Equator) and at a Local Time of the
+Ascending Node (LTAN) at 10:30 can be initialised simply with:
+
+    >>> from astropy import units as u
+    >>> from satmad.propagation.tle import TLE
+    >>> alt = 800 * u. km
+    >>> ltan = 10.5
+    >>> tle_sso = TLE.init_sso(Time("2020-06-10T12:13:14.000"), alt, ltan)
+    >>> print(tle_sso)
+    No Name
+    1 99999U 12345A   20162.50918981  .00000000  00000-0  00000+0 0    15
+    2 99999  98.6032  56.8119 0000000   0.0000   0.0000 14.27530325    07
+
+
+Other parameters such as eccentricity, argument of perigee or mean anomaly can be optionally set to initialise with
+the requested values.
 
 .. _tle-orbit_properties:
 
