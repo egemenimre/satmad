@@ -9,6 +9,8 @@ TLE Storage class tests
 """
 from pathlib import Path
 
+from astropy import units as u
+
 from satmad.propagation.tle_storage import TleFilterParams, TleStorage
 
 extra_path = Path("satmad", "propagation", "tests")
@@ -60,6 +62,65 @@ def test_filter_value():
     assert len(filtered_list_sat_nr.tle_list) == 2
     assert len(filtered_list_int_deg.tle_list) == 1
     assert len(empty_filtered_list.tle_list) == 0
+
+
+def test_filter_func():
+    """Tests filtering for a value range with a function."""
+    file_path = process_paths(mixed_tle_file_path_1)
+
+    tle_storage = TleStorage.from_path(file_path)
+
+    def sma_filter_1(a):
+        """Semimajor axis filter min."""
+        return True if a > 7000 * u.km else False
+
+    def sma_filter_2(a):
+        """Semimajor axis filter max."""
+        return True if 7000 * u.km > a else False
+
+    def sma_filter_3(a):
+        """Semimajor axis filter min/max."""
+        return True if 7100 * u.km > a > 7000 * u.km else False
+
+    filtered_list_sma_1 = tle_storage.filter_by_func(
+        TleFilterParams.SM_AXIS, sma_filter_1
+    )
+    filtered_list_sma_2 = tle_storage.filter_by_func(
+        TleFilterParams.SM_AXIS, sma_filter_2
+    )
+    filtered_list_sma_3 = tle_storage.filter_by_func(
+        TleFilterParams.SM_AXIS, sma_filter_3
+    )
+
+    assert len(filtered_list_sma_1.tle_list) == 11
+    assert len(filtered_list_sma_2.tle_list) == 8
+    assert len(filtered_list_sma_3.tle_list) == 8
+
+
+def test_filter_range():
+    """Tests filtering for a value range with min/max parameters."""
+    file_path = process_paths(mixed_tle_file_path_1)
+
+    tle_storage = TleStorage.from_path(file_path)
+
+    filtered_list_sma_1 = tle_storage.filter_by_range(
+        TleFilterParams.SM_AXIS, min_value=7000 * u.km
+    )
+
+    filtered_list_sma_2 = tle_storage.filter_by_range(
+        TleFilterParams.SM_AXIS, max_value=7000 * u.km
+    )
+
+    filtered_list_sma_3 = tle_storage.filter_by_range(
+        TleFilterParams.SM_AXIS, min_value=7000 * u.km, max_value=7100 * u.km
+    )
+
+    filtered_list_sma_4 = tle_storage.filter_by_range(TleFilterParams.SM_AXIS)
+
+    assert len(filtered_list_sma_1.tle_list) == 11
+    assert len(filtered_list_sma_2.tle_list) == 8
+    assert len(filtered_list_sma_3.tle_list) == 8
+    assert len(filtered_list_sma_4.tle_list) == 0
 
 
 def process_paths(path):
