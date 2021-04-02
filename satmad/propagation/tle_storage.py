@@ -7,7 +7,32 @@
 TLE storage classes.
 
 """
+from enum import Enum
+from typing import List
+
 from satmad.propagation.tle import TLE
+
+
+class TleFilterParams(Enum):
+    PERIOD = "period"
+    SM_AXIS = "sm_axis"
+    NODE_ROTATION_RATE = "node_rotation_rate"
+    ARGP_ROTATION_RATE = "argp_rotation_rate"
+    EPOCH = "epoch"
+    BSTAR = "bstar"
+    N_DOT = "n_dot"
+    N_DOTDOT = "n_dotdot"
+    INCLINATION = "inclination"
+    RAAN = "raan"
+    ECCENTRICITY = "eccentricity"
+    ARG_PERIGEE = "arg_perigee"
+    MEAN_ANOMALY = "mean_anomaly"
+    MEAN_MOTION = "mean_motion"
+    NAME = "name"
+    SAT_NUMBER = "sat_number"
+    INTL_DESIGNATOR = "intl_designator"
+    CLASSIFICATION = "classification"
+    REV_NR = "rev_nr"
 
 
 class TleStorage:
@@ -15,7 +40,18 @@ class TleStorage:
     at multiple times ant without any ordering.
 
     This class is the entry point for reading a TLE file, from which various sublists
-    (e.g. single satellite, all LEO sats etc.) can be derived."""
+    (e.g. single satellite, all LEO sats etc.) can be derived.
+
+    Parameters
+    ----------
+    tle_list : list[TLE]
+        initial list of TLE objects (shallow copied into object)
+    """
+
+    tle_list: List[TLE] = []
+
+    def __init__(self, tle_list):
+        self.tle_list = tle_list
 
     @classmethod
     def from_path(cls, tle_file_path):
@@ -64,6 +100,43 @@ class TleStorage:
         tle_storage.tle_list = _parse_tle_list(tle_source_str)
 
         return tle_storage
+
+    def filter_by_value(self, param, value):
+        """
+        Filters the TLE list for equivalence to a given value.
+
+        For example `param` can be equal to `TleFilterParams.SAT_NUMBER` and `value`
+        can be equal to `46945`, which filters all TLEs with a sat number 46945.
+
+        Note that this filter is not appropriate for float values such as eccentricity
+        where equivalence is very brittle. For these applications, use
+        `filter_by_range()` instead.
+
+        This method returns a `TleStorage` object even if the filtering result is empty.
+        In this case, `tle_list` parameter of the `TleStorage` object will be an empty
+        list.
+
+        Also note that, the returned TLE objects in the list are just shallow copies
+        of the objects in the master TLE list. Any change to them will change the
+        relevant item in the backing TLE list.
+
+        Parameters
+        ----------
+        param : TleFilterParams
+            Filter parameter (such as name or satellite number)
+        value
+            Value associated with the parameter
+
+        Returns
+        -------
+        tle_storage
+            A `TleStorage` object that contains the filtered list of TLE data
+        """
+        filtered_list = [
+            tle for tle in self.tle_list if getattr(tle, param.value) == value
+        ]
+
+        return TleStorage(filtered_list)
 
 
 def _parse_tle_list(tle_source_str_list):

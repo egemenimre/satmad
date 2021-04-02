@@ -9,17 +9,16 @@ TLE Storage class tests
 """
 from pathlib import Path
 
-from satmad.propagation.tle_storage import TleStorage
+from satmad.propagation.tle_storage import TleFilterParams, TleStorage
 
 extra_path = Path("satmad", "propagation", "tests")
+
+mixed_tle_file_path_1 = Path("data", "tle_mixed_1.txt")
 
 
 def test_parse_storage_file():
     """Test parsing of the storage file with mixed TLE input."""
-    file_path = Path("data", "tle_mixed_1.txt")
-
-    working_dir = Path.cwd()
-    file_path = process_paths(working_dir, file_path)
+    file_path = process_paths(mixed_tle_file_path_1)
 
     tle_storage = TleStorage.from_path(file_path)
 
@@ -44,10 +43,31 @@ def test_parse_storage_file():
     ]
 
 
-def process_paths(working_dir, path):
+def test_filter_value():
+    """Tests filtering for a value equivalence."""
+    file_path = process_paths(mixed_tle_file_path_1)
+
+    tle_storage = TleStorage.from_path(file_path)
+
+    filtered_list_sat_nr = tle_storage.filter_by_value(
+        TleFilterParams.SAT_NUMBER, 46495
+    )
+    filtered_list_int_deg = tle_storage.filter_by_value(
+        TleFilterParams.INTL_DESIGNATOR, "18014H"
+    )
+    empty_filtered_list = tle_storage.filter_by_value(TleFilterParams.SAT_NUMBER, 56495)
+
+    assert len(filtered_list_sat_nr.tle_list) == 2
+    assert len(filtered_list_int_deg.tle_list) == 1
+    assert len(empty_filtered_list.tle_list) == 0
+
+
+def process_paths(path):
     """
     Processes the path depending on the run environment.
     """
+    working_dir = Path.cwd()
+
     file_path = working_dir.joinpath(path)
     if not working_dir.joinpath(file_path).exists():
         file_path = working_dir.joinpath(extra_path).joinpath(path)
