@@ -136,7 +136,7 @@ def test_init_sso(init_tle_sso):
     tle_sso = init_tle_sso
 
     epoch = tle_sso.epoch
-    alt = tle_sso.sm_axis() - tle_sso._earth_radius
+    alt = tle_sso.sm_axis - tle_sso._earth_radius
 
     # Sentinel-2A has an LTAN of 22:30
     ltan = 22.5
@@ -160,8 +160,8 @@ def test_init_sso(init_tle_sso):
     # print(tle_sso.raan.to(u.deg))
     # print(tle.raan.to(u.deg))
 
-    assert tle.sm_axis().to_value(u.m) == approx(
-        tle_sso.sm_axis().to_value(u.m), abs=(5e-3 * u.mm).to_value(u.m)
+    assert tle.sm_axis.to_value(u.m) == approx(
+        tle_sso.sm_axis.to_value(u.m), abs=(5e-3 * u.mm).to_value(u.m)
     )
     assert tle.inclination.to_value(u.deg) == approx(
         tle_sso.inclination.to_value(u.deg), abs=(14e-3 * u.deg).to_value()
@@ -202,7 +202,7 @@ def test_node_rot(init_tle_sso):
     """Test orbit plane rotation rate."""
     tle = init_tle_sso
 
-    assert tle.node_rotation_rate().to_value(u.deg / u.day) == approx(
+    assert tle.node_rotation_rate.to_value(u.deg / u.day) == approx(
         (0.9870658041317965 * u.deg / u.day).to_value(),
         abs=(1e-14 * u.deg / u.day).to_value(),
     )
@@ -212,7 +212,7 @@ def test_argp_rot(init_tle_sso):
     """Test argument of perigee rotation rate."""
     tle = init_tle_sso
 
-    assert tle.argp_rotation_rate().to_value(u.deg / u.day) == approx(
+    assert tle.argp_rotation_rate.to_value(u.deg / u.day) == approx(
         (-2.9445253809901057 * u.deg / u.day).to_value(),
         abs=(1e-14 * u.deg / u.day).to_value(),
     )
@@ -238,10 +238,10 @@ def test_getters_setters(init_tle_leo):
     tle = init_tle_leo
 
     # test getters
-    assert tle.sm_axis().to_value() == approx(
+    assert tle.sm_axis.to_value() == approx(
         (7055.953203777368 * u.km).to_value(), abs=(0.01 * u.mm).to_value(u.km)
     )
-    assert tle.period().to_value(u.s) == approx(
+    assert tle.period.to_value(u.s) == approx(
         (5898.53720524 * u.s).to_value(), abs=(1 * u.us).to_value(u.s)
     )
     assert tle.inclination.to_value(u.deg) == approx(

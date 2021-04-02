@@ -428,10 +428,12 @@ class TLE:
 
         return line1, line2
 
+    @property
     def period(self) -> Quantity:
         """Computes the satellite period [sec]."""
         return 2 * np.pi / self.mean_motion * u.s
 
+    @property
     def sm_axis(self) -> Quantity:
         """Computes the semimajor axis [km].
 
@@ -441,6 +443,7 @@ class TLE:
         n = self.mean_motion
         return np.power(TLE._mu.value / n / n, 1 / 3) * u.km
 
+    @property
     def node_rotation_rate(self):
         """
         Node (or orbital plane) rotation rate due to J2.
@@ -456,7 +459,7 @@ class TLE:
         n = self.mean_motion
         r_e = TLE._earth_radius
         e = self.eccentricity
-        p = self.sm_axis() * (1 - e * e)
+        p = self.sm_axis * (1 - e * e)
         j2 = TLE._j2
         i = self.inclination
 
@@ -464,6 +467,7 @@ class TLE:
 
         return node_rot.to(u.deg / u.day)
 
+    @property
     def argp_rotation_rate(self):
         """
         Argument of Perigee (or eccentricity vector) rotation rate due to J2.
@@ -479,7 +483,7 @@ class TLE:
         n = self.mean_motion
         r_e = TLE._earth_radius
         e = self.eccentricity
-        p = self.sm_axis() * (1 - e * e)
+        p = self.sm_axis * (1 - e * e)
         j2 = TLE._j2
         sin_i = np.sin(self.inclination)
 
