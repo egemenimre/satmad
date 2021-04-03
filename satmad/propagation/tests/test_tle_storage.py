@@ -59,6 +59,7 @@ def test_filter_value():
     )
     empty_filtered_list = tle_storage.filter_by_value(TleFilterParams.SAT_NUMBER, 56495)
 
+    assert tle_storage.tle_list[0].name == "APRIZESAT 2"
     assert len(filtered_list_sat_nr.tle_list) == 2
     assert len(filtered_list_int_deg.tle_list) == 1
     assert len(empty_filtered_list.tle_list) == 0
