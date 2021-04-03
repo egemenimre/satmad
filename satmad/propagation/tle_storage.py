@@ -7,6 +7,7 @@
 TLE storage classes.
 
 """
+from abc import ABC
 from enum import Enum
 from typing import List
 
@@ -14,6 +15,8 @@ from satmad.propagation.tle import TLE
 
 
 class TleFilterParams(Enum):
+    """TLE Filtering Parameters."""
+
     PERIOD = "period"
     SM_AXIS = "sm_axis"
     NODE_ROTATION_RATE = "node_rotation_rate"
@@ -35,71 +38,10 @@ class TleFilterParams(Enum):
     REV_NR = "rev_nr"
 
 
-class TleStorage:
-    """TLE storage class that keeps a list of TLE data from multiple satellites,
-    at multiple times ant without any ordering.
-
-    This class is the entry point for reading a TLE file, from which various sublists
-    (e.g. single satellite, all LEO sats etc.) can be derived.
-
-    Parameters
-    ----------
-    tle_list : list[TLE]
-        initial list of TLE objects (shallow copied into object)
-    """
+class _TleList(ABC):
+    """Abstract Base Class for TLE lists."""
 
     tle_list: List[TLE] = []
-
-    def __init__(self, tle_list):
-        self.tle_list = tle_list
-
-    @classmethod
-    def from_path(cls, tle_file_path):
-        """
-        Read a set of TLE data from file. Tries to extract satellite names from the
-        list, if no name is found, an empty string (not `None`) is assigned.
-
-        Parameters
-        ----------
-        tle_file_path : Path
-            Path of the text file to be read
-
-        Returns
-        -------
-        tle_storage
-            A `TleStorage` object that contains the list of TLE data
-        """
-        with open(tle_file_path, "r") as f:
-            tle_source_str = f.read()
-
-        return cls.from_string(tle_source_str)
-
-    @classmethod
-    def from_string(cls, tle_string):
-        """
-        Read a set of TLE data from a text. Tries to extract satellite names from the
-        list, if no name is found, an empty string (not `None`) is assigned.
-
-        Parameters
-        ----------
-        tle_string : str
-            String containing successive TLE data
-
-        Returns
-        -------
-        tle_storage
-            A `TleStorage` object that contains the list of TLE data
-        """
-
-        tle_source_str = tle_string.split("\n")
-
-        # create object without calling `__init__`
-        tle_storage = cls.__new__(cls)
-
-        # parse the string and load parsed items into list
-        tle_storage.tle_list = _parse_tle_list(tle_source_str)
-
-        return tle_storage
 
     def filter_by_value(self, param, value):
         """
@@ -169,7 +111,7 @@ class TleStorage:
         ----------
         param : TleFilterParams
             Filter parameter (such as name or satellite number)
-        filter_func : function
+        filter_func
             Function to test the parameter against
 
         Returns
@@ -247,6 +189,116 @@ class TleStorage:
             filtered_list = []
 
         return TleStorage(filtered_list)
+
+
+class TleTimeSeries(_TleList):
+    """TLE storage class that keeps a list of TLE data from a single satellite,
+    at multiple times and with time order.
+
+    The entry point is ideally the `TleStorage` class, where a TLE file is usually read,
+    and a single satellite is filtered. Once this class is initialised, various sublists
+    (e.g. specific time range) can be derived.
+
+    Parameters
+    ----------
+    tle_list : list[TLE]
+        initial list of TLE objects (shallow copied into object)
+    """
+
+    def __init__(self, tle_list, sat_number):
+
+        # init a TLE Storage and filter for the sat number
+        self.tle_list = (
+            TleStorage(tle_list)
+            .filter_by_value(TleFilterParams.SAT_NUMBER, sat_number)
+            .tle_list
+        )
+
+        # order the internal TLE list with respect to epoch
+        self.tle_list.sort(key=lambda tle: tle.epoch)
+
+
+class TleStorage(_TleList):
+    """TLE storage class that keeps a list of TLE data from multiple satellites,
+    at multiple times and without any ordering.
+
+    This class is the entry point for reading a TLE file, from which various sublists
+    (e.g. single satellite, all LEO sats etc.) can be derived.
+
+    Parameters
+    ----------
+    tle_list : list[TLE]
+        initial list of TLE objects (shallow copied into object)
+    """
+
+    def __init__(self, tle_list):
+        self.tle_list = tle_list
+
+    @classmethod
+    def from_path(cls, tle_file_path):
+        """
+        Read a set of TLE data from file. Tries to extract satellite names from the
+        list, if no name is found, an empty string (not `None`) is assigned.
+
+        Parameters
+        ----------
+        tle_file_path : Path
+            Path of the text file to be read
+
+        Returns
+        -------
+        TleStorage
+            A `TleStorage` object that contains the list of TLE data
+        """
+        with open(tle_file_path, "r") as f:
+            tle_source_str = f.read()
+
+        return cls.from_string(tle_source_str)
+
+    @classmethod
+    def from_string(cls, tle_string):
+        """
+        Read a set of TLE data from a text. Tries to extract satellite names from the
+        list, if no name is found, an empty string (not `None`) is assigned.
+
+        Parameters
+        ----------
+        tle_string : str
+            String containing successive TLE data
+
+        Returns
+        -------
+        TleStorage
+            A `TleStorage` object that contains the list of TLE data
+        """
+
+        tle_source_str = tle_string.split("\n")
+
+        # create object without calling `__init__`
+        tle_storage = cls.__new__(cls)
+
+        # parse the string and load parsed items into list
+        tle_storage.tle_list = _parse_tle_list(tle_source_str)
+
+        return tle_storage
+
+    def to_tle_timeseries(self, sat_number):
+        """
+        Filters the TLE list for a single satellite to initialise a `TleTimeSeries`.
+
+        Parameters
+        ----------
+        sat_number
+            Satellite Catalog Number
+
+        Returns
+        -------
+        TleTimeSeries
+            A `TleTimeSeries` object that contains the list of TLE data of a single
+            satellite
+
+        """
+        return TleTimeSeries(self.tle_list, sat_number)
 
 
 def _parse_tle_list(tle_source_str_list):

@@ -10,12 +10,15 @@ TLE Storage class tests
 from pathlib import Path
 
 from astropy import units as u
+from astropy.time import Time
 
 from satmad.propagation.tle_storage import TleFilterParams, TleStorage
 
 extra_path = Path("satmad", "propagation", "tests")
 
 mixed_tle_file_path_1 = Path("data", "tle_mixed_1.txt")
+time_series_tle_file_path_1 = Path("data", "tle_rasat_desc.txt")
+time_series_tle_file_path_2 = Path("data", "tle_rasat.txt")
 
 
 def test_parse_storage_file():
@@ -122,6 +125,41 @@ def test_filter_range():
     assert len(filtered_list_sma_2.tle_list) == 8
     assert len(filtered_list_sma_3.tle_list) == 8
     assert len(filtered_list_sma_4.tle_list) == 0
+
+
+def test_tle_timeseries_ordered():
+    """Test parsing of the TLE Timeseries with ordered time input."""
+    file_path = process_paths(time_series_tle_file_path_2)
+
+    tle_storage = TleStorage.from_path(file_path).to_tle_timeseries(37791)
+
+    assert tle_storage.tle_list[0].epoch.isot == "2021-03-15T02:02:02.753"
+    assert tle_storage.tle_list[-1].epoch.isot == "2021-03-31T21:19:42.808"
+
+
+def test_tle_timeseries_unordered():
+    """Test parsing of the TLE Timeseries with inverted time input."""
+    file_path = process_paths(time_series_tle_file_path_1)
+
+    tle_storage = TleStorage.from_path(file_path).to_tle_timeseries(37791)
+
+    assert tle_storage.tle_list[0].epoch.isot == "2021-03-30T04:20:36.404"
+    assert tle_storage.tle_list[-1].epoch.isot == "2021-04-01T20:16:48.785"
+
+
+def test_tle_timeseries_time_filter():
+    """Test parsing of the TLE Timeseries with time filter."""
+    file_path = process_paths(time_series_tle_file_path_1)
+
+    tle_storage = TleStorage.from_path(file_path).to_tle_timeseries(37791)
+
+    threshold_time = Time("2021-04-01T00:00:00.000")
+    tle_storage_filtered = tle_storage.filter_by_range(
+        TleFilterParams.EPOCH, min_value=threshold_time
+    )
+
+    assert tle_storage_filtered.tle_list[0].epoch.isot == "2021-04-01T02:14:48.404"
+    assert tle_storage_filtered.tle_list[-1].epoch.isot == "2021-04-01T20:16:48.785"
 
 
 def process_paths(path):
