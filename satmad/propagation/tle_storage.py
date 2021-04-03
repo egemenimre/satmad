@@ -284,6 +284,8 @@ def _parse_tle_list(tle_source_str_list):
                     and not __is_tle_line(tle_source_str_list[i - 1], 2)
                 ):
                     name = tle_source_str_list[i - 1].strip("\n ")
+                    if name.startswith("0 "):
+                        name = name[2:]
 
         if line1 and line2:
             tle = TLE.from_tle(line1, line2, name if name else "")
