@@ -22,7 +22,6 @@ and `in plain document format <https://satmad-applications.readthedocs.io/>`_.
 
     about
     getting_started
-    user_guide
     examples
     doc_index
     references
