@@ -47,11 +47,11 @@ Extracting Specific Data from the Lists (Filtering)
 
 Once initialised, the TLE list can be filtered using the enumerator :class:`.TleFilterParams` and a
 filtering value. To filter with an element like an identifier (e.g. name or catalogue number) where an exact match
-can be found, :meth:`.TleStorage.filter_by_value` method should be used. In the example above, a satellite with the
+can be found, `filter_by_value` method should be used. In the example above, a satellite with the
 catalogue number "46495" is extracted from the list.
 
 Conversely, if a range rather than an exact match is sought (e.g. semimajor axis, epoch or eccentricity),
-then :meth:`.TleStorage.filter_by_range` method should be used. In the example above, a threshold epoch is given and
+then `filter_by_range` method should be used. In the example above, a threshold epoch is given and
 all TLE values after this threshold are extracted. This method can accept a minimum, a maximum or both, such that::
 
 `max_value > param > min_value`
@@ -88,8 +88,8 @@ backing list is somehow changed, then all the other filtered lists may change as
 Finally, if the filter results in an empty list, then a new `TleStorage` object is still returned, with an empty
 internal `tle_list`.
 
-In addition to the :meth:`.TleStorage.filter_by_value` and :meth:`.TleStorage.filter_by_range` methods, there is a
-third and very powerful method to filter the TLEs through user defined functions. In :meth:`.TleStorage.filter_by_func`,
+In addition to the `filter_by_value` and `filter_by_range` methods, there is a
+third and very powerful method to filter the TLEs through user defined functions. In `filter_by_func`,
 a user-defined function takes one parameter related to the TLE and returns `True` or `False` through some test.
 It is even possible for this filter function to accept the entire TLE (as opposed to a single parameter, for more
 complicated computations). The semimajor axis filter above can be written with this method, sending the semimajor axis
@@ -121,8 +121,8 @@ or the entire TLE.
 
     filtered_list_sma_2 = tle_storage.filter_by_func(TleFilterParams.TLE, tle_filter)
 
-Note that, `TleFilterParams.TLE` is available for :meth:`.TleStorage.filter_by_func` method only, as the behaviour with
-an entire TLE is not well defined with :meth:`.TleStorage.filter_by_value` and :meth:`.TleStorage.filter_by_range`
+Note that, `TleFilterParams.TLE` is available for `filter_by_func` method only, as the behaviour with
+an entire TLE is not well defined with `filter_by_value` and `filter_by_range`
 methods.
 
 Lists of TLEs of the Same Satellite: :class:`.TleTimeSeries`
@@ -134,7 +134,7 @@ particularly useful to plot the orbit or to feed it to a propagator to propagate
 multiple TLEs. The ideal way to initialise it is to initialise a `TleStorage` from a file or another source and then
 filter for a single orbit.
 
-The code below initialises a a `TleStorage` from a file and filters for the satellites
+The code below initialises a `TleStorage` from a file and filters for the satellites
 with the catalogue number `37791`.
 
 .. code-block:: python
