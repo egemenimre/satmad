@@ -10,9 +10,6 @@ and analyses in a dedicated project called SatMAD Applications,
 `available at Github <https://github.com/egemenimre/satmad_applications>`_ (for Jupyter notebooks)
 and `in plain document format <https://satmad-applications.readthedocs.io/>`_.
 
-
-Tutorials
----------
 .. toctree::
     :maxdepth: 1
 
