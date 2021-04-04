@@ -12,6 +12,7 @@ Orbits and Trajectories
 
     coordinates/trajectory
     propagation/tle
+    propagation/tle_storage
     propagation/propagators
     propagation/force_models
 
