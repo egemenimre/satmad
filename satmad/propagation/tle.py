@@ -46,13 +46,13 @@ class TLE:
         TEME mean inclination of the orbit [rad]
     raan : float or Quantity
         TEME mean right ascension of ascending node (RAAN) of the orbit [rad]
-    eccentricity : float
-        mean eccentricity of the orbit
+    eccentricity : float or Quantity
+        mean eccentricity of the orbit [dimensionless]
     arg_perigee : float or Quantity
         TEME mean argument of perigee [rad]
     mean_anomaly : float or Quantity
         mean anomaly of the orbit [rad]
-    mean_motion : float
+    mean_motion : float or Quantity
         mean motion of the orbit [rad/sec]
     bstar : float or Quantity
         sgp4 type drag coefficient [1 / earth radius] (see TLE class documentation)
@@ -119,6 +119,16 @@ class TLE:
                 f"Inclination value, "
                 f"only values in range 0 <= i < PI are allowed."
             )
+
+        # check mean motion
+        if isinstance(mean_motion, Quantity):
+            mean_motion = mean_motion.to(
+                u.rad / u.s, equivalencies=u.dimensionless_angles()
+            ).value
+
+        # check eccentricity as Quantity and reduce to value
+        if isinstance(eccentricity, Quantity):
+            eccentricity = eccentricity.value
 
         # fill the Satrec object
         self._satrec.sgp4init(
@@ -431,7 +441,9 @@ class TLE:
     @property
     def period(self) -> Quantity:
         """Computes the satellite period [sec]."""
-        return 2 * np.pi / self.mean_motion * u.s
+        return (2 * np.pi / self.mean_motion).to(
+            u.s, equivalencies=u.dimensionless_angles()
+        )
 
     @property
     def sm_axis(self) -> Quantity:
@@ -440,7 +452,7 @@ class TLE:
         Note that the :math:`mu` value used in the computation of the semimajor axis
         is that of WGS72 for consistency with the orbital elements definition.
         """
-        n = self.mean_motion
+        n = self.mean_motion.to_value(u.rad / u.s)
         return np.power(TLE._mu.value / n / n, 1 / 3) * u.km
 
     @property
@@ -463,7 +475,7 @@ class TLE:
         j2 = TLE._j2
         i = self.inclination
 
-        node_rot = (-3 * n * r_e * r_e * j2 / (2 * p * p) * np.cos(i)) * (u.rad / u.s)
+        node_rot = -3 * n * r_e * r_e * j2 / (2 * p * p) * np.cos(i)
 
         return node_rot.to(u.deg / u.day)
 
@@ -488,14 +500,7 @@ class TLE:
         sin_i = np.sin(self.inclination)
 
         argp_rot = (
-            3.0
-            * n
-            * r_e
-            * r_e
-            * j2
-            / (4.0 * p * p)
-            * (4.0 - 5.0 * sin_i * sin_i)
-            * (u.rad / u.s)
+            3.0 * n * r_e * r_e * j2 / (4.0 * p * p) * (4.0 - 5.0 * sin_i * sin_i)
         )
 
         return argp_rot.to(u.deg / u.day)
@@ -610,12 +615,19 @@ class TLE:
     def eccentricity(self) -> float:
         """Gets and sets the mean eccentricity of the orbit.
 
+        Input can be a Quantity (dimensionless) or float. Getter value is a float.
+
         Eccentricity should be in range 0 <= e < 1.0.
         Raises a `ValueError` otherwise."""
         return self._satrec.ecco
 
     @eccentricity.setter
     def eccentricity(self, e):
+
+        # check eccentricity as Quantity and reduce to value
+        if isinstance(e, Quantity):
+            e = e.value
+
         if 0 <= e < 1.0:
             self._satrec.ecco = e
         else:
@@ -679,16 +691,24 @@ class TLE:
             )
 
     @property
-    def mean_motion(self) -> float:
+    def mean_motion(self) -> Quantity:
         """Gets and sets the mean motion of the orbit [rad/sec].
+
+        Setter input can be in float [rad/sec] or Quantity. Getter output is in
+        Quantity.
 
         Mean Motion in revs/day should be in range 0 < n <= 17.0.
         Raises a `ValueError` otherwise.
         """
-        return self._satrec.no_kozai / 60.0
+        return self._satrec.no_kozai / 60.0 * u.rad / u.s
 
     @mean_motion.setter
-    def mean_motion(self, n: float):
+    def mean_motion(self, n):
+
+        # check mean motion as Quantity
+        if isinstance(n, Quantity):
+            n = n.to(u.rad / u.s, equivalencies=u.dimensionless_angles()).value
+
         no = _DAY_TO_SEC.to_value() * n / (2 * np.pi)
         if 0 < no <= 17.0:
             self._satrec.no_kozai = n * 60
