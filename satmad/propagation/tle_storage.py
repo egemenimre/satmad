@@ -36,6 +36,7 @@ class TleFilterParams(Enum):
     INTL_DESIGNATOR = "intl_designator"
     CLASSIFICATION = "classification"
     REV_NR = "rev_nr"
+    TLE = "tle"
 
 
 class _TleList(ABC):
@@ -73,7 +74,17 @@ class _TleList(ABC):
         -------
         TleStorage
             A `TleStorage` object that contains the filtered list of TLE data
+
+        Raises
+        ------
+        ValueError
+            TleFilterParams.TLE is given as an input
         """
+        if param is TleFilterParams.TLE:
+            raise ValueError(
+                "TleFilterParams.TLE is not defined for filtering by value."
+            )
+
         filtered_list = [
             tle for tle in self.tle_list if getattr(tle, param.value) == value
         ]
@@ -120,7 +131,7 @@ class _TleList(ABC):
             A `TleStorage` object that contains the filtered list of TLE data
         """
         filtered_list = [
-            tle for tle in self.tle_list if filter_func(getattr(tle, param.value))
+            tle for tle in self.tle_list if filter_func(getattr(tle, param.value, tle))
         ]
 
         return TleStorage(filtered_list)
@@ -168,7 +179,17 @@ class _TleList(ABC):
         -------
         TleStorage
             A `TleStorage` object that contains the filtered list of TLE data
+
+        Raises
+        ------
+        ValueError
+            TleFilterParams.TLE is given as an input
         """
+        if param is TleFilterParams.TLE:
+            raise ValueError(
+                "TleFilterParams.TLE is not defined for filtering by value."
+            )
+
         # `min_value` and `max_value` are quantities and should be checked explicitly
         # for `None`, otherwise can be interpreted as `True` or `False`.
         if min_value is not None and max_value is not None:
@@ -179,11 +200,15 @@ class _TleList(ABC):
             ]
         elif min_value is not None:
             filtered_list = [
-                tle for tle in self.tle_list if getattr(tle, param.value) > min_value
+                tle
+                for tle in self.tle_list
+                if getattr(tle, param.value, None) > min_value
             ]
         elif max_value is not None:
             filtered_list = [
-                tle for tle in self.tle_list if max_value > getattr(tle, param.value)
+                tle
+                for tle in self.tle_list
+                if max_value > getattr(tle, param.value, None)
             ]
         else:
             filtered_list = []

@@ -9,6 +9,7 @@ TLE Storage class tests
 """
 from pathlib import Path
 
+import pytest
 from astropy import units as u
 from astropy.time import Time
 
@@ -46,6 +47,16 @@ def test_parse_storage_file():
         truth_line1,
         truth_line2,
     ]
+
+
+def test_tle_param_filter_error():
+    with pytest.raises(ValueError):
+        """Tests filtering for a TleFilterParams.TLE error."""
+        file_path = process_paths(mixed_tle_file_path_1)
+
+        tle_storage = TleStorage.from_path(file_path)
+
+        tle_storage.filter_by_value(TleFilterParams.TLE, 46495)
 
 
 def test_filter_value():
@@ -86,6 +97,10 @@ def test_filter_func():
         """Semimajor axis filter min/max."""
         return True if 7100 * u.km > a > 7000 * u.km else False
 
+    def tle_filter_1(tle):
+        """Semimajor axis filter min/max."""
+        return True if 7100 * u.km > tle.sm_axis > 7000 * u.km else False
+
     filtered_list_sma_1 = tle_storage.filter_by_func(
         TleFilterParams.SM_AXIS, sma_filter_1
     )
@@ -95,10 +110,12 @@ def test_filter_func():
     filtered_list_sma_3 = tle_storage.filter_by_func(
         TleFilterParams.SM_AXIS, sma_filter_3
     )
+    filtered_list_sma_4 = tle_storage.filter_by_func(TleFilterParams.TLE, tle_filter_1)
 
     assert len(filtered_list_sma_1.tle_list) == 11
     assert len(filtered_list_sma_2.tle_list) == 8
     assert len(filtered_list_sma_3.tle_list) == 8
+    assert len(filtered_list_sma_4.tle_list) == 8
 
 
 def test_filter_range():
