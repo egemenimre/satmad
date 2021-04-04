@@ -15,6 +15,7 @@ Current Status
 
 Current functionality is:
 
+-   Loading a list of TLEs from file
 -   Initialising an orbit with a TLE (see :ref:`tle-intro` Section)
 -   Propagating the orbit analytically via SGP4 propagator (see :ref:`sgp4-intro` Section)
 -   Propagating the orbit numerically via the Scipy ODE Solvers with two-body force model

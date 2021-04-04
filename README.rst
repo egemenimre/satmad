@@ -12,6 +12,7 @@ flight dynamics library.
 
 Current functionality is:
 
+-   Loading a list of TLEs from file
 -   Initialising an orbit with a TLE
 -   Propagating the orbit analytically via the SGP4 propagator
 -   Propagating an orbit numerically via the Scipy ODE Solvers (two-body force model) around the Earth or another planet
