@@ -8,6 +8,7 @@ TLE storage classes.
 
 """
 from abc import ABC
+from copy import copy
 from enum import Enum
 from typing import List
 
@@ -89,7 +90,8 @@ class _TleList(ABC):
             tle for tle in self.tle_list if getattr(tle, param.value) == value
         ]
 
-        return TleStorage(filtered_list)
+        # create new object with the filtered list
+        return self._selfcopy(filtered_list)
 
     def filter_by_func(self, param, filter_func):
         """
@@ -134,7 +136,8 @@ class _TleList(ABC):
             tle for tle in self.tle_list if filter_func(getattr(tle, param.value, tle))
         ]
 
-        return TleStorage(filtered_list)
+        # create new object with the filtered list
+        return self._selfcopy(filtered_list)
 
     def filter_by_range(self, param, min_value=None, max_value=None):
         """
@@ -213,7 +216,15 @@ class _TleList(ABC):
         else:
             filtered_list = []
 
-        return TleStorage(filtered_list)
+        # create new object with the filtered list
+        return self._selfcopy(filtered_list)
+
+    def _selfcopy(self, new_list):
+        """Creates a new (shallow copied) object of the same type with the new list."""
+        output = copy(self)
+        output.tle_list = new_list
+
+        return output
 
 
 class TleTimeSeries(_TleList):

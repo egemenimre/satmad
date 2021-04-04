@@ -13,7 +13,7 @@ import pytest
 from astropy import units as u
 from astropy.time import Time
 
-from satmad.propagation.tle_storage import TleFilterParams, TleStorage
+from satmad.propagation.tle_storage import TleFilterParams, TleStorage, TleTimeSeries
 
 extra_path = Path("satmad", "propagation", "tests")
 
@@ -73,6 +73,7 @@ def test_filter_value():
     )
     empty_filtered_list = tle_storage.filter_by_value(TleFilterParams.SAT_NUMBER, 56495)
 
+    assert isinstance(filtered_list_sat_nr, TleStorage)
     assert tle_storage.tle_list[0].name == "APRIZESAT 2"
     assert len(filtered_list_sat_nr.tle_list) == 2
     assert len(filtered_list_int_deg.tle_list) == 1
@@ -175,6 +176,7 @@ def test_tle_timeseries_time_filter():
         TleFilterParams.EPOCH, min_value=threshold_time
     )
 
+    assert isinstance(tle_storage_filtered, TleTimeSeries)
     assert tle_storage_filtered.tle_list[0].epoch.isot == "2021-04-01T02:14:48.404"
     assert tle_storage_filtered.tle_list[-1].epoch.isot == "2021-04-01T20:16:48.785"
 
