@@ -52,7 +52,7 @@ catalogue number "46495" is extracted from the list.
 
 Conversely, if a range rather than an exact match is sought (e.g. semimajor axis, epoch or eccentricity),
 then `filter_by_range` method should be used. In the example above, a threshold epoch is given and
-all TLE values after this threshold are extracted. This method can accept a minimum, a maximum or both, such that::
+all TLE values after this threshold are extracted. This method can accept a minimum, a maximum or both, such that:
 
 `max_value > param > min_value`
 
