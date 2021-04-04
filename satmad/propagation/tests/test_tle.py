@@ -89,20 +89,33 @@ def test_tle_with_params(init_tle_leo, check_str_leo):
 
     tle1 = init_tle_leo
 
+    # Quantity input with different units
+    inclination = tle1.inclination.to(u.deg)
+    # float input
+    raan = tle1.raan.to_value(u.rad)
+    # dimensionless units
+    eccentricity = tle1.eccentricity * u.dimensionless_unscaled
+
+    # mean motion in rad/s
+    mean_motion = tle1.mean_motion._to_value(u.rad / u.s) * 1 / u.s
+
+    # sat number given as string - should be int
+    sat_num = str(tle1.sat_number)
+
     tle2 = TLE(
         tle1.epoch,
-        tle1.inclination,
-        tle1.raan,
-        tle1.eccentricity,
+        inclination,
+        raan,
+        eccentricity,
         tle1.arg_perigee,
         tle1.mean_anomaly,
-        tle1.mean_motion,
+        mean_motion,
         tle1.bstar,
         tle1.n_dot,
         n_dotdot=tle1.n_dotdot,
         name=init_tle_leo.name,
         intl_designator=tle1.intl_designator,
-        sat_num=tle1.sat_number,
+        sat_num=sat_num,
         classification=tle1.classification,
         rev_nr=tle1.rev_nr,
         el_nr=tle1.el_nr,
@@ -279,8 +292,15 @@ def test_getters_setters(init_tle_leo):
     tle.eccentricity = 0.05
     assert tle.eccentricity == approx(0.05, abs=1e-10)
 
+    tle.eccentricity = 0.05 * u.dimensionless_unscaled
+    assert tle.eccentricity == approx(0.05, abs=1e-10)
+
     tle.mean_motion = 1.05e-5
-    assert tle.mean_motion == approx(1.05e-5, rel=1e-10)
+    assert tle.mean_motion == 1.05e-5 * u.rad / u.s
+
+    # setter and getter with Quantity
+    tle.mean_motion = 1.05e-5 * u.rad / u.s
+    assert tle.mean_motion == 1.05e-5 * u.rad / u.s
 
     tle.n_dot = 1.05e-5
     assert tle.n_dot == approx(1.05e-5, rel=1e-10)
