@@ -18,13 +18,12 @@ from astropy.coordinates import (
     BaseCoordinateFrame,
     CartesianDifferential,
     DynamicMatrixTransform,
+    SkyCoord,
     StaticMatrixTransform,
     TimeAttribute,
     frame_transform_graph,
     get_body_barycentric,
     get_body_barycentric_posvel,
-    CartesianRepresentation,
-    SkyCoord,
 )
 from astropy.coordinates import representation as r
 from astropy.coordinates.builtin_frames.utils import (

@@ -15,7 +15,6 @@ from astropy.coordinates import (
     ITRS,
     CartesianDifferential,
     CartesianRepresentation,
-    SkyCoord,
 )
 from astropy.time import Time
 from pytest import approx

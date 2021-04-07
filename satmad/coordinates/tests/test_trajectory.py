@@ -10,12 +10,7 @@ Trajectory Class tests.
 
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import (
-    TEME,
-    CartesianDifferential,
-    CartesianRepresentation,
-    SkyCoord,
-)
+from astropy.coordinates import TEME, CartesianDifferential, CartesianRepresentation
 from astropy.time import Time, TimeDelta
 from matplotlib import pyplot as plt
 from sgp4.api import Satrec

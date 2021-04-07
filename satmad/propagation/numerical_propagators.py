@@ -11,12 +11,7 @@ from enum import Enum
 
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import (
-    GCRS,
-    CartesianDifferential,
-    CartesianRepresentation,
-    SkyCoord,
-)
+from astropy.coordinates import GCRS, CartesianDifferential, CartesianRepresentation
 from scipy.integrate import solve_ivp
 
 from satmad.coordinates.frames import init_pvt
@@ -147,6 +142,7 @@ class NumericalPropagator(AbstractPropagator):
             *init_coords.velocity.d_xyz.to_value(u.km / u.s),
         ]
 
+        # noinspection PyTypeChecker
         solver = solve_ivp(
             self._ode_diff_eqns,
             (t_list_epoch[0], t_list_epoch[-1]),
