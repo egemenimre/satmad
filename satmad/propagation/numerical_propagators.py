@@ -19,6 +19,7 @@ from astropy.coordinates import (
 )
 from scipy.integrate import solve_ivp
 
+from satmad.coordinates.frames import init_pvt
 from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH
 from satmad.propagation.base_propagator import AbstractPropagator
@@ -171,14 +172,8 @@ class NumericalPropagator(AbstractPropagator):
             CartesianDifferential(v_list, unit=u.km / u.s)
         )
 
-        coords_list = SkyCoord(
-            rv_list,
-            obstime=time_list,
-            frame=GCRS,
-            representation_type="cartesian",
-            differential_type="cartesian",
-            copy=False,
-        )
+        coords_list = init_pvt(GCRS, time_list, rv_list, copy=False)
+
         return coords_list
 
     def _ode_diff_eqns(self, t, rv):

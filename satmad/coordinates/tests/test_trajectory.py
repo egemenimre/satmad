@@ -20,6 +20,7 @@ from astropy.time import Time, TimeDelta
 from matplotlib import pyplot as plt
 from sgp4.api import Satrec
 
+from satmad.coordinates.frames import init_pvt
 from satmad.coordinates.trajectory import Trajectory
 from satmad.propagation.tle import TLE
 
@@ -54,13 +55,7 @@ def propagation_engine(line1, line2, time_list):
     ).with_differentials(vel_list)
 
     # trajectory in astropy
-    traj_astropy = SkyCoord(
-        pos_list,
-        obstime=time_list,
-        frame=TEME.name,
-        representation_type="cartesian",
-        differential_type="cartesian",
-    )
+    traj_astropy = init_pvt(TEME, time_list, pos_list)
 
     # Init trajectory in Trajectory object
     trajectory = Trajectory(traj_astropy)

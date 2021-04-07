@@ -7,6 +7,7 @@
 Test coordinate transformations for the TEME, J2000 and TIRS coordinate frames.
 
 """
+import pytest
 from astropy import units as u
 from astropy.coordinates import (
     CIRS,
@@ -22,7 +23,7 @@ from astropy.coordinates import (
 from astropy.time import Time
 from pytest import approx
 
-from satmad.coordinates.frames import J2000, TIRS, CelestialBodyCRS
+from satmad.coordinates.frames import J2000, TIRS, CelestialBodyCRS, init_pvt
 from satmad.core.celestial_bodies import EARTH, SUN
 
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
@@ -150,6 +151,48 @@ def vel_err(rv_test, rv_true):
     """
     v_diff = rv_test.velocity - rv_true.velocity
     return v_diff.norm().to(u.mm / u.s)
+
+
+# ********** Cartesian init testing **********
+
+
+def test_init_cart():
+    """Tests the cartesian initialisation convenience method."""
+
+    rv_gcrs_true_sky = SkyCoord(rv_gcrs_true)
+
+    # easy init
+    rv_gcrs_0 = init_pvt(GCRS, time, r_gcrs_true, v_gcrs_true)
+
+    # init with str frame name (should be lowercase letters)
+    rv_gcrs_1 = init_pvt("GCRS", time, r_gcrs_true, v_gcrs_true)
+
+    # init without velocity
+    rv_gcrs_2 = init_pvt(GCRS, time, r_gcrs_true, copy=False)
+
+    assert rv_gcrs_0 == rv_gcrs_true_sky
+    assert rv_gcrs_1 == rv_gcrs_true_sky
+    assert rv_gcrs_2 == SkyCoord(
+        GCRS(
+            r_gcrs_true,
+            obstime=time,
+            representation_type="cartesian",
+            differential_type="cartesian",
+        )
+    )
+
+
+def test_init_cart_wrong_frame():
+    """Tests cartesian init with incorrect frame name."""
+    with pytest.raises(ValueError):
+        init_pvt("GCRSx", time, r_gcrs_true, v_gcrs_true)
+
+
+def test_init_cart_wrong_Time():
+    """Tests cartesian init with incorrect frame name."""
+    with pytest.raises(TypeError):
+        # noinspection PyTypeChecker
+        init_pvt("GCRS", "2004-04-06T07:51:28.386009", r_gcrs_true, v_gcrs_true)
 
 
 # ********** Functional testing **********
@@ -341,12 +384,8 @@ def test_cb_crs_to_icrs_sun():
     allowable_pos_diff = 5e-4 * u.mm
     allowable_vel_diff = 0.0001 * u.mm / u.s
 
-    rv_suncrs_true = SkyCoord(
-        r_gcrs_true.with_differentials(v_gcrs_true),
-        obstime=time,
-        frame=_SunCRS,
-        representation_type="cartesian",
-        differential_type="cartesian",
+    rv_suncrs_true = init_pvt(
+        _SunCRS, time, r_gcrs_true.with_differentials(v_gcrs_true)
     )
 
     rv_icrs = rv_suncrs_true.transform_to(ICRS)

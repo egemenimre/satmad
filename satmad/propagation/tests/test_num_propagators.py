@@ -20,7 +20,7 @@ from astropy.coordinates import (
 from astropy.time import Time
 from pytest import approx
 
-from satmad.coordinates.frames import MoonCRS
+from satmad.coordinates.frames import MoonCRS, init_pvt
 from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
 from satmad.core.central_body import CelestialBody, CelestialBodyEllipsoid
 from satmad.propagation.numerical_propagators import ODESolverType
@@ -38,13 +38,7 @@ def rv_init_moon_crs():
     # GMAT test case
     v_moon_crs = CartesianDifferential([1, -1, 0.6], unit=u.km / u.s)
     r_moon_crs = CartesianRepresentation([1000, 1000, 2000], unit=u.km)
-    rv_init = SkyCoord(
-        r_moon_crs.with_differentials(v_moon_crs),
-        obstime=time,
-        frame=MoonCRS,
-        representation_type="cartesian",
-        differential_type="cartesian",
-    )
+    rv_init = init_pvt(MoonCRS, time, r_moon_crs.with_differentials(v_moon_crs))
 
     return rv_init
 
@@ -105,12 +99,8 @@ def test_num_propagator_moon(rv_init_moon_crs):
         [1.870952777669765e03, -1.811234513779054e02, 2.305452195816935e03],
         unit=u.km,
     )
-    rv_fin_gmat = SkyCoord(
-        r_moon_crs_gmat.with_differentials(v_moon_crs_gmat),
-        obstime=time,
-        frame=MoonCRS,
-        representation_type="cartesian",
-        differential_type="cartesian",
+    rv_fin_gmat = init_pvt(
+        MoonCRS, time, r_moon_crs_gmat.with_differentials(v_moon_crs_gmat)
     )
 
     r_diff = pos_err(rv_fin, rv_fin_gmat)
@@ -135,14 +125,8 @@ def rv_init_leo_gcrs():
     r_gcrs = CartesianRepresentation(
         [5102.50895290, 6123.01139910, 6378.13693380], unit=u.km
     )
-    rv_init = SkyCoord(
-        r_gcrs.with_differentials(v_gcrs),
-        obstime=time,
-        frame=GCRS,
-        representation_type="cartesian",
-        differential_type="cartesian",
-    )
 
+    rv_init = init_pvt(GCRS, time, r_gcrs.with_differentials(v_gcrs))
     return rv_init
 
 

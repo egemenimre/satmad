@@ -23,6 +23,8 @@ from astropy.coordinates import (
     frame_transform_graph,
     get_body_barycentric,
     get_body_barycentric_posvel,
+    CartesianRepresentation,
+    SkyCoord,
 )
 from astropy.coordinates import representation as r
 from astropy.coordinates.builtin_frames.utils import (
@@ -30,6 +32,7 @@ from astropy.coordinates.builtin_frames.utils import (
     get_jd12,
     get_polar_motion,
 )
+from astropy.time import Time
 
 from satmad.core.celestial_bodies import MOON
 
@@ -265,3 +268,72 @@ def j2000_to_gcrs():
 def gcrs_to_j2000():
     """Constant conversion matrix (Frame Bias) from GCRS to J2000."""
     return _FRAME_BIAS_MATRIX.transpose()
+
+
+def init_pvt(frame, time, pos, vel=None, copy=False):
+    """
+    Convenience method to initialise a `SkyCoord` object using the inputs.
+
+    If velocity input is not given (or is `None`), then velocity input is not set. If
+    a velocity value of (0,0,0) is desired, these values should be explicitly assigned
+    and the corresponding velocity vector should be given as input.
+
+    Note that, the position vector input may be including the velocity inputs. If
+    velocity input is not given, then these velocity values are not overwritten.
+
+    Also note that, `Time`, `CartesianRepresentation` and `CartesianDifferential`
+    objects as well as the resulting `SkyCoord` object support multiple value inputs,
+    as long as the input sizes match. As an example, it is possible to input
+    30 time, position and velocity values, representing discrete points on a trajectory.
+
+    Parameters
+    ----------
+    frame : str or Type[BaseCoordinateFrame]
+        Frame name (string) or frame object itself (e.g.GCRS)
+    time : Time
+        time(s) associated with the coordinates
+    pos : CartesianRepresentation
+        Position vector(s)
+    vel : CartesianDifferential or None
+        Velocity vector(s)
+    copy : bool, optional
+        If `True` (default), a copy of any coordinate data is made.
+
+    Returns
+    -------
+    SkyCoord
+        `SkyCoord` object representing the cartesian input
+    """
+
+    if isinstance(frame, str):
+        # frame is defined with its name, try to identify it
+        rv_frame = frame_transform_graph.lookup_name(frame.lower())
+        if not rv_frame:
+            raise ValueError(
+                f"Frame name {frame} not recognised as a valid frame name."
+            )
+    else:
+        # frame is (hopefully) defined with an object
+        rv_frame = frame
+
+    if not isinstance(time, Time):
+        raise TypeError(f"Time input ({time}) not recognised as a valid Time object.")
+
+    # All is ready, init the frame object
+    if vel:
+        rv_skycoord = rv_frame(
+            pos.with_differentials(vel),
+            obstime=time,
+            representation_type="cartesian",
+            differential_type="cartesian",
+        )
+    else:
+        rv_skycoord = rv_frame(
+            pos,
+            obstime=time,
+            representation_type="cartesian",
+            differential_type="cartesian",
+            copy=copy,
+        )
+
+    return SkyCoord(rv_skycoord, copy=copy)
