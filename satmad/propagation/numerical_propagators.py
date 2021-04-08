@@ -14,7 +14,7 @@ from astropy import units as u
 from astropy.coordinates import GCRS, CartesianDifferential, CartesianRepresentation
 from scipy.integrate import solve_ivp
 
-from satmad.coordinates.frames import init_pvt
+from satmad.coordinates.frames import init_rvt
 from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH
 from satmad.propagation.base_propagator import AbstractPropagator
@@ -168,7 +168,7 @@ class NumericalPropagator(AbstractPropagator):
             CartesianDifferential(v_list, unit=u.km / u.s)
         )
 
-        coords_list = init_pvt(GCRS, time_list, rv_list, copy=False)
+        coords_list = init_rvt(GCRS, time_list, rv_list, copy=False)
 
         return coords_list
 

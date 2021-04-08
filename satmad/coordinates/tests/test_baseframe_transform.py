@@ -23,7 +23,7 @@ from astropy.coordinates import (
 from astropy.time import Time
 from pytest import approx
 
-from satmad.coordinates.frames import J2000, TIRS, CelestialBodyCRS, init_pvt
+from satmad.coordinates.frames import J2000, TIRS, CelestialBodyCRS, init_rvt
 from satmad.core.celestial_bodies import EARTH, SUN
 
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
@@ -162,13 +162,13 @@ def test_init_cart():
     rv_gcrs_true_sky = SkyCoord(rv_gcrs_true)
 
     # easy init
-    rv_gcrs_0 = init_pvt(GCRS, time, r_gcrs_true, v_gcrs_true)
+    rv_gcrs_0 = init_rvt(GCRS, time, r_gcrs_true, v_gcrs_true)
 
     # init with str frame name (should be lowercase letters)
-    rv_gcrs_1 = init_pvt("GCRS", time, r_gcrs_true, v_gcrs_true)
+    rv_gcrs_1 = init_rvt("GCRS", time, r_gcrs_true, v_gcrs_true)
 
     # init without velocity
-    rv_gcrs_2 = init_pvt(GCRS, time, r_gcrs_true, copy=False)
+    rv_gcrs_2 = init_rvt(GCRS, time, r_gcrs_true, copy=False)
 
     assert rv_gcrs_0 == rv_gcrs_true_sky
     assert rv_gcrs_1 == rv_gcrs_true_sky
@@ -185,14 +185,14 @@ def test_init_cart():
 def test_init_cart_wrong_frame():
     """Tests cartesian init with incorrect frame name."""
     with pytest.raises(ValueError):
-        init_pvt("GCRSx", time, r_gcrs_true, v_gcrs_true)
+        init_rvt("GCRSx", time, r_gcrs_true, v_gcrs_true)
 
 
 def test_init_cart_wrong_Time():
     """Tests cartesian init with incorrect frame name."""
     with pytest.raises(TypeError):
         # noinspection PyTypeChecker
-        init_pvt("GCRS", "2004-04-06T07:51:28.386009", r_gcrs_true, v_gcrs_true)
+        init_rvt("GCRS", "2004-04-06T07:51:28.386009", r_gcrs_true, v_gcrs_true)
 
 
 # ********** Functional testing **********
@@ -384,7 +384,7 @@ def test_cb_crs_to_icrs_sun():
     allowable_pos_diff = 5e-4 * u.mm
     allowable_vel_diff = 0.0001 * u.mm / u.s
 
-    rv_suncrs_true = init_pvt(
+    rv_suncrs_true = init_rvt(
         _SunCRS, time, r_gcrs_true.with_differentials(v_gcrs_true)
     )
 

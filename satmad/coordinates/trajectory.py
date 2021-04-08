@@ -12,7 +12,7 @@ from astropy import units as u
 from astropy.coordinates import CartesianDifferential, CartesianRepresentation, SkyCoord
 from astropy.timeseries import TimeSeries
 
-from satmad.coordinates.frames import init_pvt
+from satmad.coordinates.frames import init_rvt
 from satmad.utils.interpolators import CartInterpolator3D
 from satmad.utils.timeinterval import TimeInterval
 
@@ -137,7 +137,7 @@ class Trajectory:
                 )
                 coords = coords.with_differentials(v)
 
-        return init_pvt(self._frame_name, t, coords)
+        return init_rvt(self._frame_name, t, coords)
 
     def _compute_pos(self, t):
         """
