@@ -11,7 +11,7 @@ from enum import Enum
 
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import GCRS, CartesianDifferential, CartesianRepresentation
+from astropy.coordinates import CartesianDifferential, CartesianRepresentation
 from scipy.integrate import solve_ivp
 
 from satmad.coordinates.frames import init_rvt
@@ -168,7 +168,9 @@ class NumericalPropagator(AbstractPropagator):
             CartesianDifferential(v_list, unit=u.km / u.s)
         )
 
-        coords_list = init_rvt(GCRS, time_list, rv_list, copy=False)
+        coords_list = init_rvt(
+            self.central_body.inert_coord, time_list, rv_list, copy=False
+        )
 
         return coords_list
 
