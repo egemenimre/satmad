@@ -22,9 +22,9 @@ from pytest import approx
 
 from satmad.core.celestial_bodies import (
     EARTH,
+    EARTH_ELLIPSOID_GRS80,
     EARTH_ELLIPSOID_WGS84,
     MOON,
-    EARTH_ELLIPSOID_GRS80,
 )
 from satmad.core.ground_location import GeodeticLocation, GroundLocation
 
