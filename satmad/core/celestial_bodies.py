@@ -90,7 +90,7 @@ EARTH = CelestialBody(
     GM_earth.to(u.km ** 3 / u.s ** 2),
     inert_coord="gcrs",
     body_fixed_coord="itrs",
-    ellipsoid=EARTH_ELLIPSOID_GRS80,
+    ellipsoid=EARTH_ELLIPSOID_WGS84,
 )
 """Default Earth Model."""
 
