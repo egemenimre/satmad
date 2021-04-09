@@ -14,8 +14,8 @@ These orbital elements are solely for use with the SGP4 propagator as the two ar
 with the underlying analytical orbit theory. [OM1]_
 
 See the `TLE page in Wikipedia
-<https://en.wikipedia.org/wiki/Two-line_element_set>`_ or `NASA definition
-<https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/SSOP_Help/tle_def.html>`_
+<https://en.wikipedia.org/wiki/Two-line_element_set>`_ or
+`Space-Track definition <https://www.space-track.org/documentation#tle>`_
 for more information.
 
 An example TLE is given as::
@@ -45,7 +45,7 @@ In this example, the semimajor axis is equal to 7079.056 km.
 
 In addition to the usual classical orbital elements, other components of the TLE are
 (adapted from the
-`NASA definition <https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/SSOP_Help/tle_def.html>`_
+`Space-Track definition <https://www.space-track.org/documentation#tle>`_
 ):
 
 * Satellite catalog number (NORAD ID): The unique string
