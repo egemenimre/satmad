@@ -20,7 +20,12 @@ from astropy.coordinates import (
 from astropy.time import Time, TimeDelta
 from pytest import approx
 
-from satmad.core.celestial_bodies import EARTH, EARTH_ELLIPSOID_WGS84, MOON
+from satmad.core.celestial_bodies import (
+    EARTH,
+    EARTH_ELLIPSOID_WGS84,
+    MOON,
+    EARTH_ELLIPSOID_GRS80,
+)
 from satmad.core.ground_location import GeodeticLocation, GroundLocation
 
 
@@ -31,7 +36,7 @@ def test_get_body_fixed():
     )
 
     gnd_loc = GroundLocation(
-        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH.ellipsoid
+        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH_ELLIPSOID_GRS80
     )
 
     gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(EARTH, obstime=time)
@@ -130,15 +135,15 @@ def test_round_trip():
 def test_lat_lon_alt_init():
     """Tests the GroundLocation geodetic init against astropy EarthLocation."""
     gnd_loc_astropy = EarthLocation.from_geodetic(
-        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid="WGS84"
+        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid="GRS80"
     )
 
     gnd_loc_gd = GroundLocation.from_geodetic(
-        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH_ELLIPSOID_WGS84
+        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH_ELLIPSOID_GRS80
     )
 
     gnd_loc = GroundLocation(
-        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH_ELLIPSOID_WGS84
+        10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH_ELLIPSOID_GRS80
     )
 
     print(gnd_loc_astropy.geocentric)
