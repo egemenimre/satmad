@@ -14,5 +14,6 @@ and `in plain document format <https://satmad-applications.readthedocs.io/>`_.
     :maxdepth: 1
 
     tutorials/satmad_first_steps.ipynb
-    tutorials/numerical_prop.ipynb
+    tutorials/numerical_prop_1.ipynb
+    tutorials/numerical_prop_2.ipynb
     tutorials/sso_analysis.ipynb
