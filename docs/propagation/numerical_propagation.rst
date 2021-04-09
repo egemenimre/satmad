@@ -29,7 +29,7 @@ significantly more complicated, but the procedure is still the same.
 
 While the available propagation methods are those described by the
 `Scipy ODE solvers <https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html#scipy.integrate.solve_ivp>`_,
-we have shown with `extensive analyses <../examples/analysis/num_prop_performance_1.ipynb>`_ that DOP853
+we have shown with `extensive analyses <https://satmad-applications.readthedocs.io/en/latest/analyses/propagation/num_prop_performance_1.html>`_ that DOP853
 (Explicit Runge-Kutta Order 8(5,3) due to Dormand and Prince) gives the best results in terms of accuracy
 and computational performance. Hence, this is the default propagator.
 
@@ -39,7 +39,7 @@ Usage
 The Numerical Propagator is initialised with an output stepsize (e.g. 120 seconds for a Low-Earth Orbit satellite)
 as well as relative and absolute tolerances that determine the propagation error.
 How to choose these tolerances have been investigated here in
-`this notebook <../examples/analysis/num_prop_performance_2.ipynb>`_.
+`this page <https://satmad-applications.readthedocs.io/en/latest/analyses/propagation/num_prop_performance_2.html>`_.
 
 To generate the trajectory :meth:`.NumericalPropagator.gen_trajectory` method is called with
 an initial state and a propagation interval. A trajectory is then generated through this interval with
