@@ -10,15 +10,28 @@ it also enables the user to compute interpolated coordinates within these discre
 
 The :class:`.Trajectory` class initialised with an Astropy :class:`astropy.coordinates.SkyCoord`
 object to keep these discrete points of the trajectory. These discrete points can be retrieved by the
-:meth:`.Trajectory.coord_list` method. Once the trajectory is initialised, these points should
+:property:`.Trajectory.coord_list` property. Once the trajectory is initialised, these points should
 *not* be changed, as the underlying interpolators will not be updated. Note that, the input
 discrete points should be representing a smooth and continuous trajectory to ensure a
-reliable and accurate interpolation.
+reliable and accurate interpolation. As such, any quasi-discontinuous motion (such as sharp turns or
+near-instantaneous increases in velocity) cannot be modeled perfectly and will be "smoothed out".
 
-Any point (or set of points) in time  can be computed by the :meth:`.Trajectory.get_coords`
-method - as long as they are within the discrete data points. The result is a
+Any point (or set of points) in time  can be computed by a direct call to the trajectory object
+- as long as they are within the discrete data points::
+
+    >>> # single point in time yielding a single interpolated position
+    >>> time = Time(2458826.3, format="jd", scale="utc")
+    >>> rvt = trajectory(time)
+    >>>
+    >>> # multiple points in time yielding a multiple element interpolated position
+    >>> # in a single SkyCoord object.
+    >>> times = ['2010-01-01T02:00:00.000', '2010-01-01T02:10:00']
+    >>> time_list = Time(times, format="isot", scale="utc")
+    >>> rvt_list = trajectory(time_list)
+
+The result is a
 :class:`astropy.coordinates.SkyCoord` object containing all the requested coordinates. The interval
-of validity can be queried with the :meth:`.Trajectory.interval` property. If the requested
+of validity can be queried with the :property:`.Trajectory.interval` property. If the requested
 time is out of bounds for the interpolator, a `ValueError` will be raised.
 
 Interpolation Method and Accuracy
