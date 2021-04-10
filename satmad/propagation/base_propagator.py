@@ -7,7 +7,7 @@
 Base module for analytical and numerical propagators.
 
 """
-from abc import ABC
+from abc import ABC, abstractmethod
 
 import numpy as np
 from astropy import units as u
@@ -35,6 +35,27 @@ class AbstractPropagator(ABC):
         self.name = name
         self._stepsize = stepsize
         self.central_body = central_body
+
+    @abstractmethod
+    def gen_trajectory(self, init_orbit, interval, **kwargs):
+        """
+        Generates the trajectory (time and coordinate information) for the given
+        interval with the internal output stepsize.
+
+        Parameters
+        ----------
+        init_orbit
+            Initial coordinates or orbit
+        interval : TimeInterval
+            Time interval for which the ephemeris will be generated
+        kwargs
+            Keywords specific to the implementation
+        Returns
+        -------
+        Trajectory
+            The output trajectory
+        """
+        pass
 
     @property
     def stepsize(self) -> Quantity:

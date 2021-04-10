@@ -76,7 +76,7 @@ class NumericalPropagator(AbstractPropagator):
         if not name:
             self._name = f"{solver_type.value} (rtol: {rtol}, atol: {atol} )"
 
-    def gen_trajectory(self, init_coords, interval):
+    def gen_trajectory(self, init_coords, interval, **kwargs):
         """
         Generates the trajectory (time and coordinate information) for the given
         interval with the internal output stepsize.
@@ -90,6 +90,8 @@ class NumericalPropagator(AbstractPropagator):
             Initial coordinates (the first value is used)
         interval : TimeInterval
             Time interval for which the ephemeris will be generated
+        kwargs
+            No keywords defined
         Returns
         -------
         Trajectory

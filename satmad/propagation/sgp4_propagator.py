@@ -80,7 +80,7 @@ class SGP4Propagator(AbstractPropagator):
             rv_gcrs, representation_type="cartesian", differential_type="cartesian"
         )
 
-    def gen_trajectory(self, tle, interval):
+    def gen_trajectory(self, tle, interval, **kwargs):
         """
         Generates the trajectory (time and coordinate information) for the given
         interval with the internal stepsize.
@@ -90,6 +90,8 @@ class SGP4Propagator(AbstractPropagator):
             Two-Line-Element initial orbit information (TEME mean orbital elements)
         interval : TimeInterval
             Time interval for which the ephemeris will be generated
+        kwargs
+            No keywords defined
         Returns
         -------
         Trajectory
