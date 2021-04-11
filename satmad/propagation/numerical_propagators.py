@@ -100,7 +100,7 @@ class NumericalPropagator(AbstractPropagator):
         # generate the output timelist
         time_list = self._generate_time_list(interval)
 
-        # Propagate the orbit
+        # Check initial conditions
         if init_coords.isscalar:
             # Single SkyCoord element available
             init_coords_converted = init_coords
