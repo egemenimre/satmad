@@ -62,6 +62,7 @@ master_doc = "index"
 
 # Intersphinx configuration
 intersphinx_mapping = {
+    "pyerfa": ("https://pyerfa.readthedocs.io/en/stable/", None),
     "python": ("https://docs.python.org/3", None),
     "astropy": ("https://docs.astropy.org/en/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
