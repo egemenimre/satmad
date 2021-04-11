@@ -10,7 +10,7 @@ it also enables the user to compute interpolated coordinates within these discre
 
 The :class:`.Trajectory` class initialised with an Astropy :class:`astropy.coordinates.SkyCoord`
 object to keep these discrete points of the trajectory. These discrete points can be retrieved by the
-:property:`.Trajectory.coord_list` property. Once the trajectory is initialised, these points should
+`coord_list` property. Once the trajectory is initialised, these points should
 *not* be changed, as the underlying interpolators will not be updated. Note that, the input
 discrete points should be representing a smooth and continuous trajectory to ensure a
 reliable and accurate interpolation. As such, any quasi-discontinuous motion (such as sharp turns or
@@ -31,7 +31,7 @@ Any point (or set of points) in time  can be computed by a direct call to the tr
 
 The result is a
 :class:`astropy.coordinates.SkyCoord` object containing all the requested coordinates. The interval
-of validity can be queried with the :property:`.Trajectory.interval` property. If the requested
+of validity can be queried with the `interval` property. If the requested
 time is out of bounds for the interpolator, a `ValueError` will be raised.
 
 Interpolation Method and Accuracy
