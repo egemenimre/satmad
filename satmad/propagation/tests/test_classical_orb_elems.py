@@ -20,6 +20,7 @@ from astropy.time import Time
 from pytest import approx
 
 from satmad.coordinates.frames import init_rvt
+from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
 from satmad.core.celestial_bodies import EARTH
 from satmad.core.central_body import CelestialBody
 from satmad.propagation.classical_orb_elems import (
@@ -248,14 +249,44 @@ def __init_hyperbolic_incl():
     ],
 )
 def test_rv_to_osc_elems(init_case):
-    """Tests the various orbit cases."""
+    """Tests the various orbit cases from rv to elems."""
 
     # find the function and run it
-    rv, gmat_elems, errs = globals()[init_case]()
+    rv_gmat, gmat_elems, errs = globals()[init_case]()
 
-    osc_elems = OsculatingKeplerianOrbElems.from_cartesian(rv, _EARTH_GMAT)
+    osc_elems = OsculatingKeplerianOrbElems.from_cartesian(rv_gmat, _EARTH_GMAT)
 
     _elems_assert(osc_elems, gmat_elems, errs)
+
+
+@pytest.mark.parametrize(
+    "init_case",
+    [
+        "__init_ell_equator",
+        "__init_circ_incl",
+        "__init_circ_equator",
+        "__init_hyperbolic_incl",
+    ],
+)
+def test_osc_elems_to_rv(init_case):
+    """Tests the various orbit cases from elems to rv."""
+
+    # find the function and run it
+    rv_gmat, gmat_elems, errs = globals()[init_case]()
+
+    rv = gmat_elems.to_cartesian()
+
+    r_diff = pos_err(rv, rv_gmat)
+    v_diff = vel_err(rv, rv_gmat)
+
+    print(f"r diff      :  {r_diff}")
+    print(f"v diff      :  {v_diff}")
+
+    allowable_pos_diff = 5e-05 * u.mm
+    allowable_vel_diff = 5e-06 * u.mm / u.s
+
+    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
+    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
 
 
 def test_parabolic(init_elems_leo):

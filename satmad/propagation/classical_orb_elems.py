@@ -11,10 +11,11 @@ from abc import ABC
 
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import CartesianRepresentation
+from astropy.coordinates import CartesianDifferential, CartesianRepresentation
 from astropy.time import Time
 from astropy.units import Quantity
 
+from satmad.coordinates.frames import init_rvt
 from satmad.core.celestial_bodies import EARTH
 
 
@@ -41,6 +42,11 @@ class AbstractKeplerianOrbitElements(ABC):
         argument of periapsis [rad]
     true_anomaly : Quantity
         true anomaly of the orbit [rad]
+
+    Raises
+    ------
+    ValueError
+        Parabolic orbits or singularity
     """
 
     _arg_periapsis: u.rad
@@ -70,6 +76,37 @@ class AbstractKeplerianOrbitElements(ABC):
         self.raan = raan  # type: ignore
         self.arg_periapsis = arg_periapsis  # type: ignore
         self.true_anomaly = true_anomaly  # type: ignore
+
+        # check initialisation
+        self._self_check()
+
+    def _self_check(self):
+        """Check the elements for errors. """
+        # If conic section is too close to singular, raise error.
+        if np.abs(self.sm_axis * (1 - self.eccentricity)) < 1e-3 * u.km:
+            raise ValueError(
+                "Orbit periapsis too close to zero. Singular conic sections are not allowed."
+            )
+
+        # If magnitude of the position vector is infinite, raise error.
+        if 1 + self.eccentricity * np.cos(self.true_anomaly) < 1e-30:
+            raise ValueError("Magnitude of the position vector is near infinite.")
+
+        # If ecc_mag too close to 1 then the orbit is parabolic.
+        if np.abs(1 - self.eccentricity) < 1e-7:
+            raise ValueError(
+                "Orbit eccentricity is close to 1. Parabolic orbits are not allowed."
+            )
+
+        # Check true anomaly in the hyperbolic case
+        nu_rad = self.true_anomaly.to_value(u.rad)
+        nu_rad = nu_rad if nu_rad < np.pi else nu_rad - 2 * np.pi
+        if self.eccentricity > 1 and np.abs(nu_rad) >= np.pi - np.arccos(
+            1 / self.eccentricity
+        ):
+            raise ValueError(
+                "True anomaly value physically impossible for the sm_axis and ecc values."
+            )
 
     @property
     def epoch(self) -> Time:
@@ -226,7 +263,7 @@ class AbstractKeplerianOrbitElements(ABC):
 
 class OsculatingKeplerianOrbElems(AbstractKeplerianOrbitElements):
     """
-    Osculating Classical (Keplerian) Orbital Elements.
+    Osculating Classical (Keplerian) Orbital Elements in the local inertial frame.
 
     By definition, this uses a two-body potential for computations. Therefore, this is
     not a "mean elements" model such as a TLE. Over a trajectory generated with a
@@ -257,6 +294,11 @@ class OsculatingKeplerianOrbElems(AbstractKeplerianOrbitElements):
         argument of periapsis [rad]
     true_anomaly : Quantity
         true anomaly of the orbit [rad]
+
+    Raises
+    ------
+    ValueError
+        Parabolic orbits or singularity
     """
 
     @u.quantity_input(
@@ -291,10 +333,12 @@ class OsculatingKeplerianOrbElems(AbstractKeplerianOrbitElements):
     @classmethod
     def from_cartesian(cls, init_coords, central_body=EARTH):
         """
-        Generates Osculating Keplerian Elements from cartesian coordinates.
+        Generates Osculating Keplerian Elements from cartesian coordinates in the
+        inertial frame of the celestial body.
 
-        If the initial coordinate is in a different frame than the propagation frame,
-        it is automatically converted to the proper frame for propagation.
+        If the initial coordinate is in a different frame than the
+        inertial frame of the celestial body, it is automatically converted to
+        the proper frame for conversion.
 
         Parameters
         ----------
@@ -337,6 +381,78 @@ class OsculatingKeplerianOrbElems(AbstractKeplerianOrbitElements):
         )
 
         return orb_elems
+
+    def to_cartesian(self):
+        """
+        Converts the orbital elements to the cartesian coordinates in the
+        local inertial frame of the central body.
+
+        Returns
+        -------
+        SkyCoord
+            cartesian coordinates in the local inertial frame of the central body
+
+        Raises
+        ------
+        ValueError
+            Parabolic orbits or singularity
+        """
+
+        # shorthands
+        a = self.sm_axis
+        i = self.inclination
+        e = self.eccentricity
+        argp = self.arg_periapsis
+        raan = self.raan
+        nu = self.true_anomaly
+        node = argp + nu
+        mu = self.central_body.mu
+
+        p = a * (1 - e ** 2)
+
+        r = p / (1 + e * np.cos(nu))
+
+        # compute position components
+        x = r * (np.cos(node) * np.cos(raan) - np.cos(i) * np.sin(node) * np.sin(raan))
+        y = r * (np.cos(node) * np.sin(raan) + np.cos(i) * np.sin(node) * np.cos(raan))
+        z = r * (np.sin(node) * np.sin(i))
+
+        # If orbit is too close to parabolic, raise error.
+        if np.abs(p) < 1e-30 * u.km:
+            raise ValueError(
+                "Orbit eccentricity is close to 1. Parabolic orbits are not allowed."
+            )
+
+        sqrt_mup = np.sqrt(mu / p)
+
+        # compute velocity components
+        v_x = sqrt_mup * (np.cos(nu) + e) * (
+            -np.sin(argp) * np.cos(raan) - np.cos(i) * np.sin(raan) * np.cos(argp)
+        ) - sqrt_mup * np.sin(nu) * (
+            np.cos(argp) * np.cos(raan) - np.cos(i) * np.sin(raan) * np.sin(argp)
+        )
+
+        v_y = sqrt_mup * (np.cos(nu) + e) * (
+            -np.sin(argp) * np.sin(raan) + np.cos(i) * np.cos(raan) * np.cos(argp)
+        ) - sqrt_mup * np.sin(nu) * (
+            np.cos(argp) * np.sin(raan) + np.cos(i) * np.cos(raan) * np.sin(argp)
+        )
+        v_z = sqrt_mup * (
+            (np.cos(nu) + e) * np.sin(i) * np.cos(argp)
+            - np.sin(i) * np.sin(nu) * np.sin(argp)
+        )
+
+        # collate the SkyCoord object
+        time = self.epoch.replicate()
+        r = CartesianRepresentation([x, y, z], unit=u.km)
+        v = CartesianDifferential(
+            [v_x, v_y, v_z],
+            unit=u.km / u.s,
+        )
+
+        rv_init = init_rvt(self.central_body.inert_coord, time, r.with_differentials(v))
+
+        return rv_init
 
 
 def _rv_to_keplerian_elems(epoch, r, v, central_body):
