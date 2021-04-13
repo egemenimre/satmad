@@ -1,4 +1,4 @@
-Orbit Initialisation with Two-Line Elements (TLEs)
+Representing Orbits with Two-Line Elements (TLEs)
 ====================================================
 
 .. _tle-intro:
