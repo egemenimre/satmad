@@ -7,7 +7,7 @@
 Classical Orbital Elements definitions.
 
 """
-from abc import ABC
+from abc import ABC, abstractmethod
 
 import numpy as np
 from astropy import units as u
@@ -107,6 +107,55 @@ class AbstractKeplerianOrbitElements(ABC):
             raise ValueError(
                 "True anomaly value physically impossible for the sm_axis and ecc values."
             )
+
+    @classmethod
+    @abstractmethod
+    def from_cartesian(cls, init_coords, central_body=EARTH):
+        """
+        Generates Keplerian Elements from cartesian coordinates in the
+        inertial frame of the celestial body.
+
+        If the initial coordinate is in a different frame than the
+        inertial frame of the celestial body, it is automatically converted to
+        the proper frame for conversion.
+
+        Parameters
+        ----------
+        init_coords : SkyCoord
+            Initial coordinates (the first value is used)
+        central_body : CelestialBody
+            celestial body (e.g. Earth) around which the orbit is defined
+
+        Returns
+        -------
+        OsculatingKeplerianOrbElems
+            Osculating classical (or Keplerian) orbital elements
+
+        Raises
+        ------
+        ValueError
+            Parabolic orbits or singularity
+        """
+
+        pass
+
+    @abstractmethod
+    def to_cartesian(self):
+        """
+        Converts the orbital elements to the cartesian coordinates in the
+        local inertial frame of the central body.
+
+        Returns
+        -------
+        SkyCoord
+            cartesian coordinates in the local inertial frame of the central body
+
+        Raises
+        ------
+        ValueError
+            Parabolic orbits or singularity
+        """
+        pass
 
     @property
     def epoch(self) -> Time:

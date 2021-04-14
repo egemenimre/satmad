@@ -23,10 +23,7 @@ from satmad.coordinates.frames import init_rvt
 from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
 from satmad.core.celestial_bodies import EARTH
 from satmad.core.central_body import CelestialBody
-from satmad.propagation.classical_orb_elems import (
-    AbstractKeplerianOrbitElements,
-    OsculatingKeplerianOrbElems,
-)
+from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
 
 _EARTH_GMAT = CelestialBody(
     "Earth",
@@ -50,7 +47,7 @@ def init_elems_leo():
     arg_perigee = 5.23982923 * u.rad
     true_an = 1.5 * u.rad
 
-    orb_elems = AbstractKeplerianOrbitElements(
+    orb_elems = OsculatingKeplerianOrbElems(
         time, sm_axis, ecc, incl, raan, arg_perigee, true_an, central_body
     )
 
