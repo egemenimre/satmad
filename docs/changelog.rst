@@ -11,15 +11,24 @@ Development Version
 
 The major functionalities under development are:
 
-- Add Classical Orbital Elements
-- Add resample functionality to :class:`.TimeIntervalList`
+- Add `Keplerian Orbital Elements <propagation/classical_orb_elems.rst>`_
 - Pass and Access finding with a simple elevation mask (e.g. Groundstation communication times)
-
+- Occultations and shadows
 
 
 .. _changelog-latest:
 
 Latest Version
+-----------------
+
+Version 0.1.1 (14 Apr 2021)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Added `Keplerian Orbital Elements <propagation/classical_orb_elems.rst>`_
+- Added new tutorials on `Numerical Orbit Propagation <tutorials/numerical_prop_1.ipynb>`_
+
+
+Previous Versions
 -----------------
 
 Version 0.1 (05 Apr 2021)
@@ -32,11 +41,6 @@ Version 0.1 (05 Apr 2021)
   `available at Github <https://github.com/egemenimre/satmad_applications>`_ (for Jupyter notebooks)
   and `in plain document format <https://satmad-applications.readthedocs.io/>`_.
 
-
-
-
-Previous Versions
------------------
 
 Version 0.0.7 (24 Mar 2021)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
