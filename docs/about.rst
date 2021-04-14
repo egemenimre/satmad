@@ -17,6 +17,7 @@ Current functionality is:
 
 -   Loading a list of TLEs from file
 -   Initialising an orbit with a TLE (see :ref:`tle-intro` Section)
+    or `Keplerian Orbital Elements <propagation/classical_orb_elems.rst>`_
 -   Propagating the orbit analytically via SGP4 propagator (see :ref:`sgp4-intro` Section)
 -   Propagating the orbit numerically via the Scipy ODE Solvers with two-body force model
     (see :ref:`numprop-intro` Section) around the Earth or another planet

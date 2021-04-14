@@ -11,6 +11,7 @@ Development Version
 
 The major functionalities under development are:
 
+- Add Classical Orbital Elements
 - Add resample functionality to :class:`.TimeIntervalList`
 - Pass and Access finding with a simple elevation mask (e.g. Groundstation communication times)
 

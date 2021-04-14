@@ -11,6 +11,7 @@ Orbits and Trajectories
     :maxdepth: 2
 
     coordinates/trajectory
+    propagation/classical_orb_elems
     propagation/tle
     propagation/tle_storage
     propagation/propagators
