@@ -63,7 +63,7 @@ EARTH_ELLIPSOID_GRS80 = CelestialBodyEllipsoid(
 
 EARTH_ELLIPSOID_WGS84 = CelestialBodyEllipsoid(
     "Earth Ellipsoid WGS84",
-    63781370 * u.m,
+    6378137.0 * u.m,
     298.257223563 * u.dimensionless_unscaled,
     mu=3.986004418e14 * u.m ** 3 / u.s ** 2,
     j2=1.082629821313e-3 * u.dimensionless_unscaled,
