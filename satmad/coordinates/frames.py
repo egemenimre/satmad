@@ -269,7 +269,7 @@ def gcrs_to_j2000():
     return _FRAME_BIAS_MATRIX.transpose()
 
 
-def init_rvt(frame, time, pos, vel=None, copy=False):
+def init_pvt(frame, time, pos, vel=None, copy=False):
     """
     Convenience method to initialise a `SkyCoord` object using the inputs.
 

@@ -19,7 +19,7 @@ from astropy.coordinates import (
 from astropy.time import Time
 from pytest import approx
 
-from satmad.coordinates.frames import init_rvt
+from satmad.coordinates.frames import init_pvt
 from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
 from satmad.core.celestial_bodies import EARTH
 from satmad.core.central_body import CelestialBody
@@ -69,7 +69,7 @@ def _parse_rv_line(rv_line, coord_sys):
         [float(rv_items[1]), float(rv_items[2]), float(rv_items[3])], unit=u.km
     )
 
-    rv_init = init_rvt(coord_sys, time, r.with_differentials(v))
+    rv_init = init_pvt(coord_sys, time, r.with_differentials(v))
 
     return rv_init
 

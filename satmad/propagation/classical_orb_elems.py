@@ -15,7 +15,7 @@ from astropy.coordinates import CartesianDifferential, CartesianRepresentation
 from astropy.time import Time
 from astropy.units import Quantity
 
-from satmad.coordinates.frames import init_rvt
+from satmad.coordinates.frames import init_pvt
 from satmad.core.celestial_bodies import EARTH
 
 
@@ -499,7 +499,7 @@ class OsculatingKeplerianOrbElems(AbstractKeplerianOrbitElements):
             unit=u.km / u.s,
         )
 
-        rv_init = init_rvt(self.central_body.inert_coord, time, r.with_differentials(v))
+        rv_init = init_pvt(self.central_body.inert_coord, time, r.with_differentials(v))
 
         return rv_init
 
