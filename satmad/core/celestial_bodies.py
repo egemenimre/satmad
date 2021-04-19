@@ -72,7 +72,7 @@ EARTH_ELLIPSOID_WGS84 = CelestialBodyEllipsoid(
 """Earth Ellipsoid defined in World Geodetic System WGS84.
 
 (See `WGS84 definition
-<https://earth-info.nga.mil/coordsys/coord-download.php?file=website/NGA.STND.0036_1.0.0_WGS84.pdf>`_)."""
+<https://earth-info.nga.mil/php/download.php?file=coord-wgs84>`_)."""
 
 MOON_ELLIPSOID_IAUWG2015 = CelestialBodyEllipsoid(
     "Moon Ellipsoid IAU WG 2015", 1737400 * u.m, inf * u.dimensionless_unscaled
