@@ -43,6 +43,7 @@ extensions = [
     "sphinx.ext.intersphinx",  # Link mapping to external projects
     # "sphinx.ext.doctest",  # Doctest
     "nbsphinx",  # Jupyter notebook support
+    "myst_parser",  # MyST parser
 ]
 numpydoc_show_class_members = False
 
@@ -55,7 +56,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = [".rst", ".md"]
 
 # The master toctree document.
 master_doc = "index"
@@ -78,6 +79,7 @@ else:
 # Controls when a cell will time out (defaults to 30; use -1 for no timeout):
 nbsphinx_timeout = 1000
 
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -89,3 +91,7 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+# -- Options for Texinfo output -------------------------------------------
+
+myst_update_mathjax = False
