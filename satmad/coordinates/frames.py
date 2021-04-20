@@ -164,7 +164,7 @@ class J2000(BaseCoordinateFrame):
     References
     ----------
     The definitions and conversions are from IERS Conventions 2010, Chapter 5
-    [TCF1]_.
+    [TCF1] in :doc:`References <../references>`.
 
     """
 
@@ -186,7 +186,7 @@ class TIRS(BaseCoordinateFrame):
     References
     ----------
     The definitions and conversions are from IERS Conventions 2010, Chapter 5
-    [TCF1]_.
+    [TCF1] in :doc:`References <../references>`.
 
     """
 
@@ -273,9 +273,9 @@ def init_pvt(frame, time, pos, vel=None, copy=False):
     """
     Convenience method to initialise a `SkyCoord` object using the inputs.
 
-    If velocity input is not given (or is `None`), then velocity input is not set. If
-    a velocity value of (0,0,0) is desired, these values should be explicitly assigned
-    and the corresponding velocity vector should be given as input.
+    If velocity input is not given (or is `None`), then velocity input is not set.
+    If a velocity value of (0,0,0) is desired, these values should be explicitly
+    assigned and the corresponding velocity vector should be given as input.
 
     Note that, the position vector input may be including the velocity inputs. If
     velocity input is not given, then these velocity values are not overwritten.
@@ -283,7 +283,8 @@ def init_pvt(frame, time, pos, vel=None, copy=False):
     Also note that, `Time`, `CartesianRepresentation` and `CartesianDifferential`
     objects as well as the resulting `SkyCoord` object support multiple value inputs,
     as long as the input sizes match. As an example, it is possible to input
-    30 time, position and velocity values, representing discrete points on a trajectory.
+    30 time, position and velocity values, representing discrete points on
+    a trajectory.
 
     Parameters
     ----------
