@@ -1,5 +1,4 @@
 # Central Body
-====================
 
 ## Overview
 Celestial bodies in SatMAD are defined with the {py:class}`.CelestialBody` class. A celestial body stores its relevant values (e.g $GM$ constant) for various calculations such as force models within orbit propagation. As such, each `CelestialBody` object is a central repository of information for that body.
