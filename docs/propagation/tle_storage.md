@@ -90,11 +90,11 @@ def tle_filter(tle):
 filtered_list_sma_2 = tle_storage.filter_by_func(TleFilterParams.TLE, tle_filter)
 ```
 
-Note that, `TleFilterParams.TLE` is available for `filter_by_func` method only, as the behaviour with an entire TLE is not well defined with `filter_by_value` and `filter_by_range` methods.
+Note that, `TleFilterParams.TLE` is available for `filter_by_func` method only, as the behaviour with an entire TLE is not well-defined with `filter_by_value` and `filter_by_range` methods.
 
 ## Lists of TLEs of the Same Satellite: {py:class}`.TleTimeSeries`
 
-A specific class :class:`.TleTimeSeries` exists to store the multiple TLEs from a single satellite with time ordering (epoch values). This is particularly useful to plot the orbit or to feed it to a propagator to propagate the satellite orbit through multiple TLEs. The ideal way to initialise it is to initialise a `TleStorage` from a file or another source and then filter for a single orbit.
+A specific class {py:class}`.TleTimeSeries` exists to store the multiple TLEs from a single satellite with time ordering (epoch values). This is particularly useful to plot the orbit or to feed it to a propagator to propagate the satellite orbit through multiple TLEs. The ideal way to initialise it is to initialise a `TleStorage` from a file or another source and then filter for a single orbit.
 
 The code below initialises a `TleStorage` from a file and filters for the satellites with the catalogue number `37791`.
 
