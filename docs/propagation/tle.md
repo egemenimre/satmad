@@ -4,7 +4,7 @@
 
 A two-line element set (TLE) is a data format containing a set of TEME (True Equator, Mean Equinox) mean orbital elements of an Earth-orbiting object for a given point in time, called the Epoch Time.
 
-These orbital elements are solely for use with the SGP4 propagator as the two are coupled with the underlying analytical orbit theory. [[OM1]](../references.md#orbital-mechanics):
+These orbital elements are solely for use with the SGP4 propagator as the two are coupled with the underlying analytical orbit theory. [[OM1]](../references.md#orbital-mechanics)
 
 See the [TLE page in Wikipedia](https://en.wikipedia.org/wiki/Two-line_element_set) or [Space-Track definition](https://www.space-track.org/documentation#tle) for more information.
 

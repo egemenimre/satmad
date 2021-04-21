@@ -6,7 +6,7 @@
 
 In SatMAD, all trajectories, from aircraft to satellites to entire planets, are represented with the {py:class}`.Trajectory` class. It not only keeps the discrete position (and velocity) points in time, it also enables the user to compute interpolated coordinates within these discrete data points.
 
-The :class:`.Trajectory` class initialised with an Astropy {py:class}`astropy.coordinates.SkyCoord` object to keep these discrete points of the trajectory. These discrete points can be retrieved by the `coord_list` property. Once the trajectory is initialised, these points should *not* be changed, as the underlying interpolators will not be updated. Note that, the input discrete points should be representing a smooth and continuous trajectory to ensure a reliable and accurate interpolation. As such, any quasi-discontinuous motion (such as sharp turns or near-instantaneous increases in velocity) cannot be modeled perfectly and will be "smoothed out".
+The {py:class}`.Trajectory` class initialised with an Astropy {py:class}`astropy.coordinates.SkyCoord` object to keep these discrete points of the trajectory. These discrete points can be retrieved by the `coord_list` property. Once the trajectory is initialised, these points should *not* be changed, as the underlying interpolators will not be updated. Note that, the input discrete points should be representing a smooth and continuous trajectory to ensure a reliable and accurate interpolation. As such, any quasi-discontinuous motion (such as sharp turns or near-instantaneous increases in velocity) cannot be modeled perfectly and will be "smoothed out".
 
 Any point (or set of points) in time  can be computed by a direct call to the trajectory object - as long as they are within the discrete data points:
 
