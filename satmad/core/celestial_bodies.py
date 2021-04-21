@@ -27,7 +27,7 @@ GM_sun = 1.32712442099e20 * u.m ** 3 / u.s ** 2
 """Heliocentric gravitational constant
 (TCB-compatible value, computed from the TDB-compatible value).
 
-(See IERS Technical Note No. 36 (2010) Table 1.1 
+(See IERS Technical Note No. 36 (2010) Table 1.1
 [TCF1] in :doc:`References <../references>`)"""
 
 GM_moon = 4.902802711497899e12 * u.m ** 3 / u.s ** 2
