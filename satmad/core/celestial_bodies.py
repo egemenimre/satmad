@@ -20,13 +20,15 @@ GM_earth = 3.986004418e14 * u.m ** 3 / u.s ** 2
 (TCG-compatible value). Also compatible with the WGS84 coordinate system.
 Includes mass of the atmosphere.
 
-(See IERS Technical Note No. 36 (2010) Table 1.1 [TCF1]_)"""
+(See IERS Technical Note No. 36 (2010) Table 1.1
+[TCF1] in:doc:`References <../references>`)"""
 
 GM_sun = 1.32712442099e20 * u.m ** 3 / u.s ** 2
 """Heliocentric gravitational constant
 (TCB-compatible value, computed from the TDB-compatible value).
 
-(See IERS Technical Note No. 36 (2010) Table 1.1  [TCF1]_)"""
+(See IERS Technical Note No. 36 (2010) Table 1.1 
+[TCF1] in :doc:`References <../references>`)"""
 
 GM_moon = 4.902802711497899e12 * u.m ** 3 / u.s ** 2
 r"""Lunar  gravitational constant.
@@ -34,7 +36,8 @@ r"""Lunar  gravitational constant.
 The value is derived from "Moon-Earth mass ratio" times "Geocentric
 gravitational constant" (:math:`0.0123000371 \times 398600.64418`).
 
-(See IERS Technical Note No. 36 (2010) Table 1.1  [TCF1]_)."""
+(See IERS Technical Note No. 36 (2010) Table 1.1
+[TCF1] in :doc:`References <../references>`)."""
 
 # **************** Ellipsoid Definitions ****************
 
@@ -47,7 +50,8 @@ EARTH_ELLIPSOID_IERS2003 = CelestialBodyEllipsoid(
 )
 """Earth Ellipsoid defined in IERS 2010 Numerical Standards.
 
-(See IERS Technical Note No. 36 (2010) Table 1.1  [TCF1]_)."""
+(See IERS Technical Note No. 36 (2010) Table 1.1
+[TCF1] in :doc:`References <../references>`)."""
 
 EARTH_ELLIPSOID_GRS80 = CelestialBodyEllipsoid(
     "Earth Ellipsoid GRS80",
@@ -59,7 +63,8 @@ EARTH_ELLIPSOID_GRS80 = CelestialBodyEllipsoid(
 )
 """Earth Ellipsoid defined in Geodetic Reference System GRS80.
 
-(See IERS Technical Note No. 36 (2010) Table 1.2  [TCF1]_)."""
+(See IERS Technical Note No. 36 (2010) Table 1.2
+[TCF1] in :doc:`References <../references>`)."""
 
 EARTH_ELLIPSOID_WGS84 = CelestialBodyEllipsoid(
     "Earth Ellipsoid WGS84",
@@ -80,7 +85,7 @@ MOON_ELLIPSOID_IAUWG2015 = CelestialBodyEllipsoid(
 """Moon Ellipsoid - flattening is zero as the reference value means a perfect sphere.
 
 (See Report of the IAU Working Group on Cartographic Coordinates and Rotational Elements
-(2015) Table 5  [TCF2]_)."""
+(2015) Table 5  [TCF2] in :doc:`References <../references>`)."""
 
 # **************** Celestial Body Definitions ****************
 
