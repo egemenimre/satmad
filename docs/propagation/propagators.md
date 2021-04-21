@@ -14,7 +14,7 @@ The accuracy of an orbit propagator is a function of both the force model and th
 
 ## Propagators in SatMAD
 
-A propagator in SatMAD accepts an initial *orbital state* (cartesian coordinates or orbital elements at a reference time) and outputs a :class:`.Trajectory` object through a `gen_trajectory()` method. This trajectory starts at the initial time and ends around the target time, with intermediate points at each stepsize (given by the common {py:meth}`.AbstractPropagator.stepsize` property). Note that, the trajectory may exceed the target time to ensure enough output points exist for a proper
+A propagator in SatMAD accepts an initial *orbital state* (cartesian coordinates or orbital elements at a reference time) and outputs a {py:class}`.Trajectory` object through a `gen_trajectory()` method. This trajectory starts at the initial time and ends around the target time, with intermediate points at each stepsize (given by the common {py:meth}`.AbstractPropagator.stepsize` property). Note that, the trajectory may exceed the target time to ensure enough output points exist for a proper
 interpolation.
 
 Currently, the following propagators are implemented in SatMAD:
