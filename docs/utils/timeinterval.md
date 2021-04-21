@@ -5,8 +5,7 @@
 Time intervals are critical to define the start and end of certain events such as start and end of communications with a groundstation, entering and exiting the eclipse or start and end of a thruster firing. This is particularly useful when two intervals (or sets of intervals) can be evaluated through operations such as *union* and *intersection*. This enables us to answer questions such as "What are the time intervals where thruster firings occur during communications?" (an intersection operation between 'intervals of thruster firings' and 'communications interval lists') or "When can I see a satellite at night?" (an intersection operation between intervals of 'satellite above horizon', 'sun below horizon' and 'satellite not in eclipse').
 
 
-The {py:mod}`.timeinterval` module provides the basic time interval functionality with the :class:`.TimeInterval` class i.e.,
-a time interval with a start and end time/date, using the high precision {py:class}`astropy.time.Time` classes under the hood to represent time and {py:class}`portion.interval.Interval` class to manage and manipulate the time intervals.
+The {py:mod}`.timeinterval` module provides the basic time interval functionality with the {py:class}`.TimeInterval` class i.e., a time interval with a start and end time/date, using the high precision {py:class}`astropy.time.Time` classes under the hood to represent time and {py:class}`portion.interval.Interval` class to manage and manipulate the time intervals.
 
 A {py:class}`.TimeInterval` can interact with other intervals through {py:meth}`.TimeInterval.union` and {py:meth}`.TimeInterval.intersect` methods. They can change their size through {py:meth}`.TimeInterval.expand` and they can check whether they contain ({py:meth}`.TimeInterval.contains`) or intersect with ({py:meth}`.TimeInterval.is_intersecting`) another time interval.
 
@@ -14,7 +13,7 @@ A list of such time intervals constitute {py:class}`.TimeIntervalList` class. A 
 
 
 
-## Using the Basic :class:`.TimeInterval` Class
+## Using the Basic {py:class}`.TimeInterval` Class
 
 A {py:class}`.TimeInterval` class can be simply initialised with a start time and either with an end time ({py:class}`astropy.time.Time`) or with a duration ({py:class}`astropy.time.TimeDelta`). These start and end times can be retrieved by the properties {py:meth}`.TimeInterval.start` and {py:meth}`.TimeInterval.end`.
 
@@ -39,7 +38,7 @@ The resulting time intervals can be quickly shown as:
     >>> str(interval_with_duration)
     '[ 2020-04-11T00:00:00.000  2020-04-11T00:01:00.000 ]\n'
 
-> The end time of the interval should be later than the start time. Otherwise a `ValueError` will be raised.
+> The end time of the interval should be later than the start time. Otherwise, a `ValueError` will be raised.
 
 The {py:class}`.TimeInterval` class can answer some questions:
 
@@ -49,6 +48,7 @@ The {py:class}`.TimeInterval` class can answer some questions:
 - {py:meth}`.TimeInterval.contains`: Does a given interval contain this interval?
 - {py:meth}`.TimeInterval.duration`: What is the duration of this interval?
 
+Some examples are given below:
 
     >>> interval_with_end_time.is_in_interval(Time("2020-04-11T00:05:00.000", scale="utc"))
     True
