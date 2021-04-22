@@ -78,7 +78,7 @@ Another useful output of the Osculating Keplerian Elements to convert them to th
     >>> rv = orb_elems.to_cartesian()
     >>> print(rv)
 
-
+The conversions to and from the cartesian coordinates are based on GMAT [[OM3]](../references.md#orbital-mechanics). Note that the classical orbital elements have a number of singularities for a lot of common orbits (e.g. circular and/or equatorial). GMAT Mathematical Specifications handles these cases gracefully, but care must be taken when interpreting the results. In some cases, return-trip testing may not be successful. However, the code is tested against GMAT and is working as expected.
 
 ## Reference/API
 

@@ -8,6 +8,8 @@
 [OM2] A-B-Cs of sun-synchronous orbit mission design. Ronald Boain. 14th AAS/AIAA Space Flight Mechanics Meeting,
     Maui, HI, February 8-12, 2004.
 
+[OM3] General Mission Analysis Tool (GMAT), Mathematical Specifications (DRAFT). NASA Goddard Space Flight CenterGreenbelt RDGreenbelt, MD 20771, 6 Mar 2020.
+
 ## Time and Coordinate Frames
 
 [TCF1] [IERS Conventions (2010)](https://iers-conventions.obspm.fr/conventions_versions.php#official_target). Gérard Petit and Brian Luzum (eds.). (IERS Technical Note ; 36) Frankfurt am Main; Verlag des Bundesamts für Kartographie und Geodäsie, 2010. 179 pp., ISBN: 3-89888-989-6
