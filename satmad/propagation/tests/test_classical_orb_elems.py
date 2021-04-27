@@ -10,20 +10,15 @@ Test orbit definitions.
 
 import pytest
 from astropy import units as u
-from astropy.coordinates import (
-    GCRS,
-    ITRS,
-    CartesianDifferential,
-    CartesianRepresentation,
-)
+from astropy.coordinates import GCRS, ITRS
 from astropy.time import Time
 from pytest import approx
 
-from satmad.coordinates.frames import init_pvt
 from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
 from satmad.core.celestial_bodies import EARTH
 from satmad.core.central_body import CelestialBody
 from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
+from satmad.tests.common_test_funcs import parse_rv_line
 
 _EARTH_GMAT = CelestialBody(
     "Earth",
@@ -52,26 +47,6 @@ def init_elems_leo():
     )
 
     return orb_elems
-
-
-def _parse_rv_line(rv_line, coord_sys):
-    """Converts a line of t, r, v string into a SkyCoord object."""
-
-    rv_items = [elem for elem in rv_line.strip().split(" ") if elem]
-
-    time = Time(rv_items[0], scale="utc")
-
-    v = CartesianDifferential(
-        [float(rv_items[4]), float(rv_items[5]), float(rv_items[6])],
-        unit=u.km / u.s,
-    )
-    r = CartesianRepresentation(
-        [float(rv_items[1]), float(rv_items[2]), float(rv_items[3])], unit=u.km
-    )
-
-    rv_init = init_pvt(coord_sys, time, r.with_differentials(v))
-
-    return rv_init
 
 
 def _parse_elems_line(epoch, elems_line, central_body):
@@ -126,7 +101,7 @@ def __init_ell_incl():
     rv_line = "2010-01-01T13:24:28.100   3769.438525258299  6010.414642548296   1306.35068662678  -5.810744579719358   3.604099244744345   0.9947338414920035"
     gmat_elems_line = "25198.05865856482         7191.999999999875         0.02000000000000014       12.84999999999999         306.6                      314.1899999999973          99.8870000000026         "
 
-    rv_init = _parse_rv_line(rv_line, ITRS)
+    rv_init = parse_rv_line(rv_line, ITRS)
     gmat_elems = _parse_elems_line(rv_init.obstime, gmat_elems_line, _EARTH_GMAT)
 
     return (
@@ -149,7 +124,7 @@ def __init_ell_equator():
     rv_line = "2010-01-01T13:24:28.100   7.213392947764267e+03   8.523654531348812e+01  -2.783146976770290e-16   5.902225938368851e-02   7.421779936019859e+00   1.595360086373873e-18"
     gmat_elems_line = "25198.05865856482         7191.999999999999         0.01999999999999993       0.0         0.0                      260.7899999999987          99.88700000000058         "
 
-    rv_init = _parse_rv_line(rv_line, GCRS)
+    rv_init = parse_rv_line(rv_line, GCRS)
     gmat_elems = _parse_elems_line(rv_init.obstime, gmat_elems_line, _EARTH_GMAT)
 
     return (
@@ -172,7 +147,7 @@ def __init_circ_incl():
     rv_line = "2010-01-01T13:24:28.100   7.074397805771428e+03  -1.988417626249246e+00   1.295282105138377e+03  -1.757812701818108e-01   7.378906649083491e+00   9.713860595480043e-01"
     gmat_elems_line = "25198.05865856482         7191.999999999996         2.02792751048046e-16      12.84999999999999         306.6                      0                         54.07699999999998         "
 
-    rv_init = _parse_rv_line(rv_line, GCRS)
+    rv_init = parse_rv_line(rv_line, GCRS)
     gmat_elems = _parse_elems_line(rv_init.obstime, gmat_elems_line, _EARTH_GMAT)
 
     return (
@@ -195,7 +170,7 @@ def __init_circ_equator():
     rv_line = "2010-01-01T13:24:28.100   4.355971648857403e+03  -5.722794334444523e+03  -1.411143337598508e-15   5.923828927156149e+00   4.508991473634389e+00   7.270719060994101e-19"
     gmat_elems_line = "25198.05865856482         7191.999999999996         2.02792751048046e-16      0.0         0.0                      0                         307.2770000000005     "
 
-    rv_init = _parse_rv_line(rv_line, GCRS)
+    rv_init = parse_rv_line(rv_line, GCRS)
     gmat_elems = _parse_elems_line(rv_init.obstime, gmat_elems_line, _EARTH_GMAT)
 
     return (
@@ -218,7 +193,7 @@ def __init_hyperbolic_incl():
     rv_line = "2010-01-01T13:24:28.100   3.464897862367937e+02  -9.738869896647320e-02   6.344031422145902e+01   3.588822034885639e+01   3.027151368726605e+01   1.068941616196268e+01"
     gmat_elems_line = "25198.05865856482         -7191.999999999876         1.02       12.84999999999999         306.6                      314.1899999999976          99.88700000000226         "
 
-    rv_init = _parse_rv_line(rv_line, GCRS)
+    rv_init = parse_rv_line(rv_line, GCRS)
     gmat_elems = _parse_elems_line(rv_init.obstime, gmat_elems_line, _EARTH_GMAT)
 
     return (
