@@ -100,9 +100,23 @@ EARTH = CelestialBody(
 """Default Earth Model."""
 
 SUN = CelestialBody(
-    "Sun", "Default Sun Model. ", GM_sun.to(u.km ** 3 / u.s ** 2), inert_coord="hcrs"
+    "Sun",
+    "Default Sun Model. ",
+    GM_sun.to(u.km ** 3 / u.s ** 2),
+    inert_coord="hcrs",
+    ellipsoid=CelestialBodyEllipsoid(
+        "Sun Ellipsoid IAU Resolution B3 2015",
+        695700 * u.km,
+        inf * u.dimensionless_unscaled,
+    ),
 )
-"""Default Sun Model."""
+"""Default Sun Model.
+
+Sun Ellipsoid is based on
+"Mamajek, E.E.; Prsa, A.; Torres, G.; et, al. (2015), "IAU 2015 Resolution B3
+on Recommended Nominal Conversion Constants for Selected Solar and Planetary Properties"
+<https://arxiv.org/pdf/1510.07674.pdf>
+"""
 
 MOON = CelestialBody(
     "Moon",
