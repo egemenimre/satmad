@@ -7,15 +7,17 @@
 Tests related to occultations, shadows and illumination.
 
 """
+import time
+
 import numpy as np
 from astropy import units as u
+from astropy.coordinates import SkyCoord, get_body_barycentric
 from astropy.time import Time
-
 from pytest import approx
 
+from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH, SUN
 from satmad.core.occultation import compute_occultation
-
 from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
 from satmad.propagation.numerical_propagators import NumericalPropagator
 from satmad.utils.discrete_time_events import DiscreteTimeEvents
@@ -56,26 +58,90 @@ def _init_trajectory(pvt0, stepsize, prop_interval):
 
 
 def test_occultation_times():
-    """Tests the umbra and penumbra times against GMAT."""
+    """Tests the umbra and penumbra times against GMAT.
+
+    Using a stepsize of 60 seconds gives more points to evaluate and increases the
+    accuracy of the entry-exit times by a few milliseconds.
+    """
+
+    output_timer_results = True
+
+    # init timer
+    begin = time.time()
 
     # Init trajectory
     pvt0 = _init_orbit()
 
     # Set up propagation config
-    stepsize = 60 * u.s
+    stepsize = 120 * u.s
     prop_interval = TimeInterval(pvt0.obstime, 2.0 * u.day)
 
     # init propagator with defaults
     # run propagation and get trajectory
     trajectory = _init_trajectory(pvt0, stepsize, prop_interval)
 
+    # begin = time.time()
+    sparse_stepsize = 2 * u.hr
+    sparse_time_list = (
+        pvt0.obstime + np.arange(-0.5, +2.5, sparse_stepsize.to_value(u.day)) * u.day
+    )
+    illum_traj = Trajectory(
+        SkyCoord(
+            get_body_barycentric(SUN.name, sparse_time_list, ephemeris="jpl"),
+            obstime=sparse_time_list,
+            frame="icrs",
+            representation_type="cartesian",
+            differential_type="cartesian",
+        ).transform_to("gcrs")
+    )
+
+    occult_traj = Trajectory(
+        SkyCoord(
+            get_body_barycentric(EARTH.name, sparse_time_list, ephemeris="jpl"),
+            obstime=sparse_time_list,
+            frame="icrs",
+            representation_type="cartesian",
+            differential_type="cartesian",
+        ).transform_to("gcrs")
+    )
+
+    # end timer
+    end = time.time()
+    if output_timer_results:
+        print(f"Propagation and interpolations: {end - begin} seconds")
+
     time_list = trajectory.coord_list.obstime
+
+    # init timer
+    begin = time.time()
+
+    # init interpolated planet positions
+    # this is 10-15% faster than the list comprehension
+    occult_pos_list = occult_traj(time_list)
+    illum_pos_list = illum_traj(time_list)
+
     occultation_results = [
-        compute_occultation(coord, EARTH, SUN, ephemeris="jpl")
-        for coord in trajectory.coord_list
+        compute_occultation(
+            coord,
+            occult_pos_list[i],
+            illum_pos_list[i],
+            occulting_body=EARTH,
+            illum_body=SUN,
+        )
+        for i, coord in enumerate(trajectory.coord_list)
     ]
-    umbra_params = np.asarray([result[3] for result in occultation_results])
-    penumbra_params = np.asarray([result[2] for result in occultation_results])
+
+    # end timer
+    end = time.time()
+    if output_timer_results:
+        print(f"Occultation finding: {end - begin} seconds")
+
+    umbra_params = np.asarray(
+        [result[3].to_value(u.km) for result in occultation_results]
+    )
+    penumbra_params = np.asarray(
+        [result[2].to_value(u.km) for result in occultation_results]
+    )
 
     # # plot umbra params if required
     # from satmad.plots.basic_plots import plot_time_param
@@ -101,7 +167,7 @@ def test_occultation_times():
         (22, "2020-01-03T00:49:10.141", "2020-01-03T01:22:32.221"),
     ]
 
-    start_diff = 13 * u.ms
+    start_diff = 16 * u.ms
     end_diff = 50 * u.ms
 
     _check_entry_exit_times(umbra_intervals, gmat_umbra_times, start_diff, end_diff)
@@ -129,8 +195,8 @@ def test_occultation_times():
         (44, "2020-01-03T00:48:59.061", "2020-01-03T00:49:10.141"),
     ]
 
-    start_diff = 75 * u.ms
-    end_diff = 15 * u.ms
+    start_diff = 73 * u.ms
+    end_diff = 16 * u.ms
 
     _check_entry_exit_times(
         penumbra_intervals, gmat_penumbra_times, start_diff, end_diff
@@ -146,11 +212,11 @@ def _check_entry_exit_times(intervals, truth_intervals, start_diff, end_diff):
         truth_event = TimeInterval(Time(truth_event_entry), Time(truth_event_exit))
         interval = intervals.get_interval(i)
 
-        print(
-            i,
-            (interval.start - truth_event.start).to(u.ms),
-            (interval.end - truth_event.end).to(u.ms),
-        )
+        # print(
+        #     i,
+        #     (interval.start - truth_event.start).to(u.ms),
+        #     (interval.end - truth_event.end).to(u.ms),
+        # )
 
         assert (interval.start - truth_event.start).to_value(u.s) == approx(
             0.0, abs=start_diff.to_value(u.s)

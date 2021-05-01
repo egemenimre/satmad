@@ -11,7 +11,6 @@ from enum import Enum, auto
 
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import CartesianRepresentation, SkyCoord, get_body_barycentric
 
 from satmad.core.celestial_bodies import EARTH, SUN
 
@@ -25,10 +24,15 @@ class IlluminationStatus(Enum):
 
 
 def compute_occultation(
-    rv_obj, occulting_body=EARTH, illum_body=SUN, ephemeris="builtin"
+    rv_obj, r_occult_body, r_illum_body, occulting_body=EARTH, illum_body=SUN
 ):
     """
     Computes the instantaneous occultation status and related geometry.
+
+    Note that the input position vectors can be in any frame - they will be converted
+    to the local inertial frame of the occulting body (e.g. GCRS for the Earth) to
+    carry out the calculations. However, it seems to be much faster to convert to the
+    correct coordinates outside this method.
 
     Based on the paper NASA Technical Paper 3547, "Method for the Calculation of
     Spacecraft Umbra and Penumbra Shadow Terminator Points", Carlos R. Ortiz Longo,
@@ -39,6 +43,7 @@ def compute_occultation(
     occulting body, assuming that the oblateness is along the local Z axis (i.e.,
     equatorial radius is the maximum radius and polar radius is the minimum radius).
 
+    Also note the following::
 
     a) Shadow terminators may only be encountered when `proj_distance >= 0`
     b) However,the object will still be illuminated if `penumbra_param > 0`
@@ -51,33 +56,66 @@ def compute_occultation(
     ----------
     rv_obj : SkyCoord
         Position of the object to be tested
+    r_occult_body : SkyCoord
+        Position vector of the Occulting Body
+    r_illum_body : SkyCoord
+        Position vector of the Illuminating Body
     occulting_body : CelestialBody
         Occulting body (defaults to `EARTH`)
     illum_body : CelestialBody
         Illuminating body (defaults to `SUN`)
-    ephemeris : str, optional
-        Ephemeris to use.  By default uses "builtin".
-        Can also be "jpl" (default JPL ephemeris e.g. DE430).
 
 
     Returns
     -------
-
+    illum_status, illum_ratio, penumbra_param, umbra_param
+        Illumination Status, Illumination Ratio (between 0 and 1), penumbra parameter,
+        umbra parameter
     """
 
-    # TODO little point in calculating where the sun is every 30 secs.
-    #      generate a trajectory for the sun and interpolate.
-    #      Can even be cached in the Sun object in ICRS
-
-    # TODO check with moon, most probably will have to project to the
-    #  inertial frame of the occulting body
+    # TODO check with moon
 
     # TODO illumination ratio is probably incorrect
 
+    # TODO check times - they should all be equal
+
+    # define the inertial coord frame of the occulting body,
+    # we will execute all computations in this frame
+    frame = occulting_body.inert_coord_frame
+
+    # convert to occulting body inertial frame if and as needed
+    if rv_obj.frame.name != frame.name:
+        r_obj = rv_obj.transform_to(frame).cartesian.without_differentials()
+    else:
+        r_obj = rv_obj.cartesian.without_differentials()
+
+    if r_occult_body.frame.name != frame.name:
+        pos_occult_body = r_occult_body.transform_to(
+            frame
+        ).cartesian.without_differentials()
+    else:
+        pos_occult_body = r_occult_body.cartesian.without_differentials()
+
+    if r_illum_body.frame.name != frame.name:
+        pos_illum_body = r_illum_body.transform_to(
+            frame
+        ).cartesian.without_differentials()
+    else:
+        pos_illum_body = r_illum_body.cartesian.without_differentials()
+
+    # compute pos vector of the illum body
+    r_occ_body_to_illum = pos_illum_body - pos_occult_body  # s_dot in GMAT
+
     # compute shadow geometry params
     ksi, kappa, proj_distance, delta = _compute_shadow_geometry(
-        rv_obj, occulting_body, illum_body, ephemeris
+        r_obj.xyz.to_value(u.km),
+        r_occ_body_to_illum.xyz.to_value(u.km),
+        occulting_body.ellipsoid,
+        illum_body.ellipsoid,
     )
+    # ksi, kappa, proj_distance, delta = _compute_shadow_geometry_quantity(
+    #     r_obj, r_occ_body_to_illum, occulting_body.ellipsoid, illum_body.ellipsoid
+    # )
 
     # set the penumbra and umbra params
     penumbra_param = delta - kappa
@@ -112,16 +150,18 @@ def compute_occultation(
     return (
         illum_status,
         illum_ratio,
-        penumbra_param.to_value(u.km),
-        umbra_param.to_value(u.km),
+        penumbra_param.to(u.km),
+        umbra_param.to(u.km),
     )
 
 
 def _compute_shadow_geometry(
-    rv_obj, occulting_body, illum_body=SUN, ephemeris="builtin"
+    r_obj, r_occ_body_to_illum, occulting_body_ellipsoid, illum_body_ellipsoid
 ):
     """
     Computes the shadow geometry and related parameters.
+
+    The method does not use `Quantity` objects to increase processing speed.
 
     Note the following::
 
@@ -134,15 +174,16 @@ def _compute_shadow_geometry(
 
     Parameters
     ----------
-    rv_obj : SkyCoord
-        Position of the object to be tested
-    occulting_body : CelestialBody
-        Occulting body (e.g. Earth)
-    illum_body : CelestialBody
-        Illuminating body (defaults to `SUN`)
-    ephemeris : str, optional
-        Ephemeris to use.  By default uses "builtin".
-        Can also be "jpl" (default JPL ephemeris e.g. DE430).
+    r_obj : ndarray
+        Position vector of the object to be tested in the local inertial frame of the
+        Occulting Body [km]
+    r_occ_body_to_illum : ndarray
+        Position vector of the Illuminating Body in the local inertial frame of the
+        Occulting Body
+    occulting_body_ellipsoid : CelestialBodyEllipsoid
+        Ellipsoid parameters of the Occulting Body
+    illum_body_ellipsoid : CelestialBodyEllipsoid
+        Ellipsoid parameters of the Illuminating Body
 
     Returns
     -------
@@ -153,30 +194,9 @@ def _compute_shadow_geometry(
 
     """
 
-    # define the inertial coord frame of the occulting body,
-    # we will execute all computations in this frame
-    frame = occulting_body.inert_coord_frame
-
-    # shorthand for object position vector
-    r_obj = rv_obj.cartesian.without_differentials()
-
-    # `get_body_barycentric` is in ICRS, convert to the frame needed
-    r_occult_body = SkyCoord(
-        get_body_barycentric(occulting_body.name, rv_obj.obstime, ephemeris=ephemeris),
-        obstime=rv_obj.obstime,
-        frame="icrs",
-    ).transform_to(frame)
-    r_illum_body = SkyCoord(
-        get_body_barycentric(illum_body.name, rv_obj.obstime, ephemeris=ephemeris),
-        obstime=rv_obj.obstime,
-        frame="icrs",
-    ).transform_to(frame)
-    r_occ_body_to_illum = (
-        r_illum_body.cartesian - r_occult_body.cartesian
-    )  # s_dot in GMAT
-
     # unit vector body to illum (e.g. Earth to Sun)
-    r_occ_body_to_illum_unit = r_occ_body_to_illum / r_occ_body_to_illum.norm()
+    r_occ_body_to_illum_norm = np.linalg.norm(r_occ_body_to_illum)
+    r_occ_body_to_illum_unit = r_occ_body_to_illum / r_occ_body_to_illum_norm
 
     # projection of object position vector on the occ body to illum body
     # (e.g. Earth to Sun).
@@ -186,38 +206,35 @@ def _compute_shadow_geometry(
 
     # this is practically the normal of the instantaneous "shadow plane"
     rs = r_occ_body_to_illum_unit * proj_distance
+    rs_norm = np.linalg.norm(rs)
     # position vector of the object in the instantaneous "shadow plane"
     r_diff = r_obj - rs
 
     # compute flattening scale for z axis
-    f = 1.0 / occulting_body.ellipsoid.inv_f
+    f = 1.0 / occulting_body_ellipsoid.inv_f.value
     flattening_scale = 1.0 / np.sqrt(1.0 - (2 * f - f * f))
 
     # scale the z axis in the shadow plane to account for the ellipsoid shape of
     # the shadow - in the local frame z axis is the "squashed" axis
-    r_diff = CartesianRepresentation(
-        r_diff.x,
-        r_diff.y,
-        r_diff.z * flattening_scale,
-    )
+    r_diff[2] = r_diff[2] * flattening_scale
 
     # distance of position vector on the shadow plane (or radius of the object)
-    delta = r_diff.norm()  # d in GMAT (though no flattening there)
+    delta = np.linalg.norm(r_diff)  # d in GMAT (though no flattening there)
 
     # Illumination depends on the diameters of the Illuminating and Occulting Bodies
-    diam_occult = 2 * occulting_body.ellipsoid.re
-    diam_illum = 2 * illum_body.ellipsoid.re
+    diam_occult = 2 * occulting_body_ellipsoid.re.to_value(u.km)
+    diam_illum = 2 * illum_body_ellipsoid.re.to_value(u.km)
 
     # compute umbra params
-    x_u = (diam_occult * r_occ_body_to_illum.norm()) / (diam_illum - diam_occult)
+    x_u = (diam_occult * r_occ_body_to_illum_norm) / (diam_illum - diam_occult)
     alpha_u = np.arcsin(diam_occult / (2 * x_u))
 
     # compute penumbra params
-    x_p = (diam_occult * r_occ_body_to_illum.norm()) / (diam_illum + diam_occult)
+    x_p = (diam_occult * r_occ_body_to_illum_norm) / (diam_illum + diam_occult)
     alpha_p = np.arcsin(diam_occult / (2 * x_p))
 
     # compute radii of the shadow terminator points at the shadow plane
-    ksi = (x_u - rs.norm()) * np.tan(alpha_u)  # radius of umbra cone - r_U in GMAT
-    kappa = (x_p + rs.norm()) * np.tan(alpha_p)  # radius of penumbra cone - r_P in GMAT
+    ksi = (x_u - rs_norm) * np.tan(alpha_u)  # radius of umbra cone - r_U in GMAT
+    kappa = (x_p + rs_norm) * np.tan(alpha_p)  # radius of penumbra cone - r_P in GMAT
 
-    return ksi, kappa, proj_distance, delta
+    return ksi * u.km, kappa * u.km, proj_distance * u.km, delta * u.km
