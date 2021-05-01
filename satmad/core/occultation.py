@@ -90,8 +90,8 @@ def compute_occultation(
     ):
         raise ValueError(
             f"Occultation calculation: Position vector times do not match. "
-            f"Illum to obj {(r_illum_body.obstime - rv_obj.obstime).to(u.s)}, "
-            f"Occult to obj {(r_occult_body.obstime - rv_obj.obstime).to(u.s)}."
+            f"Illum - obj diff: {(r_illum_body.obstime - rv_obj.obstime).to(u.s)}, "
+            f"Occult - obj diff: {(r_occult_body.obstime - rv_obj.obstime).to(u.s)}."
         )
 
     # define the inertial coord frame of the occulting body,
