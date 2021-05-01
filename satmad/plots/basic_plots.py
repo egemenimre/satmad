@@ -7,7 +7,6 @@
 Basic/Common plots for quick visualisation of data.
 
 """
-from matplotlib.ticker import AutoLocator
 from astropy.visualization import quantity_support, time_support
 from matplotlib import pyplot as plt
 
