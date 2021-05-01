@@ -320,20 +320,44 @@ def init_pvt(frame, time, pos, vel=None, copy=False):
         raise TypeError(f"Time input ({time}) not recognised as a valid Time object.")
 
     # All is ready, init the frame object
-    if vel:
-        rv_skycoord = rv_frame(
-            pos.with_differentials(vel),
-            obstime=time,
-            representation_type="cartesian",
-            differential_type="cartesian",
-        )
-    else:
-        rv_skycoord = rv_frame(
-            pos,
+    try:
+        # Certain coordinate frames (notably ICRS) don't like obstime, check for this
+        if vel:
+            rv_skycoord = rv_frame(
+                pos.with_differentials(vel),
+                obstime=time,
+                representation_type="cartesian",
+                differential_type="cartesian",
+            )
+        else:
+            rv_skycoord = rv_frame(
+                pos,
+                obstime=time,
+                representation_type="cartesian",
+                differential_type="cartesian",
+                copy=copy,
+            )
+
+        return SkyCoord(rv_skycoord, copy=copy)
+    except TypeError:
+        if vel:
+            rv_skycoord = rv_frame(
+                pos.with_differentials(vel),
+                representation_type="cartesian",
+                differential_type="cartesian",
+            )
+        else:
+            rv_skycoord = rv_frame(
+                pos,
+                representation_type="cartesian",
+                differential_type="cartesian",
+                copy=copy,
+            )
+
+        return SkyCoord(
+            rv_skycoord,
             obstime=time,
             representation_type="cartesian",
             differential_type="cartesian",
             copy=copy,
         )
-
-    return SkyCoord(rv_skycoord, copy=copy)
