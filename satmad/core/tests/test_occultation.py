@@ -10,6 +10,7 @@ Tests related to occultations, shadows and illumination.
 import time
 
 import numpy as np
+import pytest
 from astropy import units as u
 from astropy.coordinates import SkyCoord, get_body_barycentric
 from astropy.time import Time
@@ -55,6 +56,35 @@ def _init_trajectory(pvt0, stepsize, prop_interval):
     trajectory = NumericalPropagator(stepsize).gen_trajectory(pvt0, prop_interval)
 
     return trajectory
+
+
+def test_time_error():
+    """ """
+    with pytest.raises(ValueError):
+        # Init PVT
+        pvt0 = _init_orbit()
+
+        r_illum = SkyCoord(
+            get_body_barycentric(SUN.name, pvt0.obstime, ephemeris="jpl"),
+            obstime=pvt0.obstime - 1 * u.s,
+            frame="icrs",
+            representation_type="cartesian",
+            differential_type="cartesian",
+        )
+
+        r_occult = SkyCoord(
+            get_body_barycentric(SUN.name, pvt0.obstime, ephemeris="jpl"),
+            obstime=pvt0.obstime,
+            frame="icrs",
+            representation_type="cartesian",
+            differential_type="cartesian",
+        )
+
+        compute_occultation(
+            pvt0,
+            r_occult,
+            r_illum,
+        )
 
 
 def test_occultation_times():

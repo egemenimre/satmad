@@ -71,13 +71,28 @@ def compute_occultation(
     illum_status, illum_ratio, penumbra_param, umbra_param
         Illumination Status, Illumination Ratio (between 0 and 1), penumbra parameter,
         umbra parameter
+
+    Raises
+    ------
+    ValueError
+        Input times of the position vectors do not match
     """
 
     # TODO check with moon
 
     # TODO illumination ratio is probably incorrect
 
-    # TODO check times - they should all be equal
+    # make sure all times match
+    allowable_time_diff = 1 * u.ms
+    if (
+        abs(r_illum_body.obstime - rv_obj.obstime) > allowable_time_diff
+        or abs(r_occult_body.obstime - rv_obj.obstime) > allowable_time_diff
+    ):
+        raise ValueError(
+            f"Occultation calculation: Position vector times do not match. "
+            f"Illum to obj {(r_illum_body.obstime - rv_obj.obstime).to(u.s)}, "
+            f"Occult to obj {(r_occult_body.obstime - rv_obj.obstime).to(u.s)}."
+        )
 
     # define the inertial coord frame of the occulting body,
     # we will execute all computations in this frame
