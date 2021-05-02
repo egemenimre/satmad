@@ -10,7 +10,6 @@ Tests related to occultations, shadows and illumination.
 import time
 
 import numpy as np
-import pytest
 from astropy import units as u
 from astropy.coordinates import SkyCoord, get_body_barycentric
 from astropy.time import Time
@@ -18,10 +17,9 @@ from pytest import approx
 
 from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH, SUN
-from satmad.core.occultation import compute_occultation
+from satmad.core.occultation import compute_single_body_occultation_times
 from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
 from satmad.propagation.numerical_propagators import NumericalPropagator
-from satmad.utils.discrete_time_events import DiscreteTimeEvents
 from satmad.utils.timeinterval import TimeInterval
 
 
@@ -58,37 +56,49 @@ def _init_trajectory(pvt0, stepsize, prop_interval):
     return trajectory
 
 
-def test_time_error():
-    """ """
-    with pytest.raises(ValueError):
-        # Init PVT
-        pvt0 = _init_orbit()
+# def test_time_error():
+#     """ """
+#     with pytest.raises(ValueError):
+#         # Init PVT
+#         pvt0 = _init_orbit()
+#
+#         r_illum = SkyCoord(
+#             get_body_barycentric(SUN.name, pvt0.obstime, ephemeris="jpl"),
+#             obstime=pvt0.obstime - 1 * u.s,
+#             frame="icrs",
+#             representation_type="cartesian",
+#             differential_type="cartesian",
+#         )
+#
+#         r_occult = SkyCoord(
+#             get_body_barycentric(SUN.name, pvt0.obstime, ephemeris="jpl"),
+#             obstime=pvt0.obstime,
+#             frame="icrs",
+#             representation_type="cartesian",
+#             differential_type="cartesian",
+#         )
+#
+#         compute_occultation(
+#             pvt0,
+#             r_occult,
+#             r_illum,
+#         )
+#####################
+# make sure all times match
+# allowable_time_diff = 1 * u.ms
+# if (
+#     abs(r_illum_body.obstime - rv_obj.obstime) > allowable_time_diff
+#     or abs(r_occult_body.obstime - rv_obj.obstime) > allowable_time_diff
+# ):
+#     raise ValueError(
+#         f"Occultation calculation: Position vector times do not match. "
+#         f"Illum - obj diff: {(r_illum_body.obstime - rv_obj.obstime).to(u.s)}, "
+#         f"Occult - obj diff: {(r_occult_body.obstime - rv_obj.obstime).to(u.s)}."
+#     )
 
-        r_illum = SkyCoord(
-            get_body_barycentric(SUN.name, pvt0.obstime, ephemeris="jpl"),
-            obstime=pvt0.obstime - 1 * u.s,
-            frame="icrs",
-            representation_type="cartesian",
-            differential_type="cartesian",
-        )
 
-        r_occult = SkyCoord(
-            get_body_barycentric(SUN.name, pvt0.obstime, ephemeris="jpl"),
-            obstime=pvt0.obstime,
-            frame="icrs",
-            representation_type="cartesian",
-            differential_type="cartesian",
-        )
-
-        compute_occultation(
-            pvt0,
-            r_occult,
-            r_illum,
-        )
-
-
-def test_occultation_times():
-    """Tests the umbra and penumbra times against GMAT.
+def test_occultation_intervals():
+    """Tests the umbra and penumbra intervals against GMAT.
 
     Using a stepsize of 60 seconds gives more points to evaluate and increases the
     accuracy of the entry-exit times by a few milliseconds.
@@ -140,37 +150,15 @@ def test_occultation_times():
     if output_timer_results:
         print(f"Propagation and interpolations: {end - begin} seconds")
 
-    time_list = trajectory.coord_list.obstime
-
     # init timer
     begin = time.time()
 
-    # init interpolated planet positions
-    # this is 10-15% faster than the list comprehension
-    occult_pos_list = occult_traj(time_list)
-    illum_pos_list = illum_traj(time_list)
-
-    occultation_results = [
-        compute_occultation(
-            coord,
-            occult_pos_list[i],
-            illum_pos_list[i],
-            occulting_body=EARTH,
-            illum_body=SUN,
-        )
-        for i, coord in enumerate(trajectory.coord_list)
-    ]
-
-    # end timer
-    end = time.time()
-    if output_timer_results:
-        print(f"Occultation finding: {end - begin} seconds")
-
-    umbra_params = np.asarray(
-        [result[3].to_value(u.km) for result in occultation_results]
-    )
-    penumbra_params = np.asarray(
-        [result[2].to_value(u.km) for result in occultation_results]
+    (
+        occulting_body_name,
+        umbra_intervals,
+        penumbra_intervals,
+    ) = compute_single_body_occultation_times(
+        trajectory, occult_traj, illum_traj, occulting_body=EARTH, illum_body=SUN
     )
 
     # # plot umbra params if required
@@ -178,12 +166,12 @@ def test_occultation_times():
     #
     # plot_time_param(time_list, umbra_params)
 
-    # ------------------- check umbra times -------------
+    # end timer
+    end = time.time()
+    if output_timer_results:
+        print(f"Intervals finding: {end - begin} seconds")
 
-    # Find intervals in data
-    umbra_intervals = DiscreteTimeEvents(
-        time_list, umbra_params, 0.0, neg_to_pos_is_start=False
-    ).start_end_intervals
+    # ------------------- check umbra times -------------
 
     # print("Start-End Intervals:")
     # print(umbra_intervals)
@@ -203,15 +191,6 @@ def test_occultation_times():
     _check_entry_exit_times(umbra_intervals, gmat_umbra_times, start_diff, end_diff)
 
     # ------------------- check penumbra times -------------
-
-    # Find intervals in data
-    penumbra_events = DiscreteTimeEvents(
-        time_list, penumbra_params, 0.0, neg_to_pos_is_start=False
-    )
-    # this nominally includes penumbra and umbra times. Subtract the umbra times.
-    penumbra_intervals = umbra_intervals.invert().intersect_list(
-        penumbra_events.start_end_intervals
-    )
 
     # print("Start-End Intervals:")
     # print(penumbra_intervals)

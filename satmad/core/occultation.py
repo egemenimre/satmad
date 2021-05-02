@@ -13,6 +13,7 @@ import numpy as np
 from astropy import units as u
 
 from satmad.core.celestial_bodies import EARTH, SUN
+from satmad.utils.discrete_time_events import DiscreteTimeEvents
 
 
 class IlluminationStatus(Enum):
@@ -21,6 +22,58 @@ class IlluminationStatus(Enum):
     UMBRA = auto()
     PENUMBRA = auto()
     ILLUMINATED = auto()
+
+
+def compute_single_body_occultation_times(
+    traj_obj, traj_occult_body, traj_illum_body, occulting_body=EARTH, illum_body=SUN
+):
+
+    # TODO there can be multiple occult bodies
+
+    time_list = traj_obj.coord_list.obstime
+    illum_pos_list = traj_illum_body(time_list)
+
+    # Do the following for each occulting object
+
+    # init interpolated planet positions
+    # this is 10-15% faster than the list comprehension
+    occult_pos_list = traj_occult_body(time_list)
+
+    occultation_results = [
+        compute_occultation(
+            coord,
+            occult_pos_list[i],
+            illum_pos_list[i],
+            occulting_body=occulting_body,
+            illum_body=illum_body,
+        )
+        for i, coord in enumerate(traj_obj.coord_list)
+    ]
+
+    umbra_params = np.asarray(
+        [result[3].to_value(u.km) for result in occultation_results]
+    )
+    penumbra_params = np.asarray(
+        [result[2].to_value(u.km) for result in occultation_results]
+    )
+
+    # ------------------- find umbra times -------------
+    umbra_intervals = DiscreteTimeEvents(
+        time_list, umbra_params, 0.0, neg_to_pos_is_start=False
+    ).start_end_intervals
+
+    # ------------------- find penumbra times -------------
+    penumbra_events = DiscreteTimeEvents(
+        time_list, penumbra_params, 0.0, neg_to_pos_is_start=False
+    )
+    # this nominally includes penumbra and umbra times. Subtract the umbra times.
+    penumbra_intervals = umbra_intervals.invert().intersect_list(
+        penumbra_events.start_end_intervals
+    )
+
+    # For each occulting body, return the umbra and penumbra intervals
+
+    return occulting_body.name, umbra_intervals, penumbra_intervals
 
 
 def compute_occultation(
@@ -33,6 +86,9 @@ def compute_occultation(
     to the local inertial frame of the occulting body (e.g. GCRS for the Earth) to
     carry out the calculations. However, it seems to be much faster to convert to the
     correct coordinates outside this method.
+
+    The times of the vectors are not checked to increase speed. It is the user's
+    responsibility to make sure that they match.
 
     Based on the paper NASA Technical Paper 3547, "Method for the Calculation of
     Spacecraft Umbra and Penumbra Shadow Terminator Points", Carlos R. Ortiz Longo,
@@ -82,41 +138,14 @@ def compute_occultation(
 
     # TODO illumination ratio is probably incorrect
 
-    # make sure all times match
-    allowable_time_diff = 1 * u.ms
-    if (
-        abs(r_illum_body.obstime - rv_obj.obstime) > allowable_time_diff
-        or abs(r_occult_body.obstime - rv_obj.obstime) > allowable_time_diff
-    ):
-        raise ValueError(
-            f"Occultation calculation: Position vector times do not match. "
-            f"Illum - obj diff: {(r_illum_body.obstime - rv_obj.obstime).to(u.s)}, "
-            f"Occult - obj diff: {(r_occult_body.obstime - rv_obj.obstime).to(u.s)}."
-        )
-
     # define the inertial coord frame of the occulting body,
     # we will execute all computations in this frame
     frame = occulting_body.inert_coord_frame
 
     # convert to occulting body inertial frame if and as needed
-    if rv_obj.frame.name != frame.name:
-        r_obj = rv_obj.transform_to(frame).cartesian.without_differentials()
-    else:
-        r_obj = rv_obj.cartesian.without_differentials()
-
-    if r_occult_body.frame.name != frame.name:
-        pos_occult_body = r_occult_body.transform_to(
-            frame
-        ).cartesian.without_differentials()
-    else:
-        pos_occult_body = r_occult_body.cartesian.without_differentials()
-
-    if r_illum_body.frame.name != frame.name:
-        pos_illum_body = r_illum_body.transform_to(
-            frame
-        ).cartesian.without_differentials()
-    else:
-        pos_illum_body = r_illum_body.cartesian.without_differentials()
+    r_obj = __check_frame(rv_obj, frame)
+    pos_occult_body = __check_frame(r_occult_body, frame)
+    pos_illum_body = __check_frame(r_illum_body, frame)
 
     # compute pos vector of the illum body
     r_occ_body_to_illum = pos_illum_body - pos_occult_body  # s_dot in GMAT
@@ -128,9 +157,6 @@ def compute_occultation(
         occulting_body.ellipsoid,
         illum_body.ellipsoid,
     )
-    # ksi, kappa, proj_distance, delta = _compute_shadow_geometry_quantity(
-    #     r_obj, r_occ_body_to_illum, occulting_body.ellipsoid, illum_body.ellipsoid
-    # )
 
     # set the penumbra and umbra params
     penumbra_param = delta - kappa
@@ -168,6 +194,16 @@ def compute_occultation(
         penumbra_param.to(u.km),
         umbra_param.to(u.km),
     )
+
+
+def __check_frame(r, tgt_frame):
+    """Checks the frame and converts to the target frame if necessary."""
+    if r.frame.name != tgt_frame.name:
+        pos = r.transform_to(tgt_frame).cartesian.without_differentials()
+    else:
+        pos = r.cartesian.without_differentials()
+
+    return pos
 
 
 def _compute_shadow_geometry(
