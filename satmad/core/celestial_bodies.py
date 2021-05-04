@@ -9,8 +9,10 @@ the planets or similar Central Bodies.
 
 """
 from astropy import units as u
+from astropy.coordinates import GCRS, HCRS, ITRS
 from numpy import inf
 
+from satmad.coordinates.frames import MoonCRS
 from satmad.core.central_body import CelestialBody, CelestialBodyEllipsoid
 
 # **************** GM values ****************
@@ -93,8 +95,8 @@ EARTH = CelestialBody(
     "Earth",
     "Default Earth Model. ",
     GM_earth.to(u.km ** 3 / u.s ** 2),
-    inert_coord="gcrs",
-    body_fixed_coord="itrs",
+    inert_coord=GCRS,
+    body_fixed_coord=ITRS,
     ellipsoid=EARTH_ELLIPSOID_WGS84,
 )
 """Default Earth Model."""
@@ -103,7 +105,7 @@ SUN = CelestialBody(
     "Sun",
     "Default Sun Model. ",
     GM_sun.to(u.km ** 3 / u.s ** 2),
-    inert_coord="hcrs",
+    inert_coord=HCRS,
     ellipsoid=CelestialBodyEllipsoid(
         "Sun Ellipsoid IAU Resolution B3 2015",
         695700 * u.km,
@@ -123,6 +125,6 @@ MOON = CelestialBody(
     "Default Moon Model. ",
     GM_moon.to(u.km ** 3 / u.s ** 2),
     ellipsoid=MOON_ELLIPSOID_IAUWG2015,
-    inert_coord="mooncrs",
+    inert_coord=MoonCRS,
 )
 """Default Moon Model."""

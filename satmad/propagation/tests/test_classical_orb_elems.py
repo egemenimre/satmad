@@ -24,7 +24,7 @@ _EARTH_GMAT = CelestialBody(
     "Earth",
     "Earth as depicted in GMAT.",
     3.98600441500000e14 * u.m ** 3 / u.s ** 2,
-    inert_coord="gcrs",
+    inert_coord=GCRS,
 )
 
 
@@ -286,7 +286,7 @@ def test_incl_out_of_bounds(init_elems_leo):
 
 
 def test_raan_out_of_bounds(init_elems_leo):
-    """Tests RAAN setter with input value out of bounds """
+    """Tests RAAN setter with input value out of bounds."""
     orb_elems = init_elems_leo
     orb_elems.raan = 390 * u.deg
     assert orb_elems.raan.to_value(u.deg) == approx((30 * u.deg).to_value(), abs=1e-8)

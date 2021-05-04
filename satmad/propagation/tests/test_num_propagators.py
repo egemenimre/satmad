@@ -51,7 +51,7 @@ _MOONGMAT = CelestialBody(
         1738.2 * u.km,
         np.inf * u.dimensionless_unscaled,
     ),
-    inert_coord="mooncrs",
+    inert_coord=MoonCRS,
 )
 """This is the Moon as defined by GMAT"""
 

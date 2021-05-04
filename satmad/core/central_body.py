@@ -9,7 +9,6 @@ an object can rotate.
 
 """
 from astropy import units as u
-from astropy.coordinates import frame_transform_graph
 
 
 class CelestialBodyEllipsoid:
@@ -67,10 +66,10 @@ class CelestialBody:
         Info on the constants etc.
     mu : Quantity
         `GM` value (Gravitational constant) of the Celestial body
-    inert_coord : str
-        Default Inertial Coordinate to run the propagations (e.g. "gcrs" for Earth)
-    body_fixed_coord : str
-        Default Central Body Fixed Coordinate to run the propagations (e.g. "itrs" for
+    inert_coord : `~astropy.coordinates.BaseRepresentation`
+        Default Inertial Coordinate to run the propagations (e.g. `GCRS` for Earth)
+    body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+        Default Central Body Fixed Coordinate to run the propagations (e.g. `ITRS` for
         Earth)
     """
 
@@ -93,8 +92,8 @@ class CelestialBody:
 
         out += f"mu: {self.mu}\n"
 
-        out += f"Default inertial coord: {self.inert_coord}\n"
-        out += f"Default body fixed coord: {self.body_fixed_coord}\n"
+        out += f"Default inertial coord: {self.inert_coord.name}\n"
+        out += f"Default body fixed coord: {self.body_fixed_coord.name}\n"
 
         return out
 
@@ -102,10 +101,10 @@ class CelestialBody:
     def inert_coord_frame(self):
         """Gets the underlying inertial coordinate frame class (e.g. GCRS for Earth)
         or None if no such class exists."""
-        return frame_transform_graph.lookup_name(self.inert_coord)
+        return self.inert_coord
 
     @property
     def body_fixed_coord_frame(self):
         """Gets the underlying body fixed coordinate frame class (e.g. ITRS for Earth)
         or None if no such class exists."""
-        return frame_transform_graph.lookup_name(self.body_fixed_coord)
+        return self.body_fixed_coord
