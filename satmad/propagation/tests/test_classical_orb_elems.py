@@ -135,8 +135,8 @@ def __init_ell_equator():
             1e-14,  # ecc
             1e-14 * u.deg,  # inc
             1e-14 * u.deg,  # raan
-            5e-13 * u.deg,  # argp
-            1e-12 * u.deg,  # true an
+            5e-11 * u.deg,  # argp
+            3e-11 * u.deg,  # true an
         ],
     )
 
@@ -155,11 +155,11 @@ def __init_circ_incl():
         gmat_elems,
         [
             0.0001 * u.mm,  # sm axis
-            1e-14,  # ecc
-            1e-14 * u.deg,  # inc
-            1e-14 * u.deg,  # raan
+            2e-14,  # ecc
+            3e-13 * u.deg,  # inc
+            5e-12 * u.deg,  # raan
             5e-13 * u.deg,  # argp
-            1e-13 * u.deg,  # true an
+            2e-12 * u.deg,  # true an
         ],
     )
 
@@ -177,8 +177,8 @@ def __init_circ_equator():
         rv_init,
         gmat_elems,
         [
-            0.0001 * u.mm,  # sm axis
-            1e-14,  # ecc
+            0.0002 * u.mm,  # sm axis
+            3e-14,  # ecc
             1e-14 * u.deg,  # inc
             1e-14 * u.deg,  # raan
             1e-13 * u.deg,  # argp
@@ -200,7 +200,7 @@ def __init_hyperbolic_incl():
         rv_init,
         gmat_elems,
         [
-            0.0001 * u.mm,  # sm axis
+            0.0002 * u.mm,  # sm axis
             1e-14,  # ecc
             1e-14 * u.deg,  # inc
             5e-13 * u.deg,  # raan
