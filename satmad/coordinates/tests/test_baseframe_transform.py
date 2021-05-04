@@ -24,7 +24,6 @@ from astropy.time import Time
 from pytest import approx
 
 from satmad.coordinates.frames import J2000, TIRS, CelestialBodyCRS, init_pvt
-from satmad.core.celestial_bodies import EARTH, SUN
 
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
 
@@ -188,7 +187,7 @@ def test_init_cart_wrong_frame():
         init_pvt("GCRSx", time, r_gcrs_true, v_gcrs_true)
 
 
-def test_init_cart_wrong_Time():
+def test_init_cart_wrong_time():
     """Tests cartesian init with incorrect frame name."""
     with pytest.raises(TypeError):
         # noinspection PyTypeChecker
@@ -344,11 +343,13 @@ def test_tirs_to_itrs():
 
 
 class _EarthCRS(CelestialBodyCRS):
-    body = EARTH
+    body_name = "EARTH"
+    ephemeris_type = "builtin"
 
 
 class _SunCRS(CelestialBodyCRS):
-    body = SUN
+    body_name = "SUN"
+    ephemeris_type = "builtin"
 
 
 def test_cb_crs_to_icrs_earth():
@@ -362,7 +363,7 @@ def test_cb_crs_to_icrs_earth():
 
     rv_icrs = SkyCoord(rv_gcrs_true).transform_to(ICRS)
 
-    rv_gcrs = rv_icrs.transform_to(_EarthCRS(obstime=rv_gcrs_true.obstime))
+    rv_gcrs = rv_icrs.transform_to(_EarthCRS)
 
     r_diff = pos_err(rv_gcrs, rv_gcrs_true)
     v_diff = vel_err(rv_gcrs, rv_gcrs_true)
@@ -390,7 +391,7 @@ def test_cb_crs_to_icrs_sun():
 
     rv_icrs = rv_suncrs_true.transform_to(ICRS)
 
-    rv_hcrs = rv_icrs.transform_to(HCRS(obstime=rv_suncrs_true.obstime))
+    rv_hcrs = rv_icrs.transform_to(HCRS)
 
     r_diff = pos_err(rv_hcrs, rv_suncrs_true)
     v_diff = vel_err(rv_hcrs, rv_suncrs_true)

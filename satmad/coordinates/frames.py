@@ -7,6 +7,8 @@
 Coordinate systems and frames defined by `satmad`.
 
 """
+from abc import ABC
+
 import erfa
 import numpy as np
 from astropy import units as u
@@ -33,8 +35,6 @@ from astropy.coordinates.builtin_frames.utils import (
 )
 from astropy.time import Time
 
-from satmad.core.celestial_bodies import MOON
-
 _w = np.array([0, 0, 7.292115e-5]) / u.s
 """Nominal mean angular velocity of the Earth [rad/s] as per GRS 80.
 (see IERS TN 36)"""
@@ -51,7 +51,7 @@ _FRAME_BIAS_MATRIX = np.array(
 """
 
 
-class CelestialBodyCRS(BaseCoordinateFrame):
+class CelestialBodyCRS(BaseCoordinateFrame, ABC):
     """
     A coordinate frame in the generic Celestial Reference System (CRS). This CRS is
     derived from ICRS by simply carrying the origin to the origin of the celestial body.
@@ -63,6 +63,8 @@ class CelestialBodyCRS(BaseCoordinateFrame):
 
     default_representation = r.CartesianRepresentation
     default_differential = r.CartesianDifferential
+
+    ephemeris_type = "builtin"
 
     def __new__(cls, *args, **kwargs):
         frame_transform_graph.transform(AffineTransform, ICRS, cls)(icrs_to_cb_crs)
@@ -78,7 +80,7 @@ _NEED_ORIGIN_HINT = (
 )
 
 
-def cb_crs_to_icrs(cb_crs_coord, icrs_frame):
+def cb_crs_to_icrs(cb_crs_coord, _):
     """Conversion from Celestial Reference System of a Central Body to ICRS."""
 
     if not u.m.is_equivalent(cb_crs_coord.cartesian.x.unit):
@@ -88,7 +90,9 @@ def cb_crs_to_icrs(cb_crs_coord, icrs_frame):
         # Calculate the barycentric position and velocity (of a solar system body).
         # Uses default ephemeris
         r_icrs, v_icrs = get_body_barycentric_posvel(
-            cb_crs_coord.body.name, cb_crs_coord.obstime, ephemeris="builtin"
+            cb_crs_coord.body_name,
+            cb_crs_coord.obstime,
+            ephemeris=cb_crs_coord.ephemeris_type,
         )
 
         v_icrs = CartesianDifferential.from_cartesian(v_icrs)
@@ -100,7 +104,9 @@ def cb_crs_to_icrs(cb_crs_coord, icrs_frame):
         # Uses default ephemeris. This is faster than the one above with velocities for
         # JPL ephemerides.
         icrs_coord = get_body_barycentric(
-            cb_crs_coord.body.name, cb_crs_coord.obstime, ephemeris="builtin"
+            cb_crs_coord.body_name,
+            cb_crs_coord.obstime,
+            ephemeris=cb_crs_coord.ephemeris_type,
         )
 
     # Return transformation matrix (None) and translation vector (with velocities)
@@ -117,7 +123,9 @@ def icrs_to_cb_crs(icrs_coord, cb_crs_frame):
         # Calculate the barycentric position and velocity (of a solar system body).
         # Uses default ephemeris
         r_icrs, v_icrs = get_body_barycentric_posvel(
-            cb_crs_frame.body.name, cb_crs_frame.obstime, ephemeris="builtin"
+            cb_crs_frame.body_name,
+            cb_crs_frame.obstime,
+            ephemeris=cb_crs_frame.ephemeris_type,
         )
 
         v_icrs = CartesianDifferential.from_cartesian(v_icrs)
@@ -129,7 +137,9 @@ def icrs_to_cb_crs(icrs_coord, cb_crs_frame):
         # Uses default ephemeris. This is faster than the one above with velocities for
         # JPL ephemerides.
         cb_crs_coord = -get_body_barycentric(
-            cb_crs_frame.body.name, cb_crs_frame.obstime, ephemeris="builtin"
+            cb_crs_frame.body_name,
+            cb_crs_frame.obstime,
+            ephemeris=cb_crs_frame.ephemeris_type,
         )
 
     # Return transformation matrix (None) and translation vector (with velocities)
@@ -138,9 +148,15 @@ def icrs_to_cb_crs(icrs_coord, cb_crs_frame):
 
 class MoonCRS(CelestialBodyCRS):
     """Moon Celestial Reference System. This is simply the ICRS shifted to the
-    centre of the Moon."""
+    centre of the Moon with the velocity adjusted with respect to the Moon.
 
-    body = MOON
+    This uses the ephemeris type `jpl` to ensure that Moon velocity is computed
+    (`builtin` cannot compute velocity). This is critical for coordinate
+    transformations that involve velocity.
+    """
+
+    body_name = "Moon"
+    ephemeris_type = "jpl"
 
 
 # ******  Mean Pole and Equinox at J2000.0 Reference System (J2000) ******
@@ -242,7 +258,7 @@ def _polar_mot_matrix(obstime):
 
 
 @frame_transform_graph.transform(DynamicMatrixTransform, TIRS, ITRS)
-def tirs_to_itrs(tirs_coord, itrs_frame):
+def tirs_to_itrs(tirs_coord, _):
     """Dynamic conversion matrix (Polar Motion) from TIRS to ITRS."""
     tirs_to_itrs_mat = _polar_mot_matrix(tirs_coord.obstime)
 
@@ -250,7 +266,7 @@ def tirs_to_itrs(tirs_coord, itrs_frame):
 
 
 @frame_transform_graph.transform(DynamicMatrixTransform, ITRS, TIRS)
-def itrs_to_tirs(itrs_coord, tirs_frame):
+def itrs_to_tirs(itrs_coord, _):
     """Dynamic conversion matrix (Polar Motion) from ITRS to TIRS."""
     itrs_to_tirs_mat = _polar_mot_matrix(itrs_coord.obstime).transpose()
 
