@@ -8,6 +8,7 @@ Tests related to occultations, shadows and illumination.
 
 """
 import time
+from typing import List, Tuple
 
 import numpy as np
 from astropy import units as u
@@ -17,7 +18,6 @@ from astropy.coordinates import (
     SkyCoord,
     get_body_barycentric,
     get_body_barycentric_posvel,
-    get_sun,
 )
 from astropy.time import Time
 from pytest import approx
@@ -28,7 +28,6 @@ from satmad.core.celestial_bodies import EARTH, MOON, SUN
 from satmad.core.occultation import (
     multi_body_occultation_intervals,
     occultation_intervals,
-    compute_occultation,
 )
 from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
 from satmad.propagation.numerical_propagators import NumericalPropagator
@@ -254,7 +253,7 @@ def test_multi_body_occultation_intervals():
     print(umbra_intervals_moon)
 
     # check Umbra params
-    gmat_umbra_times_earth = []
+    gmat_umbra_times_earth: List[Tuple] = []
 
     start_diff = 160 * u.ms
     end_diff = 80 * u.ms
