@@ -12,6 +12,7 @@ from enum import Enum, auto
 import numpy as np
 from astropy import units as u
 
+from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH, SUN
 from satmad.utils.discrete_time_events import DiscreteTimeEvents
 from satmad.utils.timeinterval import TimeIntervalList
@@ -79,9 +80,6 @@ def multi_body_occultation_intervals(
     """
     # This is the complete set of points where the intervals will be searched
     time_list = traj_obj.coord_list.obstime
-    illum_pos_list = traj_illum_body(time_list)
-
-    # TODO initialise with coord frame transforms, init Traj here?
 
     # TODO check intervals match? Occult and Illum Traj must be equal or larger than
     #  object trajectory
@@ -91,16 +89,25 @@ def multi_body_occultation_intervals(
     # Compute intervals for each occulting object
     for occulting_body, traj_occult_body in occult_bodies.items():
 
-        # init interpolated planet positions
-        # this is 10-15% faster than the list comprehension
-        occult_pos_list = traj_occult_body(time_list)
+        # regenerate interpolated planet positions in the coordinate frame necessary
+        # make sure no unnecessary coord transformations are taking place
+        occult_pos_list = __generate_pos_list(
+            traj_occult_body, time_list, occulting_body
+        )
+        illum_pos_list = __generate_pos_list(traj_illum_body, time_list, occulting_body)
+        if traj_obj.coord_list.frame.name != occulting_body.inert_coord_frame.name:
+            traj_pos_list = traj_obj.coord_list.transform_to(
+                occulting_body.inert_coord_frame
+            )
+        else:
+            traj_pos_list = traj_obj.coord_list
 
         (
             occulting_body_name,
             umbra_intervals,
             penumbra_intervals,
         ) = _single_body_occultation_intervals(
-            traj_obj.coord_list,
+            traj_pos_list,
             occult_pos_list,
             illum_pos_list,
             occulting_body=occulting_body,
@@ -108,6 +115,7 @@ def multi_body_occultation_intervals(
         )
 
         # check the intervals for the spurious "positive projected distance" cases
+        # check the umbra intervals
         umbra_intervals = _generate_corrected_intervals(
             umbra_intervals,
             traj_obj,
@@ -116,7 +124,7 @@ def multi_body_occultation_intervals(
             traj_illum_body,
             illum_body,
         )
-
+        # check the penumbra intervals
         penumbra_intervals = _generate_corrected_intervals(
             penumbra_intervals,
             traj_obj,
@@ -131,6 +139,18 @@ def multi_body_occultation_intervals(
     return output_dict
 
 
+def __generate_pos_list(traj_body, time_list, occulting_body):
+    """Checks whether the coordinates are in the inertial frame of the occulting body,
+    transform them if necessary."""
+    if traj_body.coord_list.frame.name != occulting_body.inert_coord_frame.name:
+        pos_list = Trajectory(
+            traj_body.coord_list.transform_to(occulting_body.inert_coord_frame)
+        )(time_list)
+        return pos_list
+    else:
+        return traj_body(time_list)
+
+
 def _generate_corrected_intervals(
     event_intervals,
     traj_obj,
@@ -139,6 +159,8 @@ def _generate_corrected_intervals(
     traj_illum_body,
     illum_body,
 ):
+    """Checks the intervals to make sure they don't contain false events with zero
+    umbra/penumbra param but on the illuminated side of the occulting body."""
     checked_intervals = [
         interval
         for interval in event_intervals.intervals
@@ -160,6 +182,8 @@ def _generate_corrected_intervals(
 def _is_obj_on_illum_side(
     interval, traj_obj, traj_occult_body, occulting_body, traj_illum_body, illum_body
 ):
+    """Checks the interval to make sure they it is on the illuminated side of
+    the occulting body."""
     obstime = interval.start + interval.duration * 0.5
     (
         illum_status,
