@@ -8,10 +8,40 @@ Common test functions.
 
 """
 from astropy import units as u
-from astropy.coordinates import CartesianDifferential, CartesianRepresentation
+from astropy.coordinates import (
+    GCRS,
+    ITRS,
+    CartesianDifferential,
+    CartesianRepresentation,
+)
 from astropy.time import Time
+from numpy import inf
 
-from satmad.coordinates.frames import init_pvt
+from satmad.coordinates.frames import MoonCRS, init_pvt
+from satmad.core.central_body import CelestialBody, CelestialBodyEllipsoid
+
+GMAT_MOON = CelestialBody(
+    "Moon",
+    "GMAT Moon Model.",
+    4902.8005821478 * (u.km ** 3 / u.s ** 2),
+    ellipsoid=CelestialBodyEllipsoid(
+        "GMAT Moon Ellipsoid", 1738.2 * u.km, inf * u.dimensionless_unscaled
+    ),
+    inert_coord=MoonCRS,
+)
+
+GMAT_EARTH = CelestialBody(
+    "Earth",
+    "GMAT Earth Model.",
+    398600.4415 * (u.km ** 3 / u.s ** 2),
+    inert_coord=GCRS,
+    body_fixed_coord=ITRS,
+    ellipsoid=CelestialBodyEllipsoid(
+        "GMAT Earth Ellipsoid",
+        6378.1363 * u.km,
+        298.26706833298533 * u.dimensionless_unscaled,
+    ),
+)
 
 
 def parse_rv_line(rv_line, coord_sys):
