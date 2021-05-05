@@ -17,6 +17,9 @@ def plot_time_param(
     time_list, param_list, x_label=None, y_label=None, x_rotation=False
 ):
     """
+    Plots a parameter against time.
+
+    `Quantity` type is supported.
 
     Parameters
     ----------
@@ -30,9 +33,6 @@ def plot_time_param(
         Y axis label
     x_rotation : bool
         True rotates the X axis labels by 90 deg (useful for ISOT dates)
-
-    Returns
-    -------
 
     """
 
