@@ -140,7 +140,7 @@ def test_multi_body_occultation_intervals():
     accuracy of the entry-exit times by a few milliseconds.
     """
 
-    output_timer_results = True
+    output_timer_results = False
 
     # init timer
     begin = time.time()
@@ -208,7 +208,7 @@ def test_multi_body_occultation_intervals():
     occult_bodies = {EARTH: occult_traj_earth, MOON: occult_traj_moon}
     # occult_bodies = {MOON: occult_traj_moon}
     # occult_bodies = {EARTH: occult_traj_earth}
-
+    # TODO trajectory dışında her şey seçimli olabilir
     # Compute occultation intervals
     output_dict = multi_body_occultation_intervals(
         trajectory, occult_bodies, illum_traj, illum_body=SUN
@@ -222,35 +222,12 @@ def test_multi_body_occultation_intervals():
     umbra_intervals_earth, penumbra_intervals_earth = output_dict[EARTH.name]
     umbra_intervals_moon, penumbra_intervals_moon = output_dict[MOON.name]
 
-    # Start Time (UTC)            Stop Time (UTC)               Duration (s)    Occ Body        Type        Event Number  Total Duration (s)
-    # 10 Jan 2020 11:52:56.832    10 Jan 2020 12:09:45.608      1008.7751815    Luna            Umbra       1             1008.7751815
-    # 10 Jan 2020 19:52:48.654    10 Jan 2020 20:10:05.113      1036.4593227    Luna            Umbra       2             1036.4593227
-    # 11 Jan 2020 03:52:40.660    11 Jan 2020 04:10:24.428      1063.7679860    Luna            Umbra       3             1063.7679860
-    # 11 Jan 2020 11:52:32.833    11 Jan 2020 12:10:43.557      1090.7238229    Luna            Umbra       4             1090.7238229
-    # 11 Jan 2020 19:52:25.159    11 Jan 2020 20:11:02.505      1117.3465637    Luna            Umbra       5             1117.3465637
-    # 12 Jan 2020 03:52:17.623    12 Jan 2020 04:11:21.276      1143.6534295    Luna            Umbra       6             1143.6534295
-
-    # Start Time (UTC)            Stop Time (UTC)               Duration (s)    Occ Body        Type        Event Number  Total Duration (s)
-    # 10 Jan 2020 11:50:49.031    10 Jan 2020 11:52:56.832      127.80161456    Luna            Penumbra    1             127.80161456
-    # 10 Jan 2020 12:09:45.608    10 Jan 2020 12:11:54.934      129.32634068    Luna            Penumbra    2             129.32634068
-    # 10 Jan 2020 18:41:49.529    10 Jan 2020 20:26:28.746      6279.2173116    Earth           Penumbra    3             6279.2173116
-    # 10 Jan 2020 19:50:43.540    10 Jan 2020 19:52:48.654      125.11435262    Luna            Penumbra    3             6279.2173116
-    # 10 Jan 2020 20:10:05.113    10 Jan 2020 20:12:11.758      126.64437286    Luna            Penumbra    3             6279.2173116
-    # 11 Jan 2020 03:50:38.094    11 Jan 2020 03:52:40.660      122.56627186    Luna            Penumbra    4             122.56627186
-    # 11 Jan 2020 04:10:24.428    11 Jan 2020 04:12:28.529      124.10153624    Luna            Penumbra    5             124.10153624
-    # 11 Jan 2020 11:50:32.687    11 Jan 2020 11:52:32.833      120.14619472    Luna            Penumbra    6             120.14619472
-    # 11 Jan 2020 12:10:43.557    11 Jan 2020 12:12:45.244      121.68665263    Luna            Penumbra    7             121.68665263
-    # 11 Jan 2020 19:50:27.315    11 Jan 2020 19:52:25.159      117.84421628    Luna            Penumbra    8             117.84421628
-    # 11 Jan 2020 20:11:02.505    11 Jan 2020 20:13:01.895      119.38981398    Luna            Penumbra    9             119.38981398
-    # 12 Jan 2020 03:50:21.971    12 Jan 2020 03:52:17.623      115.65151513    Luna            Penumbra    10            115.65151513
-    # 12 Jan 2020 04:11:21.276    12 Jan 2020 04:13:18.478      117.20219948    Luna            Penumbra    11            117.20219948
-
     # ------------------- check umbra times -------------
 
-    print("Umbra Start-End Intervals - Earth:")
-    print(umbra_intervals_earth)
-    print("Umbra Start-End Intervals - Moon:")
-    print(umbra_intervals_moon)
+    # print("Umbra Start-End Intervals - Earth:")
+    # print(umbra_intervals_earth)
+    # print("Umbra Start-End Intervals - Moon:")
+    # print(umbra_intervals_moon)
 
     # check Umbra params
     gmat_umbra_times_earth: List[Tuple] = []
@@ -277,10 +254,10 @@ def test_multi_body_occultation_intervals():
 
     # ------------------- check penumbra times -------------
 
-    print("Penumbra Start-End Intervals - Earth:")
-    print(penumbra_intervals_earth)
-    print("Penumbra Start-End Intervals - Moon:")
-    print(penumbra_intervals_moon)
+    # print("Penumbra Start-End Intervals - Earth:")
+    # print(penumbra_intervals_earth)
+    # print("Penumbra Start-End Intervals - Moon:")
+    # print(penumbra_intervals_moon)
 
     # check Penumbra params
     gmat_penumbra_times_moon = [
@@ -316,7 +293,7 @@ def test_occultation_intervals():
     accuracy of the entry-exit times by a few milliseconds.
     """
 
-    output_timer_results = True
+    output_timer_results = False
 
     # init timer
     begin = time.time()
