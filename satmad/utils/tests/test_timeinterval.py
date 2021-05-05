@@ -83,9 +83,11 @@ def test_interval_init_switched_err(init_times, durations):
 
 
 def test_interval_init_zero_dur_err(init_times):
-    """Test `init` with equal init and end times - should raise `ValueError`."""
-    with pytest.raises(ValueError):
-        TimeInterval(init_times, init_times + 0.1 * _EPS_TIME)
+    """Test `init` with equal init and end times - should return None."""
+
+    interval = TimeInterval(init_times, init_times + 0.1 * _EPS_TIME)
+
+    assert interval is None
 
 
 def test_interval_list_init_with_durations(init_times, durations):

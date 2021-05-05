@@ -9,11 +9,12 @@ Time interval module.
 `TimeInterval` class stores time intervals and `TimeIntervalList` class stores
 lists of `TimeInterval` objects.
 """
-
+import numpy as np
 import portion as p
 from astropy import units as u
 from astropy.time import Time, TimeDelta
 from astropy.units import Quantity
+from portion import Interval
 
 _EPS_TIME = 10 * u.ns
 """Allowable time threshold, this much 'out of bounds' is allowed when assuming two
@@ -28,51 +29,59 @@ class TimeInterval:
     This is a thin wrapper around the  :class:`portion.interval.Interval` class
     from `portion` package (for the Atomic intervals), using Astropy `Time` classes
     under the hood.
-
-
-    Note that:
-
-    * only the first element of `start_time` and `end_time` objects are used,
-      even if they are defined as arrays.
-
-    * `end_time` should be greater than (or later than) `start_time`.
-      Zero duration time intervals are not allowed and will raise `ValueError`.
-
-    Parameters
-    ----------
-    start_time : Time or TimeInterval
-        Initial time to mark the start of the interval (only the first
-        instance contained in the `Time` object is used). If specified as TimeInterval,
-        it is copied into this and `end_time` is ignored.
-    end_time : Time, TimeDelta, Quantity or None
-        End time or duration to mark the end of the interval
-        (only the first instance contained in the `Time` or `TimeDelta` object is used)
-        None is acceptable only when `start_time` is defined as a `TimeInterval`
-    replicate : bool
-        `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False` to
-        use a shallow copy to save memory
-    start_inclusive : bool
-        True if the start of the interval is inclusive (closed), False if exclusive
-        (open)
-    end_inclusive : bool
-        True if the start of the interval is inclusive (closed), False if exclusive
-        (open)
-
-    Raises
-    ------
-    ValueError
-        Raised if `end_time` is not an instance of `Time` or `TimeDelta`. Also raised
-        if `end_time` <= `start_time`.
     """
 
-    def __init__(
-        self,
+    _interval: Interval = None
+
+    def __new__(
+        cls,
         start_time,
         end_time,
         replicate=False,
         start_inclusive=True,
         end_inclusive=True,
     ):
+        """
+        Initialises the `TimeInterval` object.
+
+        Note that:
+
+        * only the first element of `start_time` and `end_time` objects are used,
+          even if they are defined as arrays.
+
+        * `end_time` should be greater than (or later than) `start_time`.
+          Zero duration time intervals are not allowed and will raise `ValueError`.
+
+        Upon successful initialisation it will return `TimeInterval`. If an empty
+        interval is defined, it will return `None`.
+
+        Parameters
+        ----------
+        start_time : Time or TimeInterval
+            Initial time to mark the start of the interval (only the first
+            instance contained in the `Time` object is used). If specified as
+            TimeInterval, it is copied into this and `end_time` is ignored.
+        end_time : Time, TimeDelta, Quantity or None
+            End time or duration to mark the end of the interval
+            (only the first instance contained in the `Time` or `TimeDelta` object
+            is used). None is acceptable only when `start_time` is defined as a
+            `TimeInterval`
+        replicate : bool
+            `True` to replicate (deep copy) the `Time` or `TimeDelta` objects, `False`
+            to use a shallow copy to save memory
+        start_inclusive : bool
+            True if the start of the interval is inclusive (closed), False if exclusive
+            (open)
+        end_inclusive : bool
+            True if the start of the interval is inclusive (closed), False if exclusive
+            (open)
+
+        Raises
+        ------
+        ValueError
+            Raised if `end_time` is not an instance of `Time` or `TimeDelta`. Also
+            raised if `end_time` <= `start_time`.
+        """
 
         start_interval = None
         end_interval = None
@@ -119,6 +128,11 @@ class TimeInterval:
             elif isinstance(end_tmp, Time) and not isinstance(end_tmp, TimeDelta):
                 # end time is a Time
 
+                # check for empty instances
+                duration = np.abs(start_tmp - end_tmp)
+                if duration <= _EPS_TIME:
+                    return None
+
                 # replicate or shallow copy start and end values - use the first
                 # time instances only
                 if start_tmp < end_tmp:
@@ -141,15 +155,19 @@ class TimeInterval:
                     f"only Time, Quantity (Temporal) or TimeDelta classes are allowed."
                 )
 
+        # check for empty instances
+        duration = np.abs(start_interval - end_interval)
+        if duration <= _EPS_TIME:
+            return None
+
         # Initialise the interval
-        self._interval = p.closed(start_interval, end_interval).replace(
+        _interval = p.closed(start_interval, end_interval).replace(
             left=start_inclusive, right=end_inclusive
         )
 
-        # Raise exception if the interval duration is too short
-        # Duration guaranteed to be positive thanks to the juggling above
-        if self.duration <= _EPS_TIME:
-            raise ValueError("Duration of the interval is negative or zero.")
+        obj = super().__new__(cls)
+        obj._interval = _interval
+        return obj
 
     def is_in_interval(self, time):
         """
@@ -486,7 +504,7 @@ class TimeIntervalList:
 
     Parameters
     ----------
-    intervals : list[TimeInterval]
+    intervals : list[TimeInterval] or None
         List of intervals
     start_valid : Time or TimeInterval
         Time at which the validity of this `TimeInterval` starts (only the first
@@ -700,7 +718,8 @@ class TimeIntervalList:
         -------
         TimeIntervalList
            A new interval list that is the Intersection of `interval_list` and
-           this time interval list, or None if there is no intersection.
+           this time interval list, or None if there is no intersection even in the
+           validity intervals.
 
         """
         if not self.valid_interval.is_intersecting(interval_list.valid_interval):
@@ -710,6 +729,11 @@ class TimeIntervalList:
         common_valid_interval = self.valid_interval.intersect(
             interval_list.valid_interval
         )
+
+        if not interval_list.intervals or not self.intervals:
+            # There are no intervals to intersect in either self or the target
+            # intervals, hence no intersection possible
+            return TimeIntervalList(None, start_valid=common_valid_interval)
 
         # Compute the portion intervals
         p_self_intervals = TimeIntervalList._to_p_intervals(self.intervals)
@@ -899,9 +923,14 @@ class TimeIntervalList:
 
         # Fill the atomic `TimeInterval` objects using the merged list
         for p_interval in p_intervals:
-            intervals.append(
-                _create_interval_from_portion(p_interval, replicate=replicate)
-            )
+
+            # check for empty instances
+            duration = np.abs(p_interval.lower - p_interval.upper)
+            if duration > _EPS_TIME:
+                # duration not empty, add the interval
+                intervals.append(
+                    _create_interval_from_portion(p_interval, replicate=replicate)
+                )
 
         return intervals
 
@@ -926,7 +955,9 @@ class TimeIntervalList:
         p_intervals = p.empty()
         if isinstance(intervals, list):
             for interval in intervals:
-                p_intervals = p_intervals.union(interval.p_interval)
+                # make sure interval is not None
+                if interval:
+                    p_intervals = p_intervals.union(interval.p_interval)
         else:
             # intervals object is a single TimeInterval
             p_intervals = intervals.p_interval
