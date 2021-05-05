@@ -47,7 +47,7 @@ EARTH_ELLIPSOID_IERS2003 = CelestialBodyEllipsoid(
     "Earth Ellipsoid IERS 2003",
     6378136.6 * u.m,
     298.25642 * u.dimensionless_unscaled,
-    mu=3.986004418 * u.m ** 3 / u.s ** 2,
+    # mu=3.986004418 * u.m ** 3 / u.s ** 2,
     j2=1.0826359e-3 * u.dimensionless_unscaled,
 )
 """Earth Ellipsoid defined in IERS 2010 Numerical Standards.
@@ -59,7 +59,7 @@ EARTH_ELLIPSOID_GRS80 = CelestialBodyEllipsoid(
     "Earth Ellipsoid GRS80",
     6378137 * u.m,
     298.257222101 * u.dimensionless_unscaled,
-    mu=3.986005e14 * u.m ** 3 / u.s ** 2,
+    # mu=3.986005e14 * u.m ** 3 / u.s ** 2,
     j2=1.08263e-3 * u.dimensionless_unscaled,
     om=7.292115e-5 * u.rad / u.s,
 )
@@ -72,7 +72,7 @@ EARTH_ELLIPSOID_WGS84 = CelestialBodyEllipsoid(
     "Earth Ellipsoid WGS84",
     6378137.0 * u.m,
     298.257223563 * u.dimensionless_unscaled,
-    mu=3.986004418e14 * u.m ** 3 / u.s ** 2,
+    # mu=3.986004418e14 * u.m ** 3 / u.s ** 2,
     j2=1.082629821313e-3 * u.dimensionless_unscaled,
     om=7.292115e-5 * u.rad / u.s,
 )
@@ -93,7 +93,7 @@ MOON_ELLIPSOID_IAUWG2015 = CelestialBodyEllipsoid(
 
 EARTH = CelestialBody(
     "Earth",
-    "Default Earth Model. ",
+    "Default Earth Model.",
     GM_earth.to(u.km ** 3 / u.s ** 2),
     inert_coord=GCRS,
     body_fixed_coord=ITRS,
@@ -103,7 +103,7 @@ EARTH = CelestialBody(
 
 SUN = CelestialBody(
     "Sun",
-    "Default Sun Model. ",
+    "Default Sun Model.",
     GM_sun.to(u.km ** 3 / u.s ** 2),
     inert_coord=HCRS,
     ellipsoid=CelestialBodyEllipsoid(
@@ -122,7 +122,7 @@ on Recommended Nominal Conversion Constants for Selected Solar and Planetary Pro
 
 MOON = CelestialBody(
     "Moon",
-    "Default Moon Model. ",
+    "Default Moon Model.",
     GM_moon.to(u.km ** 3 / u.s ** 2),
     ellipsoid=MOON_ELLIPSOID_IAUWG2015,
     inert_coord=MoonCRS,

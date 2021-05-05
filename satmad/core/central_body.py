@@ -26,12 +26,14 @@ class CelestialBodyEllipsoid:
         Dynamical form factor
     om : Quantity
         Nominal mean angular velocity of the celestial body
-    mu : Quantity
-        `GM` value (Gravitational constant) of the Celestial body
+
     """
 
     j2 = None
-    mu = None
+
+    #     mu : Quantity
+    #         `GM` value (Gravitational constant) of the Celestial body
+    # mu = None
 
     om = None
 
@@ -49,7 +51,7 @@ class CelestialBodyEllipsoid:
         self.inv_f = inv_f
 
         self.j2 = kwargs.get("j2")
-        self.mu = kwargs.get("mu")
+        # self.mu = kwargs.get("mu")
 
         self.om = kwargs.get("om")
 
