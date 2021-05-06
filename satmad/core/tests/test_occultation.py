@@ -10,20 +10,12 @@ Tests related to occultations, shadows and illumination.
 import time
 from typing import List, Tuple
 
-import numpy as np
 from astropy import units as u
-from astropy.coordinates import (
-    CartesianDifferential,
-    CartesianRepresentation,
-    SkyCoord,
-    get_body_barycentric,
-    get_body_barycentric_posvel,
-)
+from astropy.coordinates import CartesianDifferential, CartesianRepresentation, SkyCoord
 from astropy.time import Time
 from pytest import approx
 
 from satmad.coordinates.frames import MoonCRS
-from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH, MOON, SUN
 from satmad.core.occultation import (
     multi_body_occultation_intervals,
@@ -91,56 +83,18 @@ def _init_trajectory(pvt0, stepsize, prop_interval, central_body=EARTH):
     return trajectory
 
 
-# def test_time_error():
-#     """ """
-#     with pytest.raises(ValueError):
-#         # Init PVT
-#         pvt0 = _init_orbit()
-#
-#         r_illum = SkyCoord(
-#             get_body_barycentric(SUN.name, pvt0.obstime, ephemeris="jpl"),
-#             obstime=pvt0.obstime - 1 * u.s,
-#             frame="icrs",
-#             representation_type="cartesian",
-#             differential_type="cartesian",
-#         )
-#
-#         r_occult = SkyCoord(
-#             get_body_barycentric(SUN.name, pvt0.obstime, ephemeris="jpl"),
-#             obstime=pvt0.obstime,
-#             frame="icrs",
-#             representation_type="cartesian",
-#             differential_type="cartesian",
-#         )
-#
-#         compute_occultation(
-#             pvt0,
-#             r_occult,
-#             r_illum,
-#         )
-#####################
-# make sure all times match
-# allowable_time_diff = 1 * u.ms
-# if (
-#     abs(r_illum_body.obstime - rv_obj.obstime) > allowable_time_diff
-#     or abs(r_occult_body.obstime - rv_obj.obstime) > allowable_time_diff
-# ):
-#     raise ValueError(
-#         f"Occultation calculation: Position vector times do not match. "
-#         f"Illum - obj diff: {(r_illum_body.obstime - rv_obj.obstime).to(u.s)}, "
-#         f"Occult - obj diff: {(r_occult_body.obstime - rv_obj.obstime).to(u.s)}."
-#     )
-
-
 def test_multi_body_occultation_intervals():
     """Tests the umbra and penumbra intervals against GMAT, where the occulting
     body is Earth and Moon.
 
     Using a stepsize of 60 seconds gives more points to evaluate and increases the
     accuracy of the entry-exit times by a few milliseconds.
+
+    The majority of the difference with respect to GMAT is likely due to apparent vs.
+    geometric Sun - this is not very clear from GMAT documentation.
     """
 
-    output_timer_results = False
+    print_results = False
 
     # init timer
     begin = time.time()
@@ -149,74 +103,31 @@ def test_multi_body_occultation_intervals():
     pvt0 = _init_orbit_luna()
 
     # Set up propagation config
-    stepsize = 120 * u.s
+    stepsize = 180 * u.s
     prop_interval = TimeInterval(pvt0.obstime, 2.0 * u.day)
 
     # init propagator with defaults
     # run propagation and get trajectory
     trajectory = _init_trajectory(pvt0, stepsize, prop_interval, central_body=MOON)
 
-    # begin = time.time()
-    sparse_stepsize = 2 * u.hr
-    sparse_time_list = (
-        pvt0.obstime + np.arange(-0.5, +2.5, sparse_stepsize.to_value(u.day)) * u.day
-    )
-    illum_traj = Trajectory(
-        SkyCoord(
-            get_body_barycentric(SUN.name, sparse_time_list, ephemeris="jpl"),
-            obstime=sparse_time_list,
-            frame="icrs",
-            representation_type="cartesian",
-            differential_type="cartesian",
-        ).transform_to("gcrs")
-    )
-
-    occult_traj_earth = Trajectory(
-        SkyCoord(
-            get_body_barycentric(EARTH.name, sparse_time_list, ephemeris="jpl"),
-            obstime=sparse_time_list,
-            frame="icrs",
-            representation_type="cartesian",
-            differential_type="cartesian",
-        ).transform_to("gcrs")
-    )
-
-    r_moon, v_moon = get_body_barycentric_posvel(
-        MOON.name, sparse_time_list, ephemeris="jpl"
-    )
-    v_moon = CartesianDifferential(v_moon.xyz)
-    r_moon = r_moon.with_differentials(v_moon)
-
-    occult_traj_moon = Trajectory(
-        SkyCoord(
-            r_moon.with_differentials(v_moon),
-            obstime=sparse_time_list,
-            frame="icrs",
-            representation_type="cartesian",
-            differential_type="cartesian",
-        ).transform_to(MoonCRS)
-    )
-
     # end timer
     end = time.time()
-    if output_timer_results:
+    if print_results:
         print(f"Propagation and interpolations: {end - begin} seconds")
 
     # init timer
     begin = time.time()
 
-    occult_bodies = {EARTH: occult_traj_earth, MOON: occult_traj_moon}
-    # occult_bodies = {MOON: occult_traj_moon}
-    # occult_bodies = {EARTH: occult_traj_earth}
-    # TODO trajectory dışında her şey seçimli olabilir
+    occult_bodies = (EARTH, MOON)
+
     # Compute occultation intervals
     output_dict = multi_body_occultation_intervals(
-        trajectory, occult_bodies, illum_traj, illum_body=SUN
+        trajectory, occult_bodies, illum_body=SUN, ephemeris="jpl"
     )
 
     # end timer
     end = time.time()
-    if output_timer_results:
+    if print_results:
         print(f"Intervals finding: {end - begin} seconds")
 
     umbra_intervals_earth, penumbra_intervals_earth = output_dict[EARTH.name]
@@ -224,15 +135,16 @@ def test_multi_body_occultation_intervals():
 
     # ------------------- check umbra times -------------
 
-    # print("Umbra Start-End Intervals - Earth:")
-    # print(umbra_intervals_earth)
-    # print("Umbra Start-End Intervals - Moon:")
-    # print(umbra_intervals_moon)
+    if print_results:
+        print("Umbra Start-End Intervals - Earth:")
+        print(umbra_intervals_earth)
+        print("Umbra Start-End Intervals - Moon:")
+        print(umbra_intervals_moon)
 
     # check Umbra params
     gmat_umbra_times_earth: List[Tuple] = []
 
-    start_diff = 160 * u.ms
+    start_diff = 140 * u.ms
     end_diff = 80 * u.ms
 
     _check_entry_exit_times(
@@ -254,10 +166,11 @@ def test_multi_body_occultation_intervals():
 
     # ------------------- check penumbra times -------------
 
-    # print("Penumbra Start-End Intervals - Earth:")
-    # print(penumbra_intervals_earth)
-    # print("Penumbra Start-End Intervals - Moon:")
-    # print(penumbra_intervals_moon)
+    if print_results:
+        print("Penumbra Start-End Intervals - Earth:")
+        print(penumbra_intervals_earth)
+        print("Penumbra Start-End Intervals - Moon:")
+        print(penumbra_intervals_moon)
 
     # check Penumbra params
     gmat_penumbra_times_moon = [
@@ -266,7 +179,7 @@ def test_multi_body_occultation_intervals():
         (9, "2020-01-11T20:11:02.505", "2020-01-11T20:13:01.895"),
     ]
 
-    start_diff = 73 * u.ms
+    start_diff = 65 * u.ms
     end_diff = 120 * u.ms
 
     _check_entry_exit_times(
@@ -285,16 +198,20 @@ def test_multi_body_occultation_intervals():
     )
 
 
-def test_occultation_intervals():
+def test_leo_occultation_intervals():
     """Tests the umbra and penumbra intervals against GMAT, where the occulting
     body is Earth only.
 
     Using a stepsize of 60 seconds gives more points to evaluate and increases the
     accuracy of the entry-exit times by a few milliseconds.
+
+    The majority of the difference with respect to GMAT is likely due to apparent vs.
+    geometric Sun - this is not very clear from GMAT documentation.
     """
 
-    output_timer_results = False
+    print_results = False
 
+    # TODO check speed and accuracy with stepsize etc
     # init timer
     begin = time.time()
 
@@ -309,42 +226,19 @@ def test_occultation_intervals():
     # run propagation and get trajectory
     trajectory = _init_trajectory(pvt0, stepsize, prop_interval)
 
-    # begin = time.time()
-    sparse_stepsize = 2 * u.hr
-    sparse_time_list = (
-        pvt0.obstime + np.arange(-0.5, +2.5, sparse_stepsize.to_value(u.day)) * u.day
-    )
-    illum_traj = Trajectory(
-        SkyCoord(
-            get_body_barycentric(SUN.name, sparse_time_list, ephemeris="jpl"),
-            obstime=sparse_time_list,
-            frame="icrs",
-            representation_type="cartesian",
-            differential_type="cartesian",
-        ).transform_to("gcrs")
-    )
-
-    occult_traj = Trajectory(
-        SkyCoord(
-            get_body_barycentric(EARTH.name, sparse_time_list, ephemeris="jpl"),
-            obstime=sparse_time_list,
-            frame="icrs",
-            representation_type="cartesian",
-            differential_type="cartesian",
-        ).transform_to("gcrs")
-    )
-
     # end timer
     end = time.time()
-    if output_timer_results:
+    if print_results:
         print(f"Propagation and interpolations: {end - begin} seconds")
 
     # init timer
     begin = time.time()
 
+    occulting_body = EARTH
+
     # Compute occultation intervals
     (umbra_intervals, penumbra_intervals) = occultation_intervals(
-        trajectory, occult_traj, illum_traj, occulting_body=EARTH, illum_body=SUN
+        trajectory, occulting_body, illum_body=SUN, ephemeris="jpl"
     )
 
     # # plot umbra params if required
@@ -354,13 +248,13 @@ def test_occultation_intervals():
 
     # end timer
     end = time.time()
-    if output_timer_results:
+    if print_results:
         print(f"Intervals finding: {end - begin} seconds")
 
     # ------------------- check umbra times -------------
-
-    # print("Start-End Intervals:")
-    # print(umbra_intervals)
+    if print_results:
+        print("Start-End Intervals:")
+        print(umbra_intervals)
 
     # check Umbra params
     gmat_umbra_times = [
@@ -377,9 +271,9 @@ def test_occultation_intervals():
     _check_entry_exit_times(umbra_intervals, gmat_umbra_times, start_diff, end_diff)
 
     # ------------------- check penumbra times -------------
-
-    # print("Start-End Intervals:")
-    # print(penumbra_intervals)
+    if print_results:
+        print("Start-End Intervals:")
+        print(penumbra_intervals)
 
     # check Penumbra params
     gmat_penumbra_times = [

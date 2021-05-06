@@ -32,6 +32,7 @@ class TimeInterval:
     """
 
     _interval: Interval = None
+    _as_time = None
 
     def __new__(
         cls,
@@ -167,6 +168,7 @@ class TimeInterval:
 
         obj = super().__new__(cls)
         obj._interval = _interval
+        obj._as_time = Time([obj.start, obj.end])
         return obj
 
     def is_in_interval(self, time):
@@ -184,14 +186,18 @@ class TimeInterval:
             True if time is within the reference interval, False otherwise
         """
         # check upper and lower boundaries for tolerance
-        if _are_times_almost_equal(self.start, time):
+        [is_start_equal, is_end_equal] = _are_times_almost_equal(self.as_time, time)
+
+        # check start
+        if is_start_equal:
             # time at starting edge - is edge closed?
             if self._interval.left:
                 return True
             else:
                 return False
 
-        if _are_times_almost_equal(self.end, time):
+        # check end
+        if is_end_equal:
             # time at end edge - is edge closed?
             if self._interval.right:
                 return True
@@ -395,6 +401,11 @@ class TimeInterval:
             )
 
     @property
+    def as_time(self):
+        """Gets the start and end intervals contained a single Time object."""
+        return self._as_time
+
+    @property
     def duration(self):
         """
         Computes the duration of the interval.
@@ -458,10 +469,11 @@ def _are_times_almost_equal(t1, t2):
 
     Returns
     -------
-    True if times are almost equal, False otherwise
+    bool
+        True if times are almost equal, False otherwise
 
     """
-    return abs(t1 - t2) < _EPS_TIME
+    return abs((t1 - t2).to_value(u.s)) < _EPS_TIME.to_value(u.s)
 
 
 def _create_interval_from_portion(interval, replicate=False):

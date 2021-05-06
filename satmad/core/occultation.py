@@ -12,7 +12,6 @@ from enum import Enum, auto
 import numpy as np
 from astropy import units as u
 
-from satmad.coordinates.trajectory import Trajectory
 from satmad.core.celestial_bodies import EARTH, SUN
 from satmad.utils.discrete_time_events import DiscreteTimeEvents
 from satmad.utils.timeinterval import TimeIntervalList
@@ -27,74 +26,61 @@ class IlluminationStatus(Enum):
 
 
 def multi_body_occultation_intervals(
-    traj_obj, occult_bodies, traj_illum_body, illum_body=SUN
+    traj_obj, occult_bodies, illum_body=SUN, ephemeris="builtin"
 ):
     """
-    Computes the occultation intervals of an object for multiple occulting bodies
-    (e.g. Earth and Moon).
+    Computes the occultation intervals of an object (e.g. satellite) for
+    multiple occulting bodies (e.g. Earth and Moon).
 
-    The method is initialised with a dictionary containing occulting bodies and their
-    trajectories::
+    The method is initialised with a list or tuple containing occulting bodies::
 
-        occult_traj_Earth = Trajectory(
-            SkyCoord(
-                get_body_barycentric(EARTH.name, sparse_time_list, ephemeris="jpl"),
-                obstime=sparse_time_list,
-                frame="icrs",
-                representation_type="cartesian",
-                differential_type="cartesian",
-            ).transform_to("gcrs")
-        )
+        occult_bodies = [EARTH, MOON]
 
-        occult_traj_Moon = Trajectory(
-            SkyCoord(
-                get_body_barycentric(MOON.name, sparse_time_list, ephemeris="jpl"),
-                obstime=sparse_time_list,
-                frame="icrs",
-                representation_type="cartesian",
-                differential_type="cartesian",
-            ).transform_to("MoonCRS")
-        )
-
-        occult_bodies = {EARTH: occult_traj_Earth, MOON: occult_traj_Moon}
-
-    Note that the input trajectories can be in any frame - they will be converted
-    to the local inertial frame of the occulting body (e.g. GCRS for the Earth) to
-    carry out the calculations. However, it seems to be much faster to convert to the
-    correct coordinates outside this method.
+    Note that the trajectory of the object can be in any frame.
+    If necessary, it is transformed to the local inertial frame of the occulting body.
 
     Parameters
     ----------
     traj_obj : Trajectory
         Trajectory of the object to be checked (e.g. satellite)
-    occult_bodies : dict
-        Dictionary containing occulting bodies and trajectories
-    traj_illum_body : Trajectory
-        Trajectory of the illuminating body (e.g. Sun)
-    illum_body : CelestialBody
-        Properties of the illuminating body (its name and ellipsoid properties are used)
+    occult_bodies : list[CelestialBody] or tuple[CelestialBody]
+        List or Tuple containing occulting bodies
+    illum_body : CelestialBody, optional
+        Illuminating body
+    ephemeris : str, optional
+        Ephemeris to use.  By default, use the one set with
+        ``astropy.coordinates.solar_system_ephemeris.set``
 
     Returns
     -------
+    dict
+        Dictionary with the occulting body as the key and the Tuple of umbra and
+        penumbra intervals
+        (`output_dict[occulting_body_name] = (umbra_intervals, penumbra_intervals)`)
 
     """
     # This is the complete set of points where the intervals will be searched
     time_list = traj_obj.coord_list.obstime
 
-    # TODO check intervals match? Occult and Illum Traj must be equal or larger than
-    #  object trajectory
+    # Generate ICRS positions for the illum body
+    illum_pos_list_icrs = illum_body.get_coord_list(
+        time_list, velocity=False, ephemeris=ephemeris
+    )
 
     output_dict = {}
 
     # Compute intervals for each occulting object
-    for occulting_body, traj_occult_body in occult_bodies.items():
+    for occulting_body in occult_bodies:
 
-        # regenerate interpolated planet positions in the coordinate frame necessary
-        # make sure no unnecessary coord transformations are taking place
-        occult_pos_list = __generate_pos_list(
-            traj_occult_body, time_list, occulting_body
+        # Compute pos list for illum and occulting bodies in the local inertial frame
+        illum_pos_list = illum_pos_list_icrs.transform_to(
+            occulting_body.inert_coord_frame
         )
-        illum_pos_list = __generate_pos_list(traj_illum_body, time_list, occulting_body)
+        occult_pos_list = occulting_body.get_coord_list(
+            time_list, velocity=False, ephemeris=ephemeris
+        ).transform_to(occulting_body.inert_coord_frame)
+
+        # Transform object coordinates if necessary
         if traj_obj.coord_list.frame.name != occulting_body.inert_coord_frame.name:
             traj_pos_list = traj_obj.coord_list.transform_to(
                 occulting_body.inert_coord_frame
@@ -102,6 +88,7 @@ def multi_body_occultation_intervals(
         else:
             traj_pos_list = traj_obj.coord_list
 
+        # Compute occultation times
         (
             occulting_body_name,
             umbra_intervals,
@@ -117,47 +104,71 @@ def multi_body_occultation_intervals(
         # check the intervals for the spurious "positive projected distance" cases
         # check the umbra intervals
         umbra_intervals = _generate_corrected_intervals(
-            umbra_intervals,
-            traj_obj,
-            traj_occult_body,
-            occulting_body,
-            traj_illum_body,
-            illum_body,
+            umbra_intervals, traj_obj, occulting_body, illum_body, ephemeris
         )
         # check the penumbra intervals
         penumbra_intervals = _generate_corrected_intervals(
             penumbra_intervals,
             traj_obj,
-            traj_occult_body,
             occulting_body,
-            traj_illum_body,
             illum_body,
+            ephemeris,
         )
 
+        # Add element to dictionary
         output_dict[occulting_body_name] = (umbra_intervals, penumbra_intervals)
 
     return output_dict
 
 
-def __generate_pos_list(traj_body, time_list, occulting_body):
-    """Checks whether the coordinates are in the inertial frame of the occulting body,
-    transform them if necessary."""
-    if traj_body.coord_list.frame.name != occulting_body.inert_coord_frame.name:
-        pos_list = Trajectory(
-            traj_body.coord_list.transform_to(occulting_body.inert_coord_frame)
-        )(time_list)
-        return pos_list
-    else:
-        return traj_body(time_list)
+def occultation_intervals(
+    traj_obj,
+    occulting_body=EARTH,
+    illum_body=SUN,
+    ephemeris="builtin",
+):
+    """
+    Computes the occultation intervals of an object (e.g. satellite) for
+    a single occulting body (e.g. Earth).
+
+    Note that the trajectory of the object can be in any frame.
+    If necessary, it is transformed to the local inertial frame of the occulting body.
+
+    This is a thin wrapper around the `multi_body_occultation_intervals()` method for
+    convenience.
+
+    Parameters
+    ----------
+    traj_obj : Trajectory
+        Trajectory of the object to be checked (e.g. satellite)
+    occulting_body : CelestialBody, optional
+        Occulting body
+    illum_body : CelestialBody, optional
+        Illuminating body
+    ephemeris : str, optional
+        Ephemeris to use.  By default, use the one set with
+        ``astropy.coordinates.solar_system_ephemeris.set``
+
+    Returns
+    -------
+    TimeIntervalList, TimeIntervalList
+        Umbra intervals, penumbra intervals
+
+    """
+
+    output_dict = multi_body_occultation_intervals(
+        traj_obj, [occulting_body], illum_body=illum_body, ephemeris=ephemeris
+    )
+
+    return output_dict[occulting_body.name]
 
 
 def _generate_corrected_intervals(
     event_intervals,
     traj_obj,
-    traj_occult_body,
     occulting_body,
-    traj_illum_body,
     illum_body,
+    ephemeris="builtin",
 ):
     """Checks the intervals to make sure they don't contain false events with zero
     umbra/penumbra param but on the illuminated side of the occulting body."""
@@ -165,12 +176,7 @@ def _generate_corrected_intervals(
         interval
         for interval in event_intervals.intervals
         if not _is_obj_on_illum_side(
-            interval,
-            traj_obj,
-            traj_occult_body,
-            occulting_body,
-            traj_illum_body,
-            illum_body,
+            interval, traj_obj, occulting_body, illum_body, ephemeris
         )
     ]
 
@@ -180,11 +186,23 @@ def _generate_corrected_intervals(
 
 
 def _is_obj_on_illum_side(
-    interval, traj_obj, traj_occult_body, occulting_body, traj_illum_body, illum_body
+    interval, traj_obj, occulting_body, illum_body, ephemeris="builtin"
 ):
     """Checks the interval to make sure they it is on the illuminated side of
     the occulting body."""
     obstime = interval.start + interval.duration * 0.5
+
+    # As the coordinates are on the occult_body inertial, no coord transform
+    # required in `compute_occultation`. Therefore no need for velocity at this stage.
+    pos_occult_body = occulting_body.get_coord_list(
+        obstime, velocity=False, ephemeris=ephemeris
+    ).transform_to(occulting_body.inert_coord_frame)
+
+    pos_illum_body = illum_body.get_coord_list(
+        obstime, velocity=False, ephemeris=ephemeris
+    ).transform_to(occulting_body.inert_coord_frame)
+
+    # Compute instantaneous occultation
     (
         illum_status,
         illum_ratio,
@@ -193,8 +211,8 @@ def _is_obj_on_illum_side(
         proj_distance,
     ) = compute_occultation(
         traj_obj(obstime),
-        traj_occult_body(obstime),
-        traj_illum_body(obstime),
+        pos_occult_body,
+        pos_illum_body,
         occulting_body=occulting_body,
         illum_body=illum_body,
     )
@@ -203,48 +221,6 @@ def _is_obj_on_illum_side(
         return True
     else:
         return False
-
-
-def occultation_intervals(
-    traj_obj, traj_occult_body, traj_illum_body, occulting_body=EARTH, illum_body=SUN
-):
-    """
-    Computes the occultation intervals of an object for a single occulting body.
-
-    Note that the input trajectories can be in any frame - they will be converted
-    to the local inertial frame of the occulting body (e.g. GCRS for the Earth) to
-    carry out the calculations. However, it seems to be much faster to convert to the
-    correct coordinates outside this method.
-
-    This is a thin wrapper around the `multi_body_occultation_intervals()` method for
-    convenience.
-
-    Parameters
-    ----------
-    traj_obj : Trajectory
-        Trajectory of the object to be checked (e.g. satellite)
-    traj_occult_body : Trajectory
-        Trajectory of the occulting body (e.g. Earth)
-    traj_illum_body : Trajectory
-        Trajectory of the illuminating body (e.g. Sun)
-    occulting_body : CelestialBody
-        Properties of the occulting body (its name and ellipsoid properties are used)
-    illum_body : CelestialBody
-        Properties of the illuminating body (its name and ellipsoid properties are used)
-
-    Returns
-    -------
-    TimeIntervalList, TimeIntervalList
-        Umbra intervals, penumbra intervals
-    """
-
-    occult_bodies = {occulting_body: traj_occult_body}
-
-    output_dict = multi_body_occultation_intervals(
-        traj_obj, occult_bodies, traj_illum_body, illum_body=SUN
-    )
-
-    return output_dict[occulting_body.name]
 
 
 def _single_body_occultation_intervals(
@@ -304,6 +280,7 @@ def _single_body_occultation_intervals(
     # from satmad.plots.basic_plots import plot_time_param
     #
     # plot_time_param(time_list, umbra_params, x_rotation=True)
+
     # ------------------- find penumbra times -------------
     penumbra_params = np.asarray(
         [result[2].to_value(u.km) for result in occultation_results]
@@ -330,7 +307,7 @@ def compute_occultation(
     Note that the input position vectors can be in any frame - they will be converted
     to the local inertial frame of the occulting body (e.g. GCRS for the Earth) to
     carry out the calculations. However, it seems to be much faster to convert to the
-    correct coordinates outside this method.
+    correct coordinates outside this method if multiple results are requested.
 
     The times of the vectors are not checked to increase speed. It is the user's
     responsibility to make sure that they match.
