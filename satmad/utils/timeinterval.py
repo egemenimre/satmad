@@ -9,7 +9,6 @@ Time interval module.
 `TimeInterval` class stores time intervals and `TimeIntervalList` class stores
 lists of `TimeInterval` objects.
 """
-import numpy as np
 import portion as p
 from astropy import units as u
 from astropy.time import Time, TimeDelta
@@ -130,8 +129,7 @@ class TimeInterval:
                 # end time is a Time
 
                 # check for empty instances
-                duration = np.abs(start_tmp - end_tmp)
-                if duration <= _EPS_TIME:
+                if _are_times_almost_equal(start_tmp, end_tmp):
                     return None
 
                 # replicate or shallow copy start and end values - use the first
@@ -157,8 +155,7 @@ class TimeInterval:
                 )
 
         # check for empty instances
-        duration = np.abs(start_interval - end_interval)
-        if duration <= _EPS_TIME:
+        if _are_times_almost_equal(start_interval, end_interval):
             return None
 
         # Initialise the interval
@@ -937,8 +934,7 @@ class TimeIntervalList:
         for p_interval in p_intervals:
 
             # check for empty instances
-            duration = np.abs(p_interval.lower - p_interval.upper)
-            if duration > _EPS_TIME:
+            if not _are_times_almost_equal(p_interval.lower, p_interval.upper):
                 # duration not empty, add the interval
                 intervals.append(
                     _create_interval_from_portion(p_interval, replicate=replicate)
