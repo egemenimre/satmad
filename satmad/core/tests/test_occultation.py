@@ -211,7 +211,6 @@ def test_leo_occultation_intervals():
 
     print_results = False
 
-    # TODO check speed and accuracy with stepsize etc
     # init timer
     begin = time.time()
 

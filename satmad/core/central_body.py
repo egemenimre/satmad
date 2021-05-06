@@ -9,6 +9,12 @@ an object can rotate.
 
 """
 from astropy import units as u
+from astropy.coordinates import (
+    CartesianDifferential,
+    SkyCoord,
+    get_body_barycentric,
+    get_body_barycentric_posvel,
+)
 
 
 class CelestialBodyEllipsoid:
@@ -110,3 +116,56 @@ class CelestialBody:
         """Gets the underlying body fixed coordinate frame class (e.g. ITRS for Earth)
         or None if no such class exists."""
         return self.body_fixed_coord
+
+    def get_coord_list(self, time_list, velocity=False, ephemeris="builtin"):
+        """
+        Computes the set of positions (and velocities, if requested) of the Celestial
+        Body in the `ICRS` frame. Any further frame transformations can then be carried
+        out.
+
+        Default ephemeris is `builtin`, though it cannot compute the velocity for
+        the Moon. Ephemeris can also be `jpl`, where the default implementation in
+        Astropy is used. Be warned that the first time this is called, a large file
+        has to be downloaded.
+
+        Parameters
+        ----------
+        time_list : `~astropy.time.Time`
+            List of times where position output is requested
+        velocity : bool
+            True if velocities are of the celestial body is also requested
+        ephemeris : str, optional
+            Ephemeris to use.  By default, use the one set with
+            ``astropy.coordinates.solar_system_ephemeris.set``
+
+        Returns
+        -------
+        SkyCoord
+            Set of cartesian positions (and velocities) in a `SkyCoord` object
+
+        """
+        if velocity:
+            r, v = get_body_barycentric_posvel(
+                self.name, time_list, ephemeris=ephemeris
+            )
+            v_moon = CartesianDifferential(v.xyz)
+            r_moon = r.with_differentials(v_moon)
+
+            coord_list = SkyCoord(
+                r_moon.with_differentials(v_moon),
+                obstime=time_list,
+                frame="icrs",
+                representation_type="cartesian",
+                differential_type="cartesian",
+            )
+
+        else:
+            coord_list = SkyCoord(
+                get_body_barycentric(self.name, time_list, ephemeris=ephemeris),
+                obstime=time_list,
+                frame="icrs",
+                representation_type="cartesian",
+                differential_type="cartesian",
+            )
+
+        return coord_list
