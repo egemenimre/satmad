@@ -84,7 +84,7 @@ from astropy.coordinates import (
 )
 from astropy.time import Time
 
-from satmad.core.celestial_bodies import MOON
+from satmad.core.celestial_bodies_lib import MOON
 from satmad.coordinates.frames import MoonCRS
 from satmad.propagation.numerical_propagators import NumericalPropagator, ODESolverType
 from satmad.utils.timeinterval import TimeInterval

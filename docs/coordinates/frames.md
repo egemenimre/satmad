@@ -8,10 +8,12 @@ In addition to Earth, it is possible to define a Celestial Body in space through
 
 ```python
 from satmad.coordinates.frames import CelestialBodyCRS
-from satmad.core.celestial_bodies import MOON, SUN
+from satmad.core.celestial_bodies_lib import MOON, SUN
+
 
 class SunCRS(CelestialBodyCRS):
     body = SUN
+
 
 class MoonCRS(CelestialBodyCRS):
     body = MOON

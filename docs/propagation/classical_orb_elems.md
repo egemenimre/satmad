@@ -28,7 +28,7 @@ The usual way to initialise the class is via initial orbital elements (note the 
 
 from astropy.time import Time
 from astropy import units as u
-from satmad.core.celestial_bodies import EARTH
+from satmad.core.celestial_bodies_lib import EARTH
 from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
 
 time = Time("2020-01-11T11:00:00.000", scale="utc")
@@ -53,14 +53,14 @@ The second way to initialise the orbital elements is via cartesian coordinates, 
 from astropy.time import Time
 from astropy import units as u
 from astropy.coordinates import GCRS, CartesianDifferential, CartesianRepresentation
-from satmad.core.celestial_bodies import EARTH
+from satmad.core.celestial_bodies_lib import EARTH
 from satmad.coordinates.frames import init_pvt
 from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
 
 time = Time("2020-01-11T11:00:00.000", scale="utc")
 central_body = EARTH
 
-r = CartesianRepresentation([7.213392947764267e+03, 8.523654531348812e+01, 2.783146976770290e-16 ], unit=u.km)
+r = CartesianRepresentation([7.213392947764267e+03, 8.523654531348812e+01, 2.783146976770290e-16], unit=u.km)
 v = CartesianDifferential([5.902225938368851e-02, 7.421779936019859e+00, 1.595360086373873e-18], unit=u.km / u.s)
 rv_init = init_pvt(GCRS, time, r.with_differentials(v))
 

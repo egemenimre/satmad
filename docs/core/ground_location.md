@@ -12,7 +12,7 @@ A {py:class}`.GroundLocation` object can be initialised using a cartesian positi
 from astropy import units as u
 from astropy.coordinates import Latitude, Longitude
 
-from satmad.core.celestial_bodies import MOON_ELLIPSOID_IAUWG2015
+from satmad.core.celestial_bodies_lib import MOON_ELLIPSOID_IAUWG2015
 from satmad.core.ground_location import GeodeticLocation, GroundLocation
 
 # Ground location on the Moon, defined with lat/lon
@@ -29,14 +29,13 @@ Once initialised, the {py:class}`.GroundLocation` object can yield its geodetic 
 
 Similarly, it can yield its geocentric cartesian position with the `geocentric` parameter or `to_geocentric()` method. This geocentric position is equal to the position in the Central Body Fixed frame, for example, ITRS for the Earth. The result is a three-element tuple of cartesian position. Perhaps more useful version of this is the `to_body_fixed_coords()` method, where the Geodetic Position is converted to a geocentric coordinates object as used by astropy (such as `ITRS` class for Earth). For this, one or more time values are to be provided, as well as a Celestial Body, whose internal `body_fixed_coord` is used to generate the resulting object. If there are no body-fixed coordinates are defined for the Celestial Body, then a `TypeError` will be raised.
 
-
 ```python
 import numpy as np
 
 from astropy import units as u
 from astropy.time import Time, TimeDelta
 
-from satmad.core.celestial_bodies import EARTH
+from satmad.core.celestial_bodies_lib import EARTH
 from satmad.core.ground_location import GroundLocation
 
 # Generate three time values, one day apart
