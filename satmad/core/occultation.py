@@ -321,14 +321,14 @@ def compute_occultation(
     occulting body, assuming that the oblateness is along the local Z axis (i.e.,
     equatorial radius is the maximum radius and polar radius is the minimum radius).
 
-    Also note the following::
+    Also note the following:
 
-    a) Shadow terminators may only be encountered when `proj_distance >= 0`
-    b) However,the object will still be illuminated if `penumbra_param > 0`
-    c) object in penumbra if  `penumbra_param < 0 < umbra_param`
-    d) object in umbra if `0 < umbra_param`
-    e) `penumbra_param = 0` is penumbra terminator
-    f) `umbra_param = 0` is umbra terminator
+        a) Shadow terminators may only be encountered when `proj_distance >= 0`
+        b) However,the object will still be illuminated if `penumbra_param > 0`
+        c) object in penumbra if  `penumbra_param < 0 < umbra_param`
+        d) object in umbra if `0 < umbra_param`
+        e) `penumbra_param = 0` is penumbra terminator
+        f) `umbra_param = 0` is umbra terminator
 
     Parameters
     ----------
@@ -435,14 +435,14 @@ def _compute_shadow_geometry(
 
     The method does not use `Quantity` objects to increase processing speed.
 
-    Note the following::
+    Note the following:
 
-    a) Shadow terminators may only be encountered when `(r_obj . r_illum) < 0`
-    b) However,the object will still be illuminated if `delta > kappa`
-    c) object in penumbra if  `ksi < delta < kappa`
-    d) object in umbra if `delta < ksi`
-    e) `delta = kappa` is penumbra terminator
-    f) `delta = ksi` is umbra terminator
+        a) Shadow terminators may only be encountered when `(r_obj . r_illum) < 0`
+        b) However,the object will still be illuminated if `delta > kappa`
+        c) object in penumbra if  `ksi < delta < kappa`
+        d) object in umbra if `delta < ksi`
+        e) `delta = kappa` is penumbra terminator
+        f) `delta = ksi` is umbra terminator
 
     Parameters
     ----------
