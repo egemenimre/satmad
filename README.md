@@ -24,9 +24,9 @@ Current functionality is:
 
 The documentation for SatMAD is here: <https://satmad.readthedocs.io/>
 
-You can find some hands-on Jupyter examples in the [examples directory](https://github.com/egemenimre/satmad/tree/master/docs/examples) (or in the [documentation](https://satmad.readthedocs.io/en/latest/examples.html) for a text version).
+As a quick-start, you can find some hands-on Jupyter examples in the [tutorials directory](https://github.com/egemenimre/satmad/tree/master/docs/tutorials) (or in the [documentation](https://satmad.readthedocs.io/en/latest/tutorials.html) for a text version).
 
-In addition, there is a repository of tutorials, how-to guides and analyses in a dedicated project called SatMAD Applications,
+In addition, there is a repository of how-to guides and analyses in a dedicated project called SatMAD Applications,
 [available at Github](https://github.com/egemenimre/satmad_applications) (for Jupyter notebooks) and [in plain document format](https://satmad-applications.readthedocs.io/).
 
 
