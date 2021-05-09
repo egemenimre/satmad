@@ -17,7 +17,7 @@ The `celestial_bodies` module defines the default Celestial Bodies, which are in
 
 A `CelestialBody` object should include, as a minimum, `name`, `info` and `mu` (Gravitational Constant). In addition, it can have an `ellipsoid` (e.g. GRS80 for the Earth) as well as default coordinate definitions `inert_coord` and `body_fixed_coord`. The inertial coordinate definition (`inert_coord`) is required to be able to run a propagation around this central body. For the Earth, this is set to GCRS. The body fixed coordinate (`body_fixed_coord`) is required for conversions between the inertial and body fixed coordinate frames (for example, to be able to compute where the satellite sensor is pointing at on the ground). For the Earth, this is set to ITRS.
 
-Apart from the properties that can be queried, the `CelestialBody` object offers the {py:meth}`.get_coord_list` method. This method provides positions (and velocities) of planets and other celestial bodies. For example, the following code snippet computes the position of the Sun in ICRS frame every hour for a day:
+Apart from the properties that can be queried, the `CelestialBody` object offers the {py:meth}`.get_coord_list` method. This method provides positions (and velocities) of planets and other celestial bodies. For example, the following code snippet computes the position of the Sun in Barycentric (ICRS) frame every hour for a day:
 
     >>> from astropy.time import Time
     >>> from astropy import units as u
