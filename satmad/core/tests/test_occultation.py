@@ -236,7 +236,7 @@ def test_leo_occultation_intervals():
     occulting_body = EARTH
 
     # Compute occultation intervals
-    (umbra_intervals, penumbra_intervals) = occultation_intervals(
+    umbra_intervals, penumbra_intervals = occultation_intervals(
         trajectory, occulting_body, illum_body=SUN, ephemeris="jpl"
     )
 
