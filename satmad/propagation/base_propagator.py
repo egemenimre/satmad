@@ -14,7 +14,7 @@ from astropy import units as u
 from astropy.units import Quantity
 
 from satmad.coordinates.trajectory import Trajectory
-from satmad.core.celestial_bodies import EARTH
+from satmad.core.celestial_bodies_lib import EARTH
 
 
 class AbstractPropagator(ABC):

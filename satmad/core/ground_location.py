@@ -16,7 +16,7 @@ import numpy as np
 from astropy import units as u
 from astropy.coordinates import Angle, Latitude, Longitude
 
-from satmad.core.celestial_bodies import EARTH_ELLIPSOID_GRS80
+from satmad.core.celestial_bodies_lib import EARTH_ELLIPSOID_GRS80
 
 GeodeticLocation = collections.namedtuple("GeodeticLocation", ["lon", "lat", "height"])
 

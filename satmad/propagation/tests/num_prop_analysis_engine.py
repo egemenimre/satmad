@@ -16,7 +16,7 @@ from astropy.visualization import quantity_support, time_support
 from matplotlib import pyplot as plt
 
 from satmad.coordinates.trajectory import Trajectory
-from satmad.core.celestial_bodies import EARTH, GM_earth
+from satmad.core.celestial_bodies_lib import EARTH, GM_earth
 from satmad.propagation.force_models import two_body_energy
 from satmad.propagation.numerical_propagators import NumericalPropagator
 from satmad.propagation.sgp4_propagator import SGP4Propagator

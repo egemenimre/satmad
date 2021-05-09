@@ -4,7 +4,7 @@
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
-Definition of a Central Body, which is a celestial body around which
+Definition of a Celestial Body, which is a celestial body around which
 an object can rotate.
 
 """

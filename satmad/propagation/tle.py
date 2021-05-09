@@ -16,7 +16,7 @@ from sgp4.exporter import export_tle
 from sgp4.model import WGS72, Satrec
 
 # precompile the unit as constant
-from satmad.core.celestial_bodies import EARTH_ELLIPSOID_WGS84
+from satmad.core.celestial_bodies_lib import EARTH_ELLIPSOID_WGS84
 
 _DAY_TO_SEC = (1.0 * u.day).to(u.s)
 

@@ -15,8 +15,8 @@ from astropy.time import Time
 from pytest import approx
 
 from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
-from satmad.core.celestial_bodies import EARTH
-from satmad.core.central_body import CelestialBody
+from satmad.core.celestial_bodies_lib import EARTH
+from satmad.core.celestial_body import CelestialBody
 from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
 from satmad.tests.common_test_funcs import parse_rv_line
 

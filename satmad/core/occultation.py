@@ -12,7 +12,7 @@ from enum import Enum, auto
 import numpy as np
 from astropy import units as u
 
-from satmad.core.celestial_bodies import EARTH, SUN
+from satmad.core.celestial_bodies_lib import EARTH, SUN
 from satmad.utils.discrete_time_events import DiscreteTimeEvents
 from satmad.utils.timeinterval import TimeIntervalList
 

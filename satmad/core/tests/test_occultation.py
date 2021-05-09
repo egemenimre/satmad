@@ -16,7 +16,7 @@ from astropy.time import Time
 from pytest import approx
 
 from satmad.coordinates.frames import MoonCRS
-from satmad.core.celestial_bodies import EARTH, MOON, SUN
+from satmad.core.celestial_bodies_lib import EARTH, MOON, SUN
 from satmad.core.occultation import (
     multi_body_occultation_intervals,
     occultation_intervals,

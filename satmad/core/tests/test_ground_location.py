@@ -20,7 +20,7 @@ from astropy.coordinates import (
 from astropy.time import Time, TimeDelta
 from pytest import approx
 
-from satmad.core.celestial_bodies import (
+from satmad.core.celestial_bodies_lib import (
     EARTH,
     EARTH_ELLIPSOID_GRS80,
     EARTH_ELLIPSOID_WGS84,

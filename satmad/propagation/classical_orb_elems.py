@@ -16,7 +16,7 @@ from astropy.time import Time
 from astropy.units import Quantity
 
 from satmad.coordinates.frames import init_pvt
-from satmad.core.celestial_bodies import EARTH
+from satmad.core.celestial_bodies_lib import EARTH
 
 
 class AbstractKeplerianOrbitElements(ABC):
@@ -81,7 +81,7 @@ class AbstractKeplerianOrbitElements(ABC):
         self._self_check()
 
     def _self_check(self):
-        """Check the elements for errors. """
+        """Check the elements for errors."""
         # If conic section is too close to singular, raise error.
         if np.abs(self.sm_axis * (1 - self.eccentricity)) < 1e-3 * u.km:
             raise ValueError(

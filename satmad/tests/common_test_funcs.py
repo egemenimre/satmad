@@ -18,7 +18,7 @@ from astropy.time import Time
 from numpy import inf
 
 from satmad.coordinates.frames import MoonCRS, init_pvt
-from satmad.core.central_body import CelestialBody, CelestialBodyEllipsoid
+from satmad.core.celestial_body import CelestialBody, CelestialBodyEllipsoid
 
 GMAT_MOON = CelestialBody(
     "Moon",

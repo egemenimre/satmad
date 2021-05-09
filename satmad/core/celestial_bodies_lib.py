@@ -13,7 +13,7 @@ from astropy.coordinates import GCRS, HCRS, ITRS
 from numpy import inf
 
 from satmad.coordinates.frames import MoonCRS
-from satmad.core.central_body import CelestialBody, CelestialBodyEllipsoid
+from satmad.core.celestial_body import CelestialBody, CelestialBodyEllipsoid
 
 # **************** GM values ****************
 
