@@ -148,11 +148,11 @@ class CelestialBody:
             r, v = get_body_barycentric_posvel(
                 self.name, time_list, ephemeris=ephemeris
             )
-            v_moon = CartesianDifferential(v.xyz)
-            r_moon = r.with_differentials(v_moon)
+            v_body = CartesianDifferential(v.xyz)
+            r_body = r.with_differentials(v_body)
 
             coord_list = SkyCoord(
-                r_moon.with_differentials(v_moon),
+                r_body.with_differentials(v_body),
                 obstime=time_list,
                 frame="icrs",
                 representation_type="cartesian",
