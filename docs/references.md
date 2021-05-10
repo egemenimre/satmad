@@ -8,7 +8,9 @@
 [OM2] A-B-Cs of sun-synchronous orbit mission design. Ronald Boain. 14th AAS/AIAA Space Flight Mechanics Meeting,
     Maui, HI, February 8-12, 2004.
 
-[OM3] General Mission Analysis Tool (GMAT), Mathematical Specifications (DRAFT). NASA Goddard Space Flight CenterGreenbelt RDGreenbelt, MD 20771, 6 Mar 2020.
+[OM3] General Mission Analysis Tool (GMAT), Mathematical Specifications (DRAFT). NASA Goddard Space Flight Center, 6 Mar 2020.
+
+[OM4] Satellite Orbits: Models, Methods, Applications. Oliver Montenbruck and Eberhard Gill, 2005.
 
 ## Time and Coordinate Frames
 
