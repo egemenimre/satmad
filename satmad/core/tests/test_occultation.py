@@ -118,7 +118,7 @@ def test_multi_body_occultation_intervals():
     # init timer
     begin = time.time()
 
-    occult_bodies = (EARTH, MOON)
+    occult_bodies = [EARTH, MOON]
 
     # Compute occultation intervals
     output_dict = multi_body_occultation_intervals(
@@ -252,7 +252,7 @@ def test_leo_occultation_intervals():
 
     # ------------------- check umbra times -------------
     if print_results:
-        print("Start-End Intervals:")
+        print("Umbra Start-End Intervals:")
         print(umbra_intervals)
 
     # check Umbra params
@@ -271,7 +271,7 @@ def test_leo_occultation_intervals():
 
     # ------------------- check penumbra times -------------
     if print_results:
-        print("Start-End Intervals:")
+        print("Penumbra Start-End Intervals:")
         print(penumbra_intervals)
 
     # check Penumbra params
