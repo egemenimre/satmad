@@ -1,6 +1,6 @@
 # SatMAD: Satellite Mission Analysis and Design for Python
 #
-# Copyright (C) 2020 Egemen Imre
+# Copyright (C) 2021 Egemen Imre
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
@@ -211,4 +211,4 @@ def test_init_array_mismatch():
         time_list = prepare_timelist(
             Time("2015-10-04T00:00:00.000", scale="utc"), 1.0 * u.day, 1000
         )["time_list"]
-        DiscreteTimeEvents(time_list, [0.1, 1.2, 2.3])
+        DiscreteTimeEvents(time_list, [0.1, 1.2, 2.3], crossing_value=1)
