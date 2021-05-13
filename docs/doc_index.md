@@ -34,6 +34,7 @@ coordinates/frames
 ---
 maxdepth: 2
 ---
+utils/occultations
 utils/discrete_time_events
 utils/interpolators
 core/ground_location
