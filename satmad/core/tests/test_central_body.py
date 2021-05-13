@@ -9,13 +9,13 @@ Tests the Central Body and Celestial Body modules.
 """
 from astropy import units as u
 from astropy.coordinates import (
-    get_body_barycentric_posvel,
     CartesianDifferential,
     get_body_barycentric,
+    get_body_barycentric_posvel,
 )
 from astropy.time import Time
 
-from satmad.core.celestial_bodies_lib import SUN, MOON
+from satmad.core.celestial_bodies_lib import MOON, SUN
 
 
 def test_coord_list():
