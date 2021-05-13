@@ -321,6 +321,9 @@ def compute_occultation(
     occulting body, assuming that the oblateness is along the local Z axis (i.e.,
     equatorial radius is the maximum radius and polar radius is the minimum radius).
 
+    Illumination ratio is computed by the Algorithm given in Satellite Orbits, Montenbruck and Gill,
+    Section 3.4.2 Shadow Function.
+
     Also note the following:
 
         a) Shadow terminators may only be encountered when `proj_distance >= 0`
@@ -356,23 +359,21 @@ def compute_occultation(
         Input times of the position vectors do not match
     """
 
-    # TODO illumination ratio is probably incorrect
-
     # define the inertial coord frame of the occulting body,
     # we will execute all computations in this frame
     frame = occulting_body.inert_coord_frame
 
     # convert to occulting body inertial frame if and as needed
-    r_obj = __check_frame(rv_obj, frame)
+    pos_obj = __check_frame(rv_obj, frame)
     pos_occult_body = __check_frame(r_occult_body, frame)
     pos_illum_body = __check_frame(r_illum_body, frame)
 
     # compute pos vector of the illum body
-    r_occ_body_to_illum = pos_illum_body - pos_occult_body  # s_dot in GMAT
+    r_occ_body_to_illum = pos_illum_body - pos_occult_body  # s_sun in Montenbruck
 
     # compute shadow geometry params
     ksi, kappa, proj_distance, delta = _compute_shadow_geometry(
-        r_obj.xyz.to_value(u.km),
+        pos_obj.xyz.to_value(u.km),
         r_occ_body_to_illum.xyz.to_value(u.km),
         occulting_body.ellipsoid,
         illum_body.ellipsoid,
@@ -401,8 +402,47 @@ def compute_occultation(
             # object is inside penumbra or umbra cones
             if penumbra_param <= 0 < umbra_param:
                 # object is inside penumbra
-                illum_ratio = (delta - ksi) / (kappa - ksi)
+
+                # compute illumination ratio (or opposite of percent shadow)
+                # This is from Montenbruck
+                s = pos_obj - pos_occult_body
+                s_norm = s.norm()
+
+                r_obj_to_illum_body = pos_illum_body - pos_obj
+                r_obj_to_illum_body_norm = r_obj_to_illum_body.norm()
+
+                a = np.arcsin(
+                    illum_body.ellipsoid.re / r_obj_to_illum_body_norm
+                ).to_value()  # apparent radius of illum body
+                b = np.arcsin(
+                    occulting_body.ellipsoid.re / s_norm
+                ).to_value()  # apparent radius of occulting body
+                c = np.arccos(
+                    -s.dot(r_obj_to_illum_body) / s_norm / r_obj_to_illum_body_norm
+                ).to_value()  # apparent separation of centres of both bodies
+
+                if np.abs(a - b) < c < a + b:
+                    # not annular
+                    x = (c ** 2 + a ** 2 - b ** 2) / (2 * c)
+                    y = np.sqrt(a ** 2 - x ** 2)
+
+                    area = (
+                        a ** 2 * np.arccos(x / a)
+                        + b ** 2 * np.arccos((c - x) / b)
+                        - c * y
+                    )
+
+                    frac_light = 1 - area / (np.pi * a ** 2)
+                else:
+                    # annular
+                    frac_light = (b / a) ** 2
+
+                illum_ratio = frac_light
                 illum_status = IlluminationStatus.PENUMBRA
+
+                # Alternate formulation for illumination ratio
+                # illum_ratio = (delta - ksi) / (kappa - ksi)
+                # print(occulting_body.name, illum_ratio, frac_light)
             else:
                 # object is inside umbra
                 illum_ratio = 0.0
