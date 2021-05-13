@@ -15,6 +15,7 @@ Current functionality is:
 -   Initialising an orbit with a TLE or Keplerian Orbital Elements
 -   Propagating the orbit analytically via the SGP4 propagator
 -   Propagating an orbit numerically via the Scipy ODE Solvers (two-body force model) around the Earth or another planet
+-   Occultations, shadow geometry and illuminations finding
 -   Good infrastructure for time interval management and event finding
 -   Harnessing the extensive [Astropy](http://www.astropy.org) functionalities
     (e.g. finding azimuth and elevation over a ground location and coordinate frame
@@ -53,6 +54,7 @@ You can find the source code on GitHub: <https://github.com/egemenimre/satmad>
 -   [PyERFA](https://github.com/liberfa/pyerfa) handles lower level coordinate and time transformations
 -   [Portion](https://github.com/AlexandreDecan/portion) handles the time interval mechanics
 -   [Sgp4](https://pypi.org/project/sgp4) provides the TLE manipulation and SGP4 propagation engine
+-   [Jplephem](https://github.com/brandon-rhodes/python-jplephem/) for JPL Ephemeris calculations
 -   Pytest provides the testing framework
 
 

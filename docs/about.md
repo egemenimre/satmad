@@ -13,6 +13,7 @@ Current functionality is:
 -   Initialising an orbit with a [TLE](propagation/tle.md) or [Keplerian Orbital Elements](propagation/classical_orb_elems.md)
 -   Propagating the orbit analytically via [SGP4 propagator](propagation/sgp4_propagator.md)
 -   Propagating the orbit numerically via the Scipy ODE Solvers with two-body force model (see [Numerical Propagators](propagation/numerical_propagation.md)) around the Earth or another planet
+-   [Occultations](utils/occultations.md), shadow geometry and illuminations finding
 -   Good infrastructure for time interval management and event finding
 -   Harnessing the extensive [Astropy](https://docs.astropy.org/en/latest/coordinates/index.html) functionalities (e.g. finding azimuth and elevation over a ground location and coordinate frame transformations)
 

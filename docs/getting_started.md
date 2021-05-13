@@ -17,10 +17,10 @@ You can find the source code on GitHub: <https://github.com/egemenimre/satmad>
 
 ## Dependencies
 
-- NumPy and SciPy are used for the underlying mathematical algorithms
-- Matplotlib is used for plots
-- Astropy handles all time and reference frame computations
-- PyERFA handles lower level coordinate and time transformations
-- Portion handles the time interval mechanics
-- python-sgp4 provides the TLE manipulation and SGP4 propagation engine
-- Pytest provides the testing framework
+-   NumPy and SciPy are used for the underlying mathematical algorithms
+-   Matplotlib is used for plots
+-   Astropy handles all time and reference frame computations
+-   [PyERFA](https://github.com/liberfa/pyerfa) handles lower level coordinate and time transformations
+-   [Portion](https://github.com/AlexandreDecan/portion) handles the time interval mechanics
+-   [Sgp4](https://pypi.org/project/sgp4) provides the TLE manipulation and SGP4 propagation engine
+-   [Jplephem](https://github.com/brandon-rhodes/python-jplephem/) for JPL Ephemeris calculations
