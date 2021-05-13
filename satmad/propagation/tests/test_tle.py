@@ -100,7 +100,7 @@ def test_tle_with_params(init_tle_leo, check_str_leo):
     mean_motion = tle1.mean_motion._to_value(u.rad / u.s) * 1 / u.s
 
     # sat number given as string - should be int
-    sat_num = str(tle1.sat_number)
+    sat_num = int(tle1.sat_number)
 
     tle2 = TLE(
         tle1.epoch,
@@ -240,7 +240,7 @@ def test_incl_out_of_bounds(init_tle_leo):
 
 
 def test_raan_out_of_bounds(init_tle_leo):
-    """Tests RAAN setter with input value out of bounds """
+    """Tests RAAN setter with input value out of bounds"""
     tle = init_tle_leo
     tle.raan = 390 * u.deg
     assert tle.raan.to_value(u.deg) == approx((30 * u.deg).to_value(), abs=1e-8)
