@@ -22,16 +22,13 @@ class DiscreteTimeData:
         Input dimension of data points -- must be strictly increasing
     value_list : (N,) array_like
         input dimension of data points
+    axis : int, optional
+        Axis along which `value_list` is assumed to be varying. Meaning that for
+        ``time_list[i]`` the corresponding values are ``np.take(value_list, i, axis=axis)``.
+        Default is 0.
     """
 
-    def __init__(self, time_list, value_list):
-
-        # Check whether time_list and value_list size are equal
-        if len(time_list) != len(value_list):
-            raise ValueError(
-                f"Time list and value list are of different sizes. "
-                f"({len(time_list)} vs. ({len(value_list)}))"
-            )
+    def __init__(self, time_list, value_list, axis=0):
 
         self.data_interval = TimeInterval(time_list[0], time_list[-1])
         self._init_time = time_list[0]
@@ -40,7 +37,9 @@ class DiscreteTimeData:
 
         # Init interpolators (for splines, root finding possible for 3rd degree
         # (cubics) only)
-        self._interpolator = ip.CubicSpline(t_float_list, value_list, extrapolate=False)
+        self._interpolator = ip.CubicSpline(
+            t_float_list, value_list, axis=axis, extrapolate=False
+        )
 
         self._deriv_interpolator = self._interpolator.derivative(nu=1)
 
