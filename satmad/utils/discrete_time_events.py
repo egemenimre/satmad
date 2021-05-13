@@ -1,16 +1,16 @@
 # SatMAD: Satellite Mission Analysis and Design for Python
 #
-# Copyright (C) 2020 Egemen Imre
+# Copyright (C) 2021 Egemen Imre
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
 Discrete time events and intervals finding methods.
 
 """
-from astropy import units as u
+import numpy as np
 from astropy.timeseries import TimeSeries
-from scipy import interpolate
 
+from satmad.utils.interpolators import DiscreteTimeData
 from satmad.utils.timeinterval import TimeInterval, TimeIntervalList
 
 
@@ -48,31 +48,21 @@ class DiscreteTimeEvents:
         self, time_list, value_list, crossing_value=0, neg_to_pos_is_start=True
     ):
 
-        # Check whether time_list and value_list size are equal
-        if len(time_list) != len(value_list):
-            raise ValueError(
-                f"Time list and value list are of different sizes. "
-                f"({len(time_list)} vs. ({len(value_list)}))"
+        # Init underlying Discrete Data object
+        if isinstance(value_list, np.ndarray):
+            self.discrete_data = DiscreteTimeData(
+                time_list, value_list - crossing_value
             )
-
-        self.search_interval = TimeInterval(time_list[0], time_list[-1])
-
-        # Convert time to "days since epoch"
-        t_float_list = (time_list - time_list[0]).jd
-
-        # Init interpolators (for splines, root finding possible for 3rd degree
-        # (cubics) only)
-        self._interpolator = interpolate.CubicSpline(
-            t_float_list, value_list - crossing_value
-        )
-
-        self._deriv_interpolator = self._interpolator.derivative()
+        else:
+            self.discrete_data = DiscreteTimeData(
+                time_list, np.array(value_list) - crossing_value
+            )
 
         # Find start / end intervals
         self.start_end_intervals = self._find_intervals(time_list, neg_to_pos_is_start)
 
         # Find max / min events
-        self.max_min_table = self._find_extrema_events(time_list[0])
+        self.max_min_table = self._find_extrema_events()
 
         # Return the table to absolute values
         self.max_min_table["value"] = self.max_min_table["value"] + crossing_value
@@ -100,7 +90,7 @@ class DiscreteTimeEvents:
 
         # *** Find start / end events (do not extrapolate to find roots) ***
         # No roots mean no events during this time
-        start_end_events = self._interpolator.roots(extrapolate=False)
+        start_end_events = self.discrete_data.roots(extrapolate=False)
 
         intervals = []
         if start_end_events.size != 0:
@@ -108,7 +98,7 @@ class DiscreteTimeEvents:
 
             # classify start / end events and fill the timetable
             events = self._classify_start_end_events(
-                init_time, start_end_events, neg_to_pos_is_start
+                start_end_events, neg_to_pos_is_start
             )
 
             # Put events into intervals
@@ -138,8 +128,8 @@ class DiscreteTimeEvents:
         # or the complete duration is an invalid interval with no event (e.g. a
         # satellite continuously outside visibility)
         if not intervals:
-            mid_time = 0.5 * (self.search_interval.end - self.search_interval.start)
-            value = self._interpolator(mid_time.to_value(u.day))
+            mid_time = self.search_interval.start + 0.5 * self.search_interval.duration
+            value = self.discrete_data.interpolate(mid_time)
 
             if neg_to_pos_is_start:
                 if value > 0:
@@ -161,16 +151,12 @@ class DiscreteTimeEvents:
         # generate the list of time intervals
         return TimeIntervalList(intervals, start_valid=init_time, end_valid=end_time)
 
-    def _classify_start_end_events(
-        self, init_time, start_end_events, neg_to_pos_is_start
-    ):
+    def _classify_start_end_events(self, start_end_events, neg_to_pos_is_start):
         """
         Classify the list of events into a timetable of start and end events.
 
         Parameters
         ----------
-        init_time : Time
-            Initial time
         start_end_events : ndarray
             Array of start and end event times in days, starting from `init_time`
         neg_to_pos_is_start : bool
@@ -185,9 +171,7 @@ class DiscreteTimeEvents:
 
         # loop through each root and classify them as start / end events
         events_list = []
-        for event_time in start_end_events:
-
-            deriv = self._deriv_interpolator(event_time)
+        for deriv in self.discrete_data.deriv_interpolate(start_end_events):
 
             if neg_to_pos_is_start:
                 if deriv > 0:
@@ -201,20 +185,13 @@ class DiscreteTimeEvents:
                     events_list.append("end")
 
         # init events table
-        events_table = TimeSeries(
-            time=init_time + start_end_events * u.day, data={"type": events_list}
-        )
+        events_table = TimeSeries(time=start_end_events, data={"type": events_list})
 
         return events_table
 
-    def _find_extrema_events(self, init_time):
+    def _find_extrema_events(self):
         """
         Finds the extrema (max/min) events, contained within the time intervals.
-
-        Parameters
-        ----------
-        init_time : Time
-            Initial time
 
         Returns
         -------
@@ -224,13 +201,13 @@ class DiscreteTimeEvents:
         """
 
         # *** Find max / min events ***
-        min_max_events = self._deriv_interpolator.roots()
+        min_max_events = self.discrete_data.deriv_roots()
 
         # loop through each root and classify them as max / min events
         events_list = []
         value_list = []
-        for event_time in min_max_events:
-            value = self._interpolator(event_time)
+        for value in self.discrete_data.interpolate(min_max_events):
+
             value_list.append(value)
             if value > 0:
                 events_list.append("max")
@@ -239,7 +216,7 @@ class DiscreteTimeEvents:
 
         # init events table
         max_min_table = TimeSeries(
-            time=init_time + min_max_events * u.day,
+            time=min_max_events,
             data={"type": events_list, "value": value_list},
         )
 
@@ -258,3 +235,8 @@ class DiscreteTimeEvents:
         max_min_table.remove_rows(remove_indexes)
 
         return max_min_table
+
+    @property
+    def search_interval(self):
+        """Search interval for the events."""
+        return self.discrete_data.data_interval
