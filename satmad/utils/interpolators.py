@@ -1,13 +1,142 @@
 # SatMAD: Satellite Mission Analysis and Design for Python
 #
-# Copyright (C) 2020 Egemen Imre
+# Copyright (C) 2021 Egemen Imre
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
-Interpolators used throughout the project.
+Interpolators used in the project.
 
 """
+from astropy import units as u
 from scipy import interpolate as ip
+
+from satmad.utils.timeinterval import TimeInterval
+
+
+class DiscreteTimeData:
+    """
+
+    Parameters
+    ----------
+    time_list : (N,) array_like
+        Input dimension of data points -- must be strictly increasing
+    value_list : (N,) array_like
+        input dimension of data points
+    """
+
+    def __init__(self, time_list, value_list):
+
+        # Check whether time_list and value_list size are equal
+        if len(time_list) != len(value_list):
+            raise ValueError(
+                f"Time list and value list are of different sizes. "
+                f"({len(time_list)} vs. ({len(value_list)}))"
+            )
+
+        self.data_interval = TimeInterval(time_list[0], time_list[-1])
+        self._init_time = time_list[0]
+        # Convert time to "days since epoch"
+        t_float_list = (time_list - self._init_time).jd
+
+        # Init interpolators (for splines, root finding possible for 3rd degree
+        # (cubics) only)
+        self._interpolator = ip.CubicSpline(t_float_list, value_list, extrapolate=False)
+
+        self._deriv_interpolator = self._interpolator.derivative(nu=1)
+
+    def interpolate(self, t):
+        """
+        Computes the interpolated value for the given time(s).
+
+        Parameters
+        ----------
+        t : Time or array_like
+             A 1-D array of points at which to return the value of the
+             smoothed spline or its derivatives. Note: t can be unordered
+             but the evaluation is more efficient if t is (partially) ordered.
+
+        Returns
+        -------
+        float or array_like
+            Interpolated value or 1-D array of values, depending on the input.
+
+        """
+        return self._interpolator((t - self._init_time).jd)
+
+    def deriv_interpolate(self, t):
+        """
+        Computes the interpolated derivative value for the given time(s).
+
+        Parameters
+        ----------
+        t : Time or array_like
+             A 1-D array of points at which to return the value of the
+             smoothed spline or its derivatives. Note: t can be unordered
+             but the evaluation is more efficient if t is (partially) ordered.
+
+        Returns
+        -------
+        float or array_like
+            Interpolated value or 1-D array of values, depending on the input.
+
+        """
+        return self._deriv_interpolator((t - self._init_time).jd)
+
+    def roots(self, discontinuity=True, extrapolate=False):
+        """
+        Find real roots of the the data.
+
+        Parameters
+        ----------
+        discontinuity : bool, optional
+            Whether to report sign changes across discontinuities at
+            breakpoints as roots.
+        extrapolate : {bool, 'periodic', None}, optional
+            If bool, determines whether to return roots from the polynomial
+            extrapolated based on first and last intervals, 'periodic' works
+            the same as False. If None, use `self.extrapolate`.
+
+        Returns
+        -------
+        roots : ndarray
+            Roots of the data.
+
+        """
+        return (
+            self._interpolator.roots(
+                discontinuity=discontinuity, extrapolate=extrapolate
+            )
+            * u.day
+            + self._init_time
+        )
+
+    def deriv_roots(self, discontinuity=True, extrapolate=False):
+        """
+        Find real roots of the the derivative of the data.
+
+        Parameters
+        ----------
+        discontinuity : bool, optional
+            Whether to report sign changes across discontinuities at
+            breakpoints as roots.
+        extrapolate : {bool, 'periodic', None}, optional
+            If bool, determines whether to return roots from the polynomial
+            extrapolated based on first and last intervals, 'periodic' works
+            the same as False. If None, use `self.extrapolate`.
+
+        Returns
+        -------
+        roots : ndarray
+            Roots of the data.
+
+        """
+        return (
+            self._deriv_interpolator.roots(
+                discontinuity=discontinuity, extrapolate=extrapolate
+            )
+            * u.day
+            + self._init_time
+        )
 
 
 class CartInterpolator3D:
