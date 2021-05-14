@@ -8,6 +8,7 @@ Interpolators used in the project.
 
 """
 from astropy import units as u
+from astropy.units import Quantity
 from scipy import interpolate as ip
 
 from satmad.utils.timeinterval import TimeInterval
@@ -28,6 +29,8 @@ class DiscreteTimeData:
         Default is 0.
     """
 
+    _unit = None
+
     def __init__(self, time_list, value_list, axis=0):
 
         self.data_interval = TimeInterval(time_list[0], time_list[-1])
@@ -41,7 +44,12 @@ class DiscreteTimeData:
             t_float_list, value_list, axis=axis, extrapolate=False
         )
 
+        # set the unit, if available
+        if isinstance(value_list, Quantity):
+            self._unit = value_list.unit
+
         self._deriv_interpolator = self._interpolator.derivative(nu=1)
+        self._sec_deriv_interpolator = self._interpolator.derivative(nu=2)
 
     def interpolate(self, t):
         """
@@ -60,7 +68,10 @@ class DiscreteTimeData:
             Interpolated value or 1-D array of values, depending on the input.
 
         """
-        return self._interpolator((t - self._init_time).jd)
+        if self._unit:
+            return self._interpolator((t - self._init_time).jd) * self._unit
+        else:
+            return self._interpolator((t - self._init_time).jd)
 
     def deriv_interpolate(self, t):
         """
@@ -79,7 +90,32 @@ class DiscreteTimeData:
             Interpolated value or 1-D array of values, depending on the input.
 
         """
-        return self._deriv_interpolator((t - self._init_time).jd)
+        if self._unit:
+            return self._deriv_interpolator((t - self._init_time).jd) * self._unit
+        else:
+            return self._deriv_interpolator((t - self._init_time).jd)
+
+    def sec_deriv_interpolate(self, t):
+        """
+        Computes the interpolated second derivative value for the given time(s).
+
+        Parameters
+        ----------
+        t : Time or array_like
+             A 1-D array of points at which to return the value of the
+             smoothed spline or its derivatives. Note: t can be unordered
+             but the evaluation is more efficient if t is (partially) ordered.
+
+        Returns
+        -------
+        float or array_like
+            Interpolated value or 1-D array of values, depending on the input.
+
+        """
+        if self._unit:
+            return self._sec_deriv_interpolator((t - self._init_time).jd) * self._unit
+        else:
+            return self._sec_deriv_interpolator((t - self._init_time).jd)
 
     def roots(self, discontinuity=True, extrapolate=False):
         """
