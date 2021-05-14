@@ -205,11 +205,12 @@ class DiscreteTimeEvents:
 
         # loop through each root and classify them as max / min events
         events_list = []
-        value_list = []
-        for value in self.discrete_data.interpolate(min_max_events):
+        value_list = self.discrete_data.interpolate(min_max_events)
+        sec_deriv_list = self.discrete_data.sec_deriv_interpolate(min_max_events)
 
-            value_list.append(value)
-            if value > 0:
+        for sec_deriv in sec_deriv_list:
+
+            if sec_deriv < 0:
                 events_list.append("max")
             else:
                 events_list.append("min")
