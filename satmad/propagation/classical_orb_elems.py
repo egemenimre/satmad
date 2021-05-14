@@ -416,7 +416,7 @@ class OsculatingKeplerianOrbElems(AbstractKeplerianOrbitElements):
             init_coords_converted = init_coords[0]
 
         # Check for the initial coordinate system, convert if necessary
-        if central_body.inert_coord != init_coords_converted.frame.name:
+        if central_body.inert_coord.name != init_coords_converted.frame.name:
             init_coords_converted = init_coords_converted.transform_to(
                 central_body.inert_coord
             )
@@ -672,7 +672,7 @@ def _force_angle_range(
     """
 
     while not (min_range <= angle < max_range):
-        if max_range < angle:
+        if max_range <= angle:
             angle = angle - 2 * np.pi * u.rad
 
         if angle < min_range:
