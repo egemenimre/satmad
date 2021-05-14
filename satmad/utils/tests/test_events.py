@@ -16,8 +16,12 @@ from satmad.coordinates.tests.test_trajectory import (
     generate_timelist,
     propagation_engine,
 )
+from satmad.core.celestial_bodies_lib import EARTH
+from satmad.propagation.classical_orb_elems import OsculatingKeplerianOrbElems
+from satmad.propagation.numerical_propagators import NumericalPropagator
 from satmad.propagation.tle import TLE
 from satmad.utils.discrete_time_events import DiscreteTimeEvents
+from satmad.utils.timeinterval import TimeInterval
 
 
 def prepare_timelist(init_time, duration, steps):
@@ -212,3 +216,71 @@ def test_init_array_mismatch():
             Time("2015-10-04T00:00:00.000", scale="utc"), 1.0 * u.day, 1000
         )["time_list"]
         DiscreteTimeEvents(time_list, [0.1, 1.2, 2.3], crossing_value=1)
+
+
+def test_min_max_event():
+    """Tests the min max event finding with apoapsis and periapsis."""
+
+    time = Time("2020-01-11T11:00:00.000", scale="utc")
+    central_body = EARTH
+
+    sm_axis = 7056.0 * u.km
+    ecc = 0.02 * u.dimensionless_unscaled
+    incl = 0 * u.deg
+    raan = 0 * u.deg
+    arg_perigee = 90 * u.deg
+    true_an = 20 * u.deg
+
+    init_orb_elems = OsculatingKeplerianOrbElems(
+        time, sm_axis, ecc, incl, raan, arg_perigee, true_an, central_body
+    )
+
+    # generate cartesian initial conditions
+    init_pvt = init_orb_elems.to_cartesian()
+
+    # Set up propagation config
+    stepsize = 10 * u.s
+
+    prop_start = init_pvt.obstime
+    prop_duration = init_orb_elems.period
+
+    # init propagator with defaults - run propagation and get trajectory
+    trajectory = NumericalPropagator(stepsize).gen_trajectory(
+        init_pvt, TimeInterval(prop_start, prop_duration)
+    )
+
+    # Extract search range
+    time_list = trajectory.coord_list.obstime
+    r_list = trajectory.coord_list.cartesian.without_differentials().norm()
+
+    # Find time events
+    events = DiscreteTimeEvents(time_list, r_list)
+
+    # Min / Max Event times
+    # print(events.max_min_table)
+
+    # Cross-check with orbital elems
+    # print("\nCheck with initial conditions:")
+    # print(f"Apoapsis : {init_orb_elems.apoapsis}")
+    # print(f"Periapsis: {init_orb_elems.periapsis}")
+
+    assert (
+        pytest.approx(
+            (events.max_min_table[0]["value"] - init_orb_elems.apoapsis).to_value(u.mm),
+            abs=(1e-3 * u.mm).to_value(u.mm),
+        )
+        == 0.0
+    )
+
+    assert (
+        pytest.approx(
+            (events.max_min_table[1]["value"] - init_orb_elems.periapsis).to_value(
+                u.mm
+            ),
+            abs=(5e-3 * u.mm).to_value(u.mm),
+        )
+        == 0.0
+    )
+
+    assert events.max_min_table[0]["type"] == "max"
+    assert events.max_min_table[1]["type"] == "min"
