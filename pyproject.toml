@@ -20,9 +20,11 @@ classifiers = [
 
 requires = [
     "astropy",
+    "jplephem",
     "matplotlib",
     "numpy",
     "portion",
+    "pyerfa",
     "scipy",
     "sgp4",
 ]
