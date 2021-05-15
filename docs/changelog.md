@@ -7,7 +7,7 @@ Versions here correspond to those in [PyPI](https://pypi.org/project/satmad/) an
 
 The major functionalities under development are:
 
-- Occultations and shadows
+- Added [occultations and shadows](utils/occultations.md)
 - Migrate Documentation to [MyST Markdown](https://myst-parser.readthedocs.io)
 
 ## Latest Version
