@@ -90,12 +90,8 @@ class TimeInterval:
             start_inclusive = start_time.p_interval.left
             end_inclusive = start_time.p_interval.right
 
-            if replicate:
-                start_interval = start_time.start.replicate()
-                end_interval = start_time.end.replicate()
-            else:
-                start_interval = start_time.start
-                end_interval = start_time.end
+            start_interval = start_time.start
+            end_interval = start_time.end
         else:
             # Check whether init and end times are scalar or array
             if start_time.isscalar:
@@ -112,12 +108,8 @@ class TimeInterval:
             if isinstance(end_tmp, TimeDelta):
                 # end time is a TimeDelta (duration)
 
-                if replicate:
-                    start_interval = start_tmp.replicate()
-                    end_interval = start_tmp + end_tmp
-                else:
-                    start_interval = start_tmp
-                    end_interval = start_tmp + end_tmp
+                start_interval = start_tmp
+                end_interval = start_tmp + end_tmp
 
             elif isinstance(end_tmp, Quantity):
                 # end time is a Quantity, but check whether it is a valid Time Quantity
@@ -136,12 +128,8 @@ class TimeInterval:
                 # time instances only
                 if start_tmp < end_tmp:
                     # end time is later than start time - no probs
-                    if replicate:
-                        start_interval = start_tmp.replicate()
-                        end_interval = end_tmp.replicate()
-                    else:
-                        start_interval = start_tmp
-                        end_interval = end_tmp
+                    start_interval = start_tmp
+                    end_interval = end_tmp
                 else:
                     # end time is earlier than start time - raise error
                     raise ValueError(
@@ -159,9 +147,14 @@ class TimeInterval:
             return None
 
         # Initialise the interval
-        _interval = p.closed(start_interval, end_interval).replace(
-            left=start_inclusive, right=end_inclusive
-        )
+        if replicate:
+            _interval = p.closed(
+                start_interval.replicate(), end_interval.replicate()
+            ).replace(left=start_inclusive, right=end_inclusive)
+        else:
+            _interval = p.closed(start_interval, end_interval).replace(
+                left=start_inclusive, right=end_inclusive
+            )
 
         obj = super().__new__(cls)
         obj._interval = _interval
@@ -225,10 +218,7 @@ class TimeInterval:
         start_equal = _are_times_almost_equal(interval.start, self.start)
         end_equal = _are_times_almost_equal(interval.end, self.end)
 
-        if start_equal and end_equal:
-            return True
-        else:
-            return False
+        return True if start_equal and end_equal else False
 
     def contains(self, interval):
         """
@@ -667,10 +657,7 @@ class TimeIntervalList:
             if interval_member.is_intersecting(interval)
         ]
 
-        if len(intersect_intervals) > 0:
-            return True
-        else:
-            return False
+        return True if len(intersect_intervals) > 0 else False
 
     def intersect(self, interval):
         """
