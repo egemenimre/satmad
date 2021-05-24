@@ -52,8 +52,7 @@ def parse_rv_line(rv_line, coord_sys):
     time = Time(rv_items[0], scale="utc")
 
     v = CartesianDifferential(
-        [float(rv_items[4]), float(rv_items[5]), float(rv_items[6])],
-        unit=u.km / u.s,
+        [float(rv_items[4]), float(rv_items[5]), float(rv_items[6])], unit=u.km / u.s,
     )
     r = CartesianRepresentation(
         [float(rv_items[1]), float(rv_items[2]), float(rv_items[3])], unit=u.km
