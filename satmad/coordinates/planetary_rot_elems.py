@@ -36,12 +36,12 @@ def celestial_body_rot_params(epoch, body_name):
         Epoch at which rotational parameters are evaluated, defaults to J2000 epoch
     body_name : str
         Name of the celestial body (planet or satellite)
-        
+
     Returns
     -------
     ra, dec, w : Tuple[~astropy.units.Quantity]
         Right ascension and declination of celestial body north pole, and prime meridian angle
-        
+
     Raises
     ------
     NotImplementedError
@@ -150,7 +150,7 @@ def moon_rot_params(t, d):
 def sun_rot_params(_, d):
     """Computes the North Pole rotational parameters (ra, dec, prime meridian angle)
     for the Sun.
-    
+
     Parameters
     ----------
     _
@@ -236,7 +236,7 @@ def mars_rot_params(t, d):
         Julian Centuries since J2000 epoch
     d : float
         Days since J2000 epoch
-        
+
     Returns
     -------
     ra, dec, w : Tuple[float]
@@ -323,14 +323,14 @@ def jupiter_rot_params(t, d):
 def saturn_rot_params(t, d):
     """Computes the North Pole rotational parameters (ra, dec, prime meridian angle)
     for Saturn.
-    
+
     Parameters
     ----------
     t : float
         Julian Centuries since J2000 epoch
     d : float
         Days since J2000 epoch
-        
+
     Returns
     -------
     ra, dec, w : Tuple[float]
@@ -346,7 +346,7 @@ def saturn_rot_params(t, d):
 def uranus_rot_params(_, d):
     """Computes the North Pole rotational parameters (ra, dec, prime meridian angle)
     for Uranus.
-    
+
     Parameters
     ----------
     _
