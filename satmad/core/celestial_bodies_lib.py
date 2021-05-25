@@ -1,6 +1,6 @@
 # SatMAD: Satellite Mission Analysis and Design for Python
 #
-# Copyright (C) 2020 Egemen Imre
+# Copyright (C) 2021 Egemen Imre
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
@@ -12,7 +12,7 @@ from astropy import units as u
 from astropy.coordinates import GCRS, HCRS, ITRS
 from numpy import inf
 
-from satmad.coordinates.frames import MoonCRS
+from satmad.coordinates.frames import MoonJ2000Equatorial
 from satmad.core.celestial_body import CelestialBody, CelestialBodyEllipsoid
 
 # **************** GM values ****************
@@ -125,6 +125,6 @@ MOON = CelestialBody(
     "Default Moon Model.",
     GM_moon.to(u.km ** 3 / u.s ** 2),
     ellipsoid=MOON_ELLIPSOID_IAUWG2015,
-    inert_coord=MoonCRS,
+    inert_coord=MoonJ2000Equatorial,
 )
 """Default Moon Model."""
