@@ -56,7 +56,7 @@ def pos_err(rv_test, rv_true):
     Returns
     -------
     Quantity
-        3D position difference
+        Norm of the position difference
 
     """
     r_diff = (
@@ -78,7 +78,7 @@ def vel_err(rv_test, rv_true):
     Returns
     -------
     Quantity
-        3D velocity difference
+        Norm of the velocity difference
 
     """
     v_diff = rv_test.velocity - rv_true.velocity
