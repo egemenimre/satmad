@@ -44,6 +44,47 @@ GMAT_EARTH = CelestialBody(
 )
 
 
+def pos_err(rv_test, rv_true):
+    """
+    Computes positional error between two vectors defined in a frame.
+
+    Parameters
+    ----------
+    rv_test : State with position vector under test
+    rv_true : State with true position vector
+
+    Returns
+    -------
+    Quantity
+        3D position difference
+
+    """
+    r_diff = (
+        rv_test.cartesian.without_differentials()
+        - rv_true.cartesian.without_differentials()
+    )
+    return r_diff.norm().to(u.mm)
+
+
+def vel_err(rv_test, rv_true):
+    """
+    Computes velocity error between two vectors defined in a frame.
+
+    Parameters
+    ----------
+    rv_test : State with velocity vector under test
+    rv_true : State with true velocity vector
+
+    Returns
+    -------
+    Quantity
+        3D velocity difference
+
+    """
+    v_diff = rv_test.velocity - rv_true.velocity
+    return v_diff.norm().to(u.mm / u.s)
+
+
 def parse_rv_line(rv_line, coord_sys):
     """Converts a line of t, r, v string into a SkyCoord object."""
 
