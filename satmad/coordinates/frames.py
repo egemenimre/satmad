@@ -1,6 +1,6 @@
 # SatMAD: Satellite Mission Analysis and Design for Python
 #
-# Copyright (C) 2020 Egemen Imre
+# Copyright (C) 2021 Egemen Imre
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
@@ -33,7 +33,10 @@ from astropy.coordinates.builtin_frames.utils import (
     get_jd12,
     get_polar_motion,
 )
+from astropy.coordinates.matrix_utilities import matrix_product, rotation_matrix
 from astropy.time import Time
+
+from satmad.coordinates.planetary_rot_elems import celestial_body_rot_params
 
 _w = np.array([0, 0, 7.292115e-5]) / u.s
 """Nominal mean angular velocity of the Earth [rad/s] as per GRS 80.
@@ -51,12 +54,126 @@ _FRAME_BIAS_MATRIX = np.array(
 """
 
 
+class CelestialBodyJ2000Equatorial(BaseCoordinateFrame, ABC):
+    """
+    A coordinate frame representing the Equatorial System of the
+    Celestial Body at J2000 Epoch. This is not defined for the Earth as it has its own
+    J2000 Equatorial frame.
+
+    The axis orientations are:
+
+    - x-axis: Along the line formed by the intersection of the body equator and
+      the x-y plane of the FK5 system, at the J2000 epoch
+    - y-axis: Completes the right-handed set.
+    - z-axis: Along the instantaneous body spin axis direction at the J2000 epoch
+
+    This corresponds to "Body Inertial" in GMAT.
+    """
+
+    obstime = TimeAttribute(default=DEFAULT_OBSTIME)
+
+    default_representation = r.CartesianRepresentation
+    default_differential = r.CartesianDifferential
+
+    def __new__(cls, *args, **kwargs):
+        frame_transform_graph.transform(DynamicMatrixTransform, cls.cb_crs, cls)(
+            cb_crs_to_cb_j2000_eq
+        )
+        frame_transform_graph.transform(DynamicMatrixTransform, cls, cls.cb_crs)(
+            cb_j2000_eq_to_cb_crs
+        )
+        return super().__new__(cls)
+
+
+def cb_j2000_eq_to_cb_crs(cb_eq_coord, _):
+    """Conversion from Local Equatorial at J2000 Epoch Reference System
+    of a Central Body to its Celestial Reference System."""
+
+    ra, dec, w = celestial_body_rot_params(None, cb_eq_coord.body_name)
+
+    body_eq_to_body_crs = matrix_product(
+        rotation_matrix(90 * u.deg - dec, "x"), rotation_matrix(90 * u.deg + ra, "z")
+    ).transpose()
+
+    return body_eq_to_body_crs
+
+
+def cb_crs_to_cb_j2000_eq(cb_crs_coord, _):
+    """Conversion from Celestial Reference System of a Central Body
+    to its Local Equatorial at J2000 Epoch Reference System."""
+
+    ra, dec, w = celestial_body_rot_params(None, cb_crs_coord.body_name)
+
+    body_crs_to_body_eq = matrix_product(
+        rotation_matrix(90 * u.deg - dec, "x"), rotation_matrix(90 * u.deg + ra, "z")
+    )
+
+    return body_crs_to_body_eq
+
+
+class CelestialBodyTODEquatorial(BaseCoordinateFrame, ABC):
+    """
+    A coordinate frame representing the True-of-Date Equatorial System of the
+    Celestial Body. This is not defined for the Earth as it has its own TOD
+
+    The axis orientations are:
+
+    - x-axis: Along the line formed by the intersection of the body equator
+      and the ecliptic planes.
+    - y-axis: Completes the right-handed set.
+    - z-axis: Normal to the equatorial plane.
+
+    This corresponds to "Equator System" in GMAT.
+    """
+
+    obstime = TimeAttribute(default=DEFAULT_OBSTIME)
+
+    default_representation = r.CartesianRepresentation
+    default_differential = r.CartesianDifferential
+
+    def __new__(cls, *args, **kwargs):
+        frame_transform_graph.transform(DynamicMatrixTransform, cls.cb_crs, cls)(
+            cb_crs_to_cb_tod_eq
+        )
+        frame_transform_graph.transform(DynamicMatrixTransform, cls, cls.cb_crs)(
+            cb_tod_eq_to_cb_crs
+        )
+        return super().__new__(cls)
+
+
+def cb_tod_eq_to_cb_crs(cb_eq_coord, _):
+    """Conversion from Local True-of-Date Equatorial Reference System of a Central Body
+    to its Celestial Reference System."""
+
+    ra, dec, w = celestial_body_rot_params(cb_eq_coord.obstime, cb_eq_coord.body_name)
+
+    body_eq_to_body_crs = matrix_product(
+        rotation_matrix(90 * u.deg - dec, "x"), rotation_matrix(90 * u.deg + ra, "z")
+    ).transpose()
+
+    return body_eq_to_body_crs
+
+
+def cb_crs_to_cb_tod_eq(cb_crs_coord, _):
+    """Conversion from Celestial Reference System of a Central Body
+    to its Local Equatorial True-of-Date Reference System."""
+
+    ra, dec, w = celestial_body_rot_params(cb_crs_coord.obstime, cb_crs_coord.body_name)
+
+    body_crs_to_body_eq = matrix_product(
+        rotation_matrix(90 * u.deg - dec, "x"), rotation_matrix(90 * u.deg + ra, "z")
+    )
+
+    return body_crs_to_body_eq
+
+
 class CelestialBodyCRS(BaseCoordinateFrame, ABC):
     """
     A coordinate frame in the generic Celestial Reference System (CRS). This CRS is
     derived from ICRS by simply carrying the origin to the origin of the celestial body.
-    A specific example is GCRS, where the origin is at the centre of the Earth.
 
+    Uses the `builtin` ephemeris to compute planetary positions in ICRS, unless the
+    coordinate definition explicitly specifies an ephemeris type.
     """
 
     obstime = TimeAttribute(default=DEFAULT_OBSTIME)
@@ -159,6 +276,45 @@ class MoonCRS(CelestialBodyCRS):
     ephemeris_type = "jpl"
 
 
+class MarsCRS(CelestialBodyCRS):
+    """Mars Celestial Reference System. This is simply the ICRS shifted to the
+    centre of the Mars with the velocity adjusted with respect to the Mars.
+    """
+
+    body_name = "Mars"
+    ephemeris_type = "jpl"
+
+
+class MarsTODEquatorial(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the True-of-Date Equatorial System of Mars.
+    """
+
+    body_name = "Mars"
+    cb_crs = MarsCRS
+
+
+class MarsJ2000Equatorial(CelestialBodyJ2000Equatorial):
+    """
+    A coordinate frame representing the Equatorial System of Mars at J2000 Epoch.
+    """
+
+    body_name = "Mars"
+    cb_crs = MarsCRS
+
+
+class MoonJ2000Equatorial(CelestialBodyJ2000Equatorial):
+    """
+    A coordinate frame representing the Equatorial System of Moon at J2000 Epoch.
+
+    This corresponds to the Moon Principal Axis (PA) system. This has a fixed and small
+    rotational offset with respect to the Mean Earth/rotation (ME) system.
+    """
+
+    body_name = "Moon"
+    cb_crs = MoonCRS
+
+
 # ******  Mean Pole and Equinox at J2000.0 Reference System (J2000) ******
 
 
@@ -212,6 +368,34 @@ class TIRS(BaseCoordinateFrame):
     obstime = TimeAttribute(default=DEFAULT_OBSTIME)
 
 
+@frame_transform_graph.transform(DynamicMatrixTransform, TIRS, ITRS)
+def tirs_to_itrs(tirs_coord, _):
+    """Dynamic conversion matrix (Polar Motion) from TIRS to ITRS."""
+    tirs_to_itrs_mat = _polar_mot_matrix(tirs_coord.obstime)
+
+    return tirs_to_itrs_mat
+
+
+@frame_transform_graph.transform(DynamicMatrixTransform, ITRS, TIRS)
+def itrs_to_tirs(itrs_coord, _):
+    """Dynamic conversion matrix (Polar Motion) from ITRS to TIRS."""
+    itrs_to_tirs_mat = _polar_mot_matrix(itrs_coord.obstime).transpose()
+
+    return itrs_to_tirs_mat
+
+
+@frame_transform_graph.transform(StaticMatrixTransform, J2000, GCRS)
+def j2000_to_gcrs():
+    """Constant conversion matrix (Frame Bias) from J2000 to GCRS."""
+    return _FRAME_BIAS_MATRIX
+
+
+@frame_transform_graph.transform(StaticMatrixTransform, GCRS, J2000)
+def gcrs_to_j2000():
+    """Constant conversion matrix (Frame Bias) from GCRS to J2000."""
+    return _FRAME_BIAS_MATRIX.transpose()
+
+
 def _gmst82_angle(obstime):
     """
     Universal Time to Greenwich mean sidereal time (IAU 1982 model).
@@ -255,34 +439,6 @@ def _polar_mot_matrix(obstime):
     polar_mot_mat = erfa.pom00(xp, yp, sp)
 
     return polar_mot_mat
-
-
-@frame_transform_graph.transform(DynamicMatrixTransform, TIRS, ITRS)
-def tirs_to_itrs(tirs_coord, _):
-    """Dynamic conversion matrix (Polar Motion) from TIRS to ITRS."""
-    tirs_to_itrs_mat = _polar_mot_matrix(tirs_coord.obstime)
-
-    return tirs_to_itrs_mat
-
-
-@frame_transform_graph.transform(DynamicMatrixTransform, ITRS, TIRS)
-def itrs_to_tirs(itrs_coord, _):
-    """Dynamic conversion matrix (Polar Motion) from ITRS to TIRS."""
-    itrs_to_tirs_mat = _polar_mot_matrix(itrs_coord.obstime).transpose()
-
-    return itrs_to_tirs_mat
-
-
-@frame_transform_graph.transform(StaticMatrixTransform, J2000, GCRS)
-def j2000_to_gcrs():
-    """Constant conversion matrix (Frame Bias) from J2000 to GCRS."""
-    return _FRAME_BIAS_MATRIX
-
-
-@frame_transform_graph.transform(StaticMatrixTransform, GCRS, J2000)
-def gcrs_to_j2000():
-    """Constant conversion matrix (Frame Bias) from GCRS to J2000."""
-    return _FRAME_BIAS_MATRIX.transpose()
 
 
 def init_pvt(frame, time, pos, vel=None, copy=False):

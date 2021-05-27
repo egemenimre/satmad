@@ -1,10 +1,10 @@
 # SatMAD: Satellite Mission Analysis and Design for Python
 #
-# Copyright (C) ${YEAR} Egemen Imre
+# Copyright (C) 2021 Egemen Imre
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
-Test coordinate transformations for the TEME, J2000 and TIRS coordinate frames.
+Test coordinate transformations for the coordinate frames defined by SatMAD.
 
 """
 import pytest
@@ -21,9 +21,17 @@ from astropy.coordinates import (
     SkyCoord,
 )
 from astropy.time import Time
-from pytest import approx
 
-from satmad.coordinates.frames import J2000, TIRS, CelestialBodyCRS, init_pvt
+from satmad.coordinates.frames import (
+    J2000,
+    TIRS,
+    CelestialBodyCRS,
+    MarsCRS,
+    MarsJ2000Equatorial,
+    MarsTODEquatorial,
+    init_pvt,
+)
+from satmad.tests.common_test_funcs import pos_err, pos_err_vec, vel_err, vel_err_vec
 
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
 
@@ -111,45 +119,27 @@ rv_teme_true = TEME(
 )
 
 
-def pos_err(rv_test, rv_true):
-    """
-    Computes positional error between two vectors defined in a frame.
+def _init_orbit_mars():
+    """Initialises the test orbit in a Martian orbit."""
+    obstime = Time("2020-01-10T11:30:00.0003", scale="tdb")
 
-    Parameters
-    ----------
-    rv_test : State with position vector under test
-    rv_true : State with true position vector
-
-    Returns
-    -------
-    Quantity
-        3D position difference
-
-    """
-    r_diff = (
-        rv_test.cartesian.without_differentials()
-        - rv_true.cartesian.without_differentials()
+    v_mars = CartesianDifferential(
+        [3.057934230169251e-01, -3.068219328642159e00, -1.397389382391015e00],
+        unit=u.km / u.s,
     )
-    return r_diff.norm().to(u.mm)
+    r_mars = CartesianRepresentation(
+        [1.786125452441044e03, -1.191541086863880e03, 3.003639539248147e03], unit=u.km
+    )
 
+    rv_mars = SkyCoord(
+        r_mars.with_differentials(v_mars),
+        obstime=obstime,
+        frame=MarsCRS,
+        representation_type="cartesian",
+        differential_type="cartesian",
+    )
 
-def vel_err(rv_test, rv_true):
-    """
-    Computes velocity error between two vectors defined in a frame.
-
-    Parameters
-    ----------
-    rv_test : State with velocity vector under test
-    rv_true : State with true velocity vector
-
-    Returns
-    -------
-    Quantity
-        3D velocity difference
-
-    """
-    v_diff = rv_test.velocity - rv_true.velocity
-    return v_diff.norm().to(u.mm / u.s)
+    return rv_mars
 
 
 # ********** Cartesian init testing **********
@@ -225,8 +215,8 @@ def test_itrs_roundtrip():
     # print(f"r {rv_itrs_true.name} diff      :  {r_diff}")
     # print(f"v {rv_itrs_true.name} diff      :  {v_diff}")
 
-    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
-    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
 
 
 def test_j2000_roundtrip():
@@ -245,8 +235,8 @@ def test_j2000_roundtrip():
     # print(f"r {test_frame} diff      :  {r_diff}")
     # print(f"v {test_frame} diff      :  {v_diff}")
 
-    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
-    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
 
 
 # ********** Performance testing **********
@@ -266,8 +256,8 @@ def test_j2000_to_gcrs():
     # print(f"r {test_frame} diff      :  {r_diff}")
     # print(f"v {test_frame} diff      :  {v_diff}")
 
-    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
-    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
 
 
 def test_teme_to_tirs():
@@ -284,8 +274,8 @@ def test_teme_to_tirs():
     # print(f"r {rv_tirs.name} diff      :  {r_diff}")
     # print(f"v {rv_tirs.name} diff      :  {v_diff}")
 
-    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
-    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
 
 
 def test_itrs_to_teme():
@@ -302,8 +292,8 @@ def test_itrs_to_teme():
     # print(f"r {rv_teme.name} diff      :  {r_diff}")
     # print(f"v {rv_teme.name} diff      :  {v_diff}")
 
-    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
-    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
 
 
 def test_itrs_to_tirs():
@@ -320,8 +310,8 @@ def test_itrs_to_tirs():
     # print(f"r {test_frame} diff      :  {r_diff}")
     # print(f"v {test_frame} diff      :  {v_diff}")
 
-    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
-    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
 
 
 def test_tirs_to_itrs():
@@ -338,8 +328,11 @@ def test_tirs_to_itrs():
     # print(f"r {test_frame} diff      :  {r_diff}")
     # print(f"v {test_frame} diff      :  {v_diff}")
 
-    assert approx(r_diff.value, abs=allowable_pos_diff.value) == 0.0
-    assert approx(v_diff.value, abs=allowable_vel_diff.value) == 0.0
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
+
+
+# ********************** Test CRS *************************
 
 
 class _EarthCRS(CelestialBodyCRS):
@@ -371,11 +364,8 @@ def test_cb_crs_to_icrs_earth():
     # print(f"r {rv_gcrs.name} diff      :  {r_diff}")
     # print(f"v {rv_gcrs.name} diff      :  {v_diff}")
 
-    assert approx(r_diff.to_value(u.mm), abs=allowable_pos_diff.to_value(u.mm)) == 0.0
-    assert (
-        approx(v_diff.to_value(u.mm / u.s), abs=allowable_vel_diff.to_value(u.mm / u.s))
-        == 0.0
-    )
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
 
 
 def test_cb_crs_to_icrs_sun():
@@ -399,8 +389,100 @@ def test_cb_crs_to_icrs_sun():
     # print(f"r {rv_hcrs.name} diff      :  {r_diff}")
     # print(f"v {rv_hcrs.name} diff      :  {v_diff}")
 
-    assert approx(r_diff.to_value(u.mm), abs=allowable_pos_diff.to_value(u.mm)) == 0.0
-    assert (
-        approx(v_diff.to_value(u.mm / u.s), abs=allowable_vel_diff.to_value(u.mm / u.s))
-        == 0.0
+    assert r_diff < allowable_pos_diff
+    assert v_diff < allowable_vel_diff
+
+
+# ********************** Test TOD and J2000 Equatorial *************************
+
+
+def test_equatorial_round_trip_mars():
+    """Round trip testing between CRS and TOD & J2000 Equatorial."""
+
+    allowable_pos_diff = 2e-6 * u.mm
+    allowable_vel_diff = 8e-10 * u.mm / u.s
+
+    # init CRS
+    pvt_crs = _init_orbit_mars()
+
+    # Convert to TOD Equatorial
+    pvt_tod_eq = pvt_crs.transform_to(MarsTODEquatorial)
+    # Convert to J2000 Equatorial
+    pvt_j2000_eq = pvt_crs.transform_to(MarsJ2000Equatorial)
+
+    # Convert J2000 back to CRS
+    assert pos_err(pvt_j2000_eq.transform_to(MarsCRS), pvt_crs) < allowable_pos_diff
+    assert vel_err(pvt_j2000_eq.transform_to(MarsCRS), pvt_crs) < allowable_vel_diff
+
+    # print(pos_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs))
+    # print(vel_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs))
+
+    # Convert TOD back to CRS
+    assert pos_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs) < allowable_pos_diff
+    assert vel_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs) < allowable_vel_diff
+
+
+def test_equatorial_mars():
+    """GMAT testing between CRS and TOD & J2000 Equatorial.
+
+    GMAT uses a different model in the IAU polar rotation parameters."""
+
+    obstime = Time("2020-01-10T11:30:00.0003", scale="tdb")
+
+    v_eq_gmat = CartesianDifferential(
+        [-2.061955207079347, -2.671302888480574, 0.269551765393186], unit=u.km / u.s,
     )
+    r_eq_gmat = CartesianRepresentation(
+        [322.259677663235, 120.3781499221643, 3676.074343158492], unit=u.km
+    )
+    rv_eq_gmat = init_pvt(MarsTODEquatorial, obstime, r_eq_gmat, v_eq_gmat)
+
+    v_inert_gmat = CartesianDifferential(
+        [-2.062805178080304, -2.670750348642094, 0.2685217398016297], unit=u.km / u.s,
+    )
+    r_inert_gmat = CartesianRepresentation(
+        [321.472501283011, 119.500545946684, 3676.171898278387], unit=u.km
+    )
+    rv_inert_gmat = init_pvt(MarsJ2000Equatorial, obstime, r_inert_gmat, v_inert_gmat)
+
+    allowable_pos_diff = 0.009 * u.mm
+    allowable_vel_diff = 0.006 * u.mm / u.s
+
+    # init CRS
+    pvt_crs = _init_orbit_mars()
+
+    # Convert to TOD Equatorial
+    pvt_tod_eq = pvt_crs.transform_to(MarsTODEquatorial)
+    # Convert to J2000 Equatorial
+    pvt_j2000_eq = pvt_crs.transform_to(MarsJ2000Equatorial)
+
+    # print(pvt_crs)
+    # print(pvt_tod_eq)
+    # print(pvt_j2000_eq)
+
+    print(pos_err_vec(pvt_j2000_eq, rv_inert_gmat))
+    print(vel_err_vec(pvt_j2000_eq, rv_inert_gmat))
+
+    # Diff between TOD Eq values
+    assert (
+        pos_err_vec(pvt_tod_eq, rv_eq_gmat)
+        - CartesianRepresentation(
+            [27987182.58022069, 6095393.56431948, -2765704.483425], unit=u.mm
+        )
+    ).norm().to(u.mm) < allowable_pos_diff
+    assert (
+        vel_err_vec(pvt_tod_eq, rv_eq_gmat)
+        - CartesianDifferential(
+            [30436.34308637, -21338.74892984, 18178.43802204], unit=u.mm / u.s,
+        )
+    ).norm().to(u.mm / u.s) < allowable_vel_diff
+
+    # Diff between J2000 Eq (Inertial) values
+    assert (
+        pos_err_vec(pvt_j2000_eq, rv_inert_gmat)
+        - CartesianRepresentation([27.00580985, 4.67653403, -2.61671362], unit=u.km)
+    ).norm().to(u.mm) < allowable_pos_diff
+    assert (
+        vel_err_vec(pvt_j2000_eq, rv_inert_gmat)
+        - CartesianDifferential([0.0293506, -0.02069982, 0.01667121], unit=u.km / u.s,)
+    ).norm().to(u.mm / u.s) < allowable_vel_diff
