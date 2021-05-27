@@ -2,7 +2,7 @@
 
 In SatMAD, frames and coordinate systems as well as conversions between them are handled through [Astropy](https://docs.astropy.org/en/latest/coordinates/index.html). This section introduces the additional frames defined by SatMAD.
 
-## Local Frames of Celestial Bodies ({py:class}`.CelestialBody`, {py:class}`.CelestialBodyJ2000Equatorial` and {py:class}`.CelestialBodyTODEquatorial)
+## Local Frames of Celestial Bodies ({py:class}`.CelestialBody`, {py:class}`.CelestialBodyJ2000Equatorial` and {py:class}`.CelestialBodyTODEquatorial`)
 
 In addition to Earth, it is possible to define a Celestial Body in space through the {py:class}`.CelestialBody` class. For each such Celestial Body, it is then possible to realise local reference frames.
 
