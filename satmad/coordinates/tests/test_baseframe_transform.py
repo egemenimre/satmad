@@ -425,7 +425,10 @@ def test_equatorial_round_trip_mars():
 def test_equatorial_mars():
     """GMAT testing between CRS and TOD & J2000 Equatorial.
 
-    GMAT uses a different model in the IAU polar rotation parameters."""
+    GMAT uses a different model in the IAU polar rotation parameters.
+
+    Satellite orbit is taken from Mars Reconnaissance Orbiter,
+    using the NASA Horizons Web Interface (https://ssd.jpl.nasa.gov/horizons.cgi)."""
 
     obstime = Time("2020-01-10T11:30:00.0003", scale="tdb")
 
