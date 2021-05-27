@@ -59,11 +59,7 @@ def pos_err(rv_test, rv_true):
         Norm of the position difference
 
     """
-    r_diff = (
-        rv_test.cartesian.without_differentials()
-        - rv_true.cartesian.without_differentials()
-    )
-    return r_diff.norm().to(u.mm)
+    return pos_err_vec(rv_test, rv_true).norm().to(u.mm)
 
 
 def vel_err(rv_test, rv_true):
@@ -81,8 +77,48 @@ def vel_err(rv_test, rv_true):
         Norm of the velocity difference
 
     """
+    return vel_err_vec(rv_test, rv_true).norm().to(u.mm / u.s)
+
+
+def pos_err_vec(rv_test, rv_true):
+    """
+    Computes positional error between two vectors defined in a frame.
+
+    Parameters
+    ----------
+    rv_test : State with position vector under test
+    rv_true : State with true position vector
+
+    Returns
+    -------
+    Quantity
+        Norm of the position difference
+
+    """
+    r_diff = (
+        rv_test.cartesian.without_differentials()
+        - rv_true.cartesian.without_differentials()
+    )
+    return r_diff
+
+
+def vel_err_vec(rv_test, rv_true):
+    """
+    Computes velocity error between two vectors defined in a frame.
+
+    Parameters
+    ----------
+    rv_test : State with velocity vector under test
+    rv_true : State with true velocity vector
+
+    Returns
+    -------
+    Quantity
+        Velocity difference vector
+
+    """
     v_diff = rv_test.velocity - rv_true.velocity
-    return v_diff.norm().to(u.mm / u.s)
+    return v_diff
 
 
 def parse_rv_line(rv_line, coord_sys):
