@@ -433,7 +433,8 @@ def test_equatorial_mars():
     obstime = Time("2020-01-10T11:30:00.0003", scale="tdb")
 
     v_eq_gmat = CartesianDifferential(
-        [-2.061955207079347, -2.671302888480574, 0.269551765393186], unit=u.km / u.s,
+        [-2.061955207079347, -2.671302888480574, 0.269551765393186],
+        unit=u.km / u.s,
     )
     r_eq_gmat = CartesianRepresentation(
         [322.259677663235, 120.3781499221643, 3676.074343158492], unit=u.km
@@ -441,7 +442,8 @@ def test_equatorial_mars():
     rv_eq_gmat = init_pvt(MarsTODEquatorial, obstime, r_eq_gmat, v_eq_gmat)
 
     v_inert_gmat = CartesianDifferential(
-        [-2.062805178080304, -2.670750348642094, 0.2685217398016297], unit=u.km / u.s,
+        [-2.062805178080304, -2.670750348642094, 0.2685217398016297],
+        unit=u.km / u.s,
     )
     r_inert_gmat = CartesianRepresentation(
         [321.472501283011, 119.500545946684, 3676.171898278387], unit=u.km
@@ -476,7 +478,8 @@ def test_equatorial_mars():
     assert (
         vel_err_vec(pvt_tod_eq, rv_eq_gmat)
         - CartesianDifferential(
-            [30436.34308637, -21338.74892984, 18178.43802204], unit=u.mm / u.s,
+            [30436.34308637, -21338.74892984, 18178.43802204],
+            unit=u.mm / u.s,
         )
     ).norm().to(u.mm / u.s) < allowable_vel_diff
 
@@ -487,5 +490,8 @@ def test_equatorial_mars():
     ).norm().to(u.mm) < allowable_pos_diff
     assert (
         vel_err_vec(pvt_j2000_eq, rv_inert_gmat)
-        - CartesianDifferential([0.0293506, -0.02069982, 0.01667121], unit=u.km / u.s,)
+        - CartesianDifferential(
+            [0.0293506, -0.02069982, 0.01667121],
+            unit=u.km / u.s,
+        )
     ).norm().to(u.mm / u.s) < allowable_vel_diff
