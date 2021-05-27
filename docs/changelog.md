@@ -7,17 +7,25 @@ Versions here correspond to those in [PyPI](https://pypi.org/project/satmad/) an
 
 The major functionalities under development are:
 
-- Added [occultations and shadows](utils/occultations.md)
-- Migrate Documentation to [MyST Markdown](https://myst-parser.readthedocs.io)
+- Introduction of Body Fixed Frame
+- Development of a more generic AltAz class.
 
 ## Latest Version
+
+### Version 0.1.2 (29 May 2021)
+
+- Added [occultations and shadows](utils/occultations.md)
+- Introduced [True-of-Date and J2000 Equatorial frames](coordinates/frames.md)
+- Initialised the [DiscreteTimeData interpolator](utils/interpolators.md) 
+- Migrate Documentation to [MyST Markdown](https://myst-parser.readthedocs.io)
+
+## Previous Versions
 
 ### Version 0.1.1 (14 Apr 2021)
 
 - Added [Keplerian Orbital Elements](propagation/classical_orb_elems.md)
 - Added new tutorials on [Numerical Orbit Propagation](tutorials/numerical_prop_1.ipynb)
 
-## Previous Versions
 
 ### Version 0.1 (05 Apr 2021)
 
