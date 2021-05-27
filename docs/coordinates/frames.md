@@ -22,7 +22,11 @@ class MoonCRS(CelestialBodyCRS):
 
 In the latter, the optional `ephemeris_type` parameter determines which ephemeris to use when computing the location of the Celestial Bodies. Note that, while some frames like {py:class}`.MoonCRS` and {py:class}`.MarsCRS` are predefined, and other Planets can be easily created as shown.
 
-Similarly, one other inertial and one nutating-precessing frame can be defined for each Celestial Body: {py:class}`.CelestialBodyJ2000Equatorial` and {py:class}`.CelestialBodyTODEquatorial`. The former is an inertial equatorial frame with the alignment fixed at J2000 Epoch. The latter is an equatorial frame but its orientation is computed with the instantaneous orientation due to planetary nutation and precession. 
+Similarly, one other inertial and one nutating-precessing frame can be defined for each Celestial Body: {py:class}`.CelestialBodyJ2000Equatorial` and {py:class}`.CelestialBodyTODEquatorial`. The former is an inertial equatorial frame with the alignment fixed at J2000 Epoch. The latter is an equatorial frame but its orientation is computed with the instantaneous orientation due to planetary nutation and precession: 
+
+$$
+\vec{r}_{CRS} = R_x(90+ \alpha) R_z(90- \delta)\times \vec{r}_{TOD}
+$$
 
 New frames can be defined, inspecting the preset Mars frames:
 ```python
