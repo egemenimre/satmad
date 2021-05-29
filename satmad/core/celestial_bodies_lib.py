@@ -12,8 +12,83 @@ from astropy import units as u
 from astropy.coordinates import GCRS, HCRS, ITRS
 from numpy import inf
 
-from satmad.coordinates.frames import MoonJ2000Equatorial
+from satmad.coordinates.frames import (
+    CelestialBodyCRS,
+    CelestialBodyTODEquatorial,
+    CelestialBodyJ2000Equatorial,
+)
 from satmad.core.celestial_body import CelestialBody, CelestialBodyEllipsoid
+
+
+# **************** Celestial Body Coordinate System Definitions ****************
+
+
+class MoonCRS(CelestialBodyCRS):
+    """Moon Celestial Reference System. This is simply the ICRS shifted to the
+    centre of the Moon with the velocity adjusted with respect to the Moon.
+
+    This uses the ephemeris type `jpl` to ensure that Moon velocity is computed
+    (`builtin` cannot compute velocity). This is critical for coordinate
+    transformations that involve velocity.
+    """
+
+    body_name = "Moon"
+    ephemeris_type = "jpl"
+
+
+class MarsCRS(CelestialBodyCRS):
+    """Mars Celestial Reference System. This is simply the ICRS shifted to the
+    centre of the Mars with the velocity adjusted with respect to the Mars.
+    """
+
+    body_name = "Mars"
+    ephemeris_type = "jpl"
+
+
+class MarsTODEquatorial(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the True-of-Date Equatorial System of Mars.
+    """
+
+    body_name = "Mars"
+    cb_crs = MarsCRS
+
+
+class MarsJ2000Equatorial(CelestialBodyJ2000Equatorial):
+    """
+    A coordinate frame representing the Equatorial System of Mars at J2000 Epoch.
+    """
+
+    body_name = "Mars"
+    cb_crs = MarsCRS
+
+
+class MarsBodyFixed(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the Body Fixed System of Mars.
+    """
+
+    body_name = "Mars"
+    cb_crs = MarsCRS
+
+
+class MoonTODEquatorial(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the True-of-Date Equatorial System of Moon.
+    """
+
+    body_name = "Moon"
+    cb_crs = MoonCRS
+
+
+class MoonBodyFixed(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the Body Fixed System of Moon.
+    """
+
+    body_name = "Moon"
+    cb_crs = MoonCRS
+
 
 # **************** GM values ****************
 
@@ -119,6 +194,19 @@ Sun Ellipsoid is based on
 on Recommended Nominal Conversion Constants for Selected Solar and Planetary Properties"
 <https://arxiv.org/pdf/1510.07674.pdf>
 """
+
+
+class MoonJ2000Equatorial(CelestialBodyJ2000Equatorial):
+    """
+    A coordinate frame representing the Equatorial System of Moon at J2000 Epoch.
+
+    This corresponds to the Moon Principal Axis (PA) system. This has a fixed and small
+    rotational offset with respect to the Mean Earth/rotation (ME) system.
+    """
+
+    body_name = "Moon"
+    cb_crs = MoonCRS
+
 
 MOON = CelestialBody(
     "Moon",

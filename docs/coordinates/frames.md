@@ -29,8 +29,11 @@ $$
 $$
 
 New frames can be defined, inspecting the preset Mars frames:
+
 ```python
-from satmad.coordinates.frames import CelestialBodyJ2000Equatorial, CelestialBodyTODEquatorial, MarsCRS
+from satmad.coordinates.frames import CelestialBodyJ2000Equatorial, CelestialBodyTODEquatorial
+from satmad.core.celestial_bodies_lib import MarsCRS
+
 
 class MarsTODEquatorial(CelestialBodyTODEquatorial):
     body_name = "Mars"

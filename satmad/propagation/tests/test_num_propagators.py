@@ -19,7 +19,8 @@ from astropy.coordinates import (
 from astropy.time import Time
 from pytest import approx
 
-from satmad.coordinates.frames import MoonCRS, init_pvt
+from satmad.coordinates.frames import init_pvt
+from satmad.core.celestial_bodies_lib import MoonCRS
 from satmad.coordinates.tests.test_baseframe_transform import pos_err, vel_err
 from satmad.core.celestial_body import CelestialBody, CelestialBodyEllipsoid
 from satmad.propagation.numerical_propagators import ODESolverType
