@@ -48,7 +48,7 @@ def celestial_body_rot_params(epoch, body_name):
         Rotational parameters not available for the requested body name
     """
     if epoch:
-        # Interval from the standard epoch,  in days
+        # Interval from the standard epoch, in days
         d = (epoch.tdb - Time("J2000", scale="tdb")).to(u.day).value
     else:
         d = 0
@@ -273,6 +273,15 @@ def mars_rot_params(t, d):
         + 0.584542 * np.sin(95.391654 + 0.5042615 * t)
     )
 
+    return ra, dec, w
+
+
+def mars_iau_2000_rot_params(t, d):
+    """This is used for test purposes only. Parameters are taken from the
+    2000 version of the IAU Report."""
+    ra = 317.68143 - 0.1061 * t
+    dec = 52.88650 - 0.0609 * t
+    w = 176.630 + 350.89198226 * d
     return ra, dec, w
 
 
