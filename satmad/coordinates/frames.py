@@ -20,6 +20,7 @@ from astropy.coordinates import (
     BaseCoordinateFrame,
     CartesianDifferential,
     DynamicMatrixTransform,
+    FunctionTransformWithFiniteDifference,
     SkyCoord,
     StaticMatrixTransform,
     TimeAttribute,
@@ -145,10 +146,8 @@ def cb_tod_eq_to_cb_crs(cb_eq_coord, _):
     """Conversion from Local True-of-Date Equatorial Reference System of a Central Body
     to its Celestial Reference System."""
 
-    ra, dec, w = celestial_body_rot_params(cb_eq_coord.obstime, cb_eq_coord.body_name)
-
-    body_eq_to_body_crs = matrix_product(
-        rotation_matrix(90 * u.deg - dec, "x"), rotation_matrix(90 * u.deg + ra, "z")
+    body_eq_to_body_crs = body_crs_to_body_eq_matrix(
+        cb_eq_coord.obstime, cb_eq_coord.body_name
     ).transpose()
 
     return body_eq_to_body_crs
@@ -158,13 +157,102 @@ def cb_crs_to_cb_tod_eq(cb_crs_coord, _):
     """Conversion from Celestial Reference System of a Central Body
     to its Local Equatorial True-of-Date Reference System."""
 
-    ra, dec, w = celestial_body_rot_params(cb_crs_coord.obstime, cb_crs_coord.body_name)
-
-    body_crs_to_body_eq = matrix_product(
-        rotation_matrix(90 * u.deg - dec, "x"), rotation_matrix(90 * u.deg + ra, "z")
+    body_crs_to_body_eq = body_crs_to_body_eq_matrix(
+        cb_crs_coord.obstime, cb_crs_coord.body_name
     )
 
     return body_crs_to_body_eq
+
+
+def body_crs_to_body_eq_matrix(obstime, body_name):
+    """Computes the rotation matrix from Celestial Body CRS to
+    Local Equatorial True-of-Date Reference System."""
+    ra, dec, w = celestial_body_rot_params(obstime, body_name)
+
+    body_crs_to_body_eq = matrix_product(
+        rotation_matrix(90 * u.deg - dec, "x"),
+        rotation_matrix(90 * u.deg + ra, "z"),
+    )
+
+    return body_crs_to_body_eq
+
+
+def body_crs_to_body_fixed_matrix(obstime, body_name):
+    """Computes the rotation matrix from Celestial Body CRS to
+    Body Fixed Reference System."""
+    ra, dec, w = celestial_body_rot_params(obstime, body_name)
+
+    body_crs_to_body_fixed = matrix_product(
+        rotation_matrix(w, "z"),
+        rotation_matrix(90 * u.deg - dec, "x"),
+        rotation_matrix(90 * u.deg + ra, "z"),
+    )
+
+    return body_crs_to_body_fixed
+
+
+class CelestialBodyFixed(BaseCoordinateFrame, ABC):
+    """
+    A coordinate frame representing the Body Fixed System of the
+    Celestial Body. This is not defined for the Earth as it has its own ITRS.
+
+    The axis orientations are:
+
+    - x-axis: Time-dependent instantaneous direction
+    - y-axis: Completes the right-handed set.
+    - z-axis: Normal to the equatorial plane.
+
+    This corresponds to "Celestial Body Fixed System" in GMAT.
+    """
+
+    obstime = TimeAttribute(default=DEFAULT_OBSTIME)
+
+    default_representation = r.CartesianRepresentation
+    default_differential = r.CartesianDifferential
+
+    def __new__(cls, *args, **kwargs):
+        frame_transform_graph.transform(
+            FunctionTransformWithFiniteDifference, cls.cb_crs, cls
+        )(cb_crs_to_cb_fixed)
+        frame_transform_graph.transform(
+            FunctionTransformWithFiniteDifference, cls, cls.cb_crs
+        )(cb_fixed_to_cb_crs)
+        return super().__new__(cls)
+
+
+def cb_crs_to_cb_fixed(cb_crs_coord, cb_fixed_coord):
+    """Conversion from Local Celestial Body CRS
+    to its Body Fixed Reference System."""
+    # compute the rotation matrix and rotate the position vector
+    cart_repr = cb_crs_coord.cartesian.transform(
+        body_crs_to_body_fixed_matrix(cb_crs_coord.obstime, cb_fixed_coord.body_name)
+    )
+    return cb_fixed_coord.realize_frame(cart_repr)
+
+
+def cb_fixed_to_cb_crs(cb_fixed_coord, cb_crs_coord):
+    """Conversion from Body Fixed Reference System of a Central Body
+    to its Local Celestial Body CRS."""
+    # compute the rotation matrix and rotate the position vector
+    cart_repr = cb_fixed_coord.cartesian.transform(
+        body_crs_to_body_fixed_matrix(
+            cb_fixed_coord.obstime, cb_fixed_coord.body_name
+        ).transpose()
+    )
+
+    cb_crs = cb_crs_coord.cb_crs(cart_repr, obstime=cb_fixed_coord.obstime)
+    return cb_crs.transform_to(cb_crs_coord)
+
+
+# @frame_transform_graph.transform(FunctionTransformWithFiniteDifference, ITRS, TETE)
+# def itrs_to_tete(itrs_coo, tete_frame):
+#     # compute the pmatrix, and then multiply by its transpose
+#     pmat = tete_to_itrs_mat(itrs_coo.obstime)
+#     newrepr = itrs_coo.cartesian.transform(matrix_transpose(pmat))
+#     tete = TETE(newrepr, obstime=itrs_coo.obstime)
+#
+#     # now do any needed offsets (no-op if same obstime)
+#     return tete.transform_to(tete_frame)
 
 
 class CelestialBodyCRS(BaseCoordinateFrame, ABC):
@@ -303,12 +391,39 @@ class MarsJ2000Equatorial(CelestialBodyJ2000Equatorial):
     cb_crs = MarsCRS
 
 
+class MarsBodyFixed(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the Body Fixed System of Mars.
+    """
+
+    body_name = "Mars"
+    cb_crs = MarsCRS
+
+
 class MoonJ2000Equatorial(CelestialBodyJ2000Equatorial):
     """
     A coordinate frame representing the Equatorial System of Moon at J2000 Epoch.
 
     This corresponds to the Moon Principal Axis (PA) system. This has a fixed and small
     rotational offset with respect to the Mean Earth/rotation (ME) system.
+    """
+
+    body_name = "Moon"
+    cb_crs = MoonCRS
+
+
+class MoonTODEquatorial(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the True-of-Date Equatorial System of Moon.
+    """
+
+    body_name = "Moon"
+    cb_crs = MoonCRS
+
+
+class MoonBodyFixed(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the Body Fixed System of Moon.
     """
 
     body_name = "Moon"
