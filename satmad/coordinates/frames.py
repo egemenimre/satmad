@@ -240,7 +240,7 @@ def cb_fixed_to_cb_crs(cb_fixed_coord, cb_crs_coord):
         ).transpose()
     )
 
-    cb_crs = cb_crs_coord.cb_crs(cart_repr, obstime=cb_fixed_coord.obstime)
+    cb_crs = type(cb_crs_coord)(cart_repr, obstime=cb_fixed_coord.obstime)
     return cb_crs.transform_to(cb_crs_coord)
 
 

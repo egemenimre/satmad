@@ -82,7 +82,7 @@ class MoonTODEquatorial(CelestialBodyTODEquatorial):
     cb_crs = MoonCRS
 
 
-class MoonBodyFixed(CelestialBodyTODEquatorial):
+class MoonBodyFixed(CelestialBodyFixed):
     """
     A coordinate frame representing the Body Fixed System of Moon.
     """
