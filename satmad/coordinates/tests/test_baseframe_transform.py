@@ -35,6 +35,7 @@ from satmad.core.celestial_bodies_lib import (
     MarsCRS,
     MarsTODEquatorial,
     MarsJ2000Equatorial,
+    MarsBodyFixed,
 )
 from satmad.tests.common_test_funcs import pos_err, vel_err
 
@@ -402,14 +403,16 @@ def test_cb_crs_to_icrs_sun():
 
 
 def test_equatorial_round_trip_mars():
-    """Round trip testing between CRS and TOD & J2000 Equatorial."""
+    """Round trip testing between CRS and TOD, J2000 Equatorial and Body Fixed."""
 
     allowable_pos_diff = 2e-6 * u.mm
-    allowable_vel_diff = 8e-10 * u.mm / u.s
+    allowable_vel_diff = 2e-6 * u.mm / u.s
 
     # init CRS
     pvt_crs = _init_orbit_mars()
 
+    # Convert to Body Fixed
+    pvt_body_fixed = pvt_crs.transform_to(MarsBodyFixed)
     # Convert to TOD Equatorial
     pvt_tod_eq = pvt_crs.transform_to(MarsTODEquatorial)
     # Convert to J2000 Equatorial
@@ -419,12 +422,16 @@ def test_equatorial_round_trip_mars():
     assert pos_err(pvt_j2000_eq.transform_to(MarsCRS), pvt_crs) < allowable_pos_diff
     assert vel_err(pvt_j2000_eq.transform_to(MarsCRS), pvt_crs) < allowable_vel_diff
 
-    # print(pos_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs))
-    # print(vel_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs))
+    # print(pos_err(pvt_body_fixed.transform_to(MarsCRS), pvt_crs))
+    # print(vel_err(pvt_body_fixed.transform_to(MarsCRS), pvt_crs))
 
     # Convert TOD back to CRS
     assert pos_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs) < allowable_pos_diff
     assert vel_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs) < allowable_vel_diff
+
+    # Convert Body Fixed back to CRS
+    assert pos_err(pvt_body_fixed.transform_to(MarsCRS), pvt_crs) < allowable_pos_diff
+    assert vel_err(pvt_body_fixed.transform_to(MarsCRS), pvt_crs) < allowable_vel_diff
 
 
 class _MarsIAU2000TODEquatorial(CelestialBodyTODEquatorial):
