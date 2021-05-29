@@ -2,7 +2,7 @@
 
 In SatMAD, frames and coordinate systems as well as conversions between them are handled through [Astropy](https://docs.astropy.org/en/latest/coordinates/index.html). This section introduces the additional frames defined by SatMAD.
 
-## Local Frames of Celestial Bodies ({py:class}`.CelestialBody`, {py:class}`.CelestialBodyJ2000Equatorial` and {py:class}`.CelestialBodyTODEquatorial`)
+## Local Frames of Celestial Bodies
 
 In addition to Earth, it is possible to define a Celestial Body in space through the {py:class}`.CelestialBody` class. For each such Celestial Body, it is then possible to realise local reference frames.
 
@@ -22,13 +22,17 @@ class MoonCRS(CelestialBodyCRS):
 
 In the latter, the optional `ephemeris_type` parameter determines which ephemeris to use when computing the location of the Celestial Bodies. Note that, while some frames like {py:class}`.MoonCRS` and {py:class}`.MarsCRS` are predefined, and other Planets can be easily created as shown.
 
-Similarly, one other inertial and one nutating-precessing frame can be defined for each Celestial Body: {py:class}`.CelestialBodyJ2000Equatorial` and {py:class}`.CelestialBodyTODEquatorial`. The former is an inertial equatorial frame with the alignment fixed at J2000 Epoch. The latter is an equatorial frame but its orientation is computed with the instantaneous orientation due to planetary nutation and precession: 
+Similarly, three other frames can be defined:
+
+- {py:class}`.CelestialBodyFixed`: The planet Body Fixed Equatorial frame, similar to GCRS for the Earth.
+- {py:class}`.CelestialBodyJ2000Equatorial`: An inertial equatorial frame with the alignment fixed at J2000 Epoch. This is similar to J2000 frame for the Earth.
+- {py:class}`.CelestialBodyTODEquatorial`: An equatorial frame with its orientation computed using the instantaneous orientation due to planetary nutation and precession:
 
 $$
 \vec{r}_{CRS} = R_x(90+ \alpha) R_z(90- \delta)\times \vec{r}_{TOD}
 $$
 
-New frames can be defined, inspecting the preset Mars frames:
+Inspecting the preset Mars frames, new frames for other planets can be defined:
 
 ```python
 from satmad.coordinates.frames import CelestialBodyJ2000Equatorial, CelestialBodyTODEquatorial
@@ -39,12 +43,17 @@ class MarsTODEquatorial(CelestialBodyTODEquatorial):
     body_name = "Mars"
     cb_crs = MarsCRS
 
-
 class MarsJ2000Equatorial(CelestialBodyJ2000Equatorial):
     body_name = "Mars"
     cb_crs = MarsCRS
+
+class MarsBodyFixed(CelestialBodyTODEquatorial):
+
+    body_name = "Mars"
+    cb_crs = MarsCRS
+
 ```
-Similar to the {py:class}`.CelestialBody` class, `body_name` defines the name of the body, such that its coordinates can be computed within the ICRS using builtin or JPL DE4XX ephemerides. The `cb_crs` parameter links this frame to CRS inertial frame of this body, as SatMAD (or Astropy) would not know how to chain the coordinate conversions from this frame to (for example) HCRS.
+Similar to the {py:class}`.CelestialBody` class, `body_name` defines the name of the body, such that its coordinates can be computed within the ICRS using builtin or JPL DE4XX ephemerides. The `cb_crs` parameter links these frames to CRS inertial frame of this body, as SatMAD (or Astropy) would not know how to chain the coordinate conversions from this frame to (for example) HCRS.
 
 The definition of these coordinate systems require the modelling of how the planet is oriented with respect to ICRS. This is done via the Celestial Body Rotation parameters: right ascension and declination of the celestial body North Pole, and prime meridian angle. As can be imagined, these are different for each planet - the values used in this model are taken from [Report on IAU Working Group on Cartographic Coordinates and Rotational Elements: 2015 [TCF2]](../references.md#time-and-coordinate-frames), except for the Moon, which is taken from the 2009 version of the same report. As such, these values are incompatible with, yet much more up-to-date than GMAT and [NASA HORIZONS Web Interface](https://ssd.jpl.nasa.gov/horizons.cgi), which use the much simpler 2000 version of these models. The TOD and J2000 Equatorial frame definitions are given in [[OM1], [OM3] and [OM4]](../references.md#time-and-coordinate-frames).
 
