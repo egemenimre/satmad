@@ -26,12 +26,15 @@ from satmad.coordinates.frames import (
     J2000,
     TIRS,
     CelestialBodyCRS,
+    CelestialBodyFixed,
+    CelestialBodyJ2000Equatorial,
+    CelestialBodyTODEquatorial,
     MarsCRS,
     MarsJ2000Equatorial,
     MarsTODEquatorial,
     init_pvt,
 )
-from satmad.tests.common_test_funcs import pos_err, pos_err_vec, vel_err, vel_err_vec
+from satmad.tests.common_test_funcs import pos_err, vel_err
 
 time: Time = Time("2004-04-06T07:51:28.386009", scale="utc")
 
@@ -422,76 +425,106 @@ def test_equatorial_round_trip_mars():
     assert vel_err(pvt_tod_eq.transform_to(MarsCRS), pvt_crs) < allowable_vel_diff
 
 
-def test_equatorial_mars():
-    """GMAT testing between CRS and TOD & J2000 Equatorial.
+class _MarsIAU2000TODEquatorial(CelestialBodyTODEquatorial):
+    """
+    A coordinate frame representing the True-of-Date Equatorial System of Mars.
+    """
 
-    GMAT uses a different model in the IAU polar rotation parameters.
+    body_name = "Mars_IAU_2000"
+    cb_crs = MarsCRS
+
+
+class _MarsIAU2000J2000Equatorial(CelestialBodyJ2000Equatorial):
+    """
+    A coordinate frame representing the Equatorial System of Mars at J2000 Epoch.
+    """
+
+    body_name = "Mars_IAU_2000"
+    cb_crs = MarsCRS
+
+
+class _MarsIAU2000BodyFixed(CelestialBodyFixed):
+    """
+    A coordinate frame representing the Body Fixed System of Mars.
+    """
+
+    body_name = "Mars_IAU_2000"
+    cb_crs = MarsCRS
+
+
+def test_equatorial_mars():
+    """NASA HORIZONS/GMAT testing between CRS and TOD & J2000 Equatorial
+    as well as Body Fixed (GMAT).
+
+    GMAT and HORIZONS use a different model in the IAU polar rotation parameters
+    (IAU 2000). Therefore test setup uses this version but not IAU 2015 versions.
 
     Satellite orbit is taken from Mars Reconnaissance Orbiter,
     using the NASA Horizons Web Interface (https://ssd.jpl.nasa.gov/horizons.cgi)."""
 
     obstime = Time("2020-01-10T11:30:00.0003", scale="tdb")
 
-    v_eq_gmat = CartesianDifferential(
+    v_eq_horz = CartesianDifferential(
         [-2.061955207079347, -2.671302888480574, 0.269551765393186],
         unit=u.km / u.s,
     )
-    r_eq_gmat = CartesianRepresentation(
+    r_eq_horz = CartesianRepresentation(
         [322.259677663235, 120.3781499221643, 3676.074343158492], unit=u.km
     )
-    rv_eq_gmat = init_pvt(MarsTODEquatorial, obstime, r_eq_gmat, v_eq_gmat)
+    rv_eq_horz = init_pvt(_MarsIAU2000TODEquatorial, obstime, r_eq_horz, v_eq_horz)
 
-    v_inert_gmat = CartesianDifferential(
+    v_inert_horz = CartesianDifferential(
         [-2.062805178080304, -2.670750348642094, 0.2685217398016297],
         unit=u.km / u.s,
     )
-    r_inert_gmat = CartesianRepresentation(
+    r_inert_horz = CartesianRepresentation(
         [321.472501283011, 119.500545946684, 3676.171898278387], unit=u.km
     )
-    rv_inert_gmat = init_pvt(MarsJ2000Equatorial, obstime, r_inert_gmat, v_inert_gmat)
+    rv_inert_horz = init_pvt(
+        _MarsIAU2000J2000Equatorial, obstime, r_inert_horz, v_inert_horz
+    )
 
-    allowable_pos_diff = 0.009 * u.mm
-    allowable_vel_diff = 0.006 * u.mm / u.s
+    v_body_fixed_gmat = CartesianDifferential(
+        [0.622659762445902, 3.329753468204519, 0.2695517652769852],
+        unit=u.km / u.s,
+    )
+    r_body_fixed_gmat = CartesianRepresentation(
+        [-233.7124768823157, -252.4295484193542, 3676.074343157078], unit=u.km
+    )
+    rv_body_fixed_gmat = init_pvt(
+        _MarsIAU2000BodyFixed, obstime, r_body_fixed_gmat, v_body_fixed_gmat
+    )
 
-    # init CRS
+    allowable_pos_diff = 800 * u.mm
+    allowable_vel_diff = 0.35 * u.mm / u.s
+
+    # init CRS - modify frame name to point at test coords
     pvt_crs = _init_orbit_mars()
+    pvt_crs.frame.body_name = "Mars_IAU_2000"
 
     # Convert to TOD Equatorial
-    pvt_tod_eq = pvt_crs.transform_to(MarsTODEquatorial)
+    pvt_tod_eq = pvt_crs.transform_to(_MarsIAU2000TODEquatorial)
     # Convert to J2000 Equatorial
-    pvt_j2000_eq = pvt_crs.transform_to(MarsJ2000Equatorial)
+    pvt_j2000_eq = pvt_crs.transform_to(_MarsIAU2000J2000Equatorial)
+    # Convert to Body Fixed
+    pvt_body_fixed = pvt_crs.transform_to(_MarsIAU2000BodyFixed)
 
-    # print(pvt_crs)
-    # print(pvt_tod_eq)
-    # print(pvt_j2000_eq)
+    print(pvt_crs)
+    print(pvt_tod_eq)
+    print(pvt_j2000_eq)
+    print(pvt_body_fixed)
 
-    print(pos_err_vec(pvt_j2000_eq, rv_inert_gmat))
-    print(vel_err_vec(pvt_j2000_eq, rv_inert_gmat))
+    print(pos_err(pvt_body_fixed, rv_body_fixed_gmat))
+    print(vel_err(pvt_body_fixed, rv_body_fixed_gmat))
 
     # Diff between TOD Eq values
-    assert (
-        pos_err_vec(pvt_tod_eq, rv_eq_gmat)
-        - CartesianRepresentation(
-            [27987182.58022069, 6095393.56431948, -2765704.483425], unit=u.mm
-        )
-    ).norm().to(u.mm) < allowable_pos_diff
-    assert (
-        vel_err_vec(pvt_tod_eq, rv_eq_gmat)
-        - CartesianDifferential(
-            [30436.34308637, -21338.74892984, 18178.43802204],
-            unit=u.mm / u.s,
-        )
-    ).norm().to(u.mm / u.s) < allowable_vel_diff
+    assert pos_err(pvt_tod_eq, rv_eq_horz) < allowable_pos_diff
+    assert vel_err(pvt_tod_eq, rv_eq_horz) < allowable_vel_diff
 
     # Diff between J2000 Eq (Inertial) values
-    assert (
-        pos_err_vec(pvt_j2000_eq, rv_inert_gmat)
-        - CartesianRepresentation([27.00580985, 4.67653403, -2.61671362], unit=u.km)
-    ).norm().to(u.mm) < allowable_pos_diff
-    assert (
-        vel_err_vec(pvt_j2000_eq, rv_inert_gmat)
-        - CartesianDifferential(
-            [0.0293506, -0.02069982, 0.01667121],
-            unit=u.km / u.s,
-        )
-    ).norm().to(u.mm / u.s) < allowable_vel_diff
+    assert pos_err(pvt_j2000_eq, rv_inert_horz) < allowable_pos_diff
+    assert vel_err(pvt_j2000_eq, rv_inert_horz) < allowable_vel_diff
+
+    # Diff between Body Fixed values
+    assert pos_err(pvt_body_fixed, rv_body_fixed_gmat) < allowable_pos_diff
+    assert vel_err(pvt_body_fixed, rv_body_fixed_gmat) < allowable_vel_diff
