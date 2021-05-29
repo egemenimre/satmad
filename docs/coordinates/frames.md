@@ -26,10 +26,12 @@ Similarly, three other frames can be defined:
 
 - {py:class}`.CelestialBodyFixed`: The planet Body Fixed Equatorial frame, similar to GCRS for the Earth.
 - {py:class}`.CelestialBodyJ2000Equatorial`: An inertial equatorial frame with the alignment fixed at J2000 Epoch. This is similar to J2000 frame for the Earth.
-- {py:class}`.CelestialBodyTODEquatorial`: An equatorial frame with its orientation computed using the instantaneous orientation due to planetary nutation and precession:
+- {py:class}`.CelestialBodyTODEquatorial`: An equatorial frame with its orientation computed using the instantaneous orientation due to planetary nutation and precession.
 
+The equations for Body Fixed and TOD are given below. Note that the velocity rotation from Body Fixed to CRS is not a pure rotation, the rotation of the frame itself has to be taken into account.
 $$
 \vec{r}_{CRS} = R_x(90+ \alpha) R_z(90- \delta)\times \vec{r}_{TOD}
+\vec{r}_{CRS} = R_x(90+ \alpha) R_z(90- \delta) R_x(W) \times \vec{r}_{BodyFixed}
 $$
 
 Inspecting the preset Mars frames, new frames for other planets can be defined:
