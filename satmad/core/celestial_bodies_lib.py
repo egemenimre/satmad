@@ -16,24 +16,12 @@ from satmad.coordinates.frames import (
     CelestialBodyCRS,
     CelestialBodyTODEquatorial,
     CelestialBodyJ2000Equatorial,
+    CelestialBodyFixed,
 )
 from satmad.core.celestial_body import CelestialBody, CelestialBodyEllipsoid
 
 
 # **************** Celestial Body Coordinate System Definitions ****************
-
-
-class MoonCRS(CelestialBodyCRS):
-    """Moon Celestial Reference System. This is simply the ICRS shifted to the
-    centre of the Moon with the velocity adjusted with respect to the Moon.
-
-    This uses the ephemeris type `jpl` to ensure that Moon velocity is computed
-    (`builtin` cannot compute velocity). This is critical for coordinate
-    transformations that involve velocity.
-    """
-
-    body_name = "Moon"
-    ephemeris_type = "jpl"
 
 
 class MarsCRS(CelestialBodyCRS):
@@ -63,13 +51,26 @@ class MarsJ2000Equatorial(CelestialBodyJ2000Equatorial):
     cb_crs = MarsCRS
 
 
-class MarsBodyFixed(CelestialBodyTODEquatorial):
+class MarsBodyFixed(CelestialBodyFixed):
     """
     A coordinate frame representing the Body Fixed System of Mars.
     """
 
     body_name = "Mars"
     cb_crs = MarsCRS
+
+
+class MoonCRS(CelestialBodyCRS):
+    """Moon Celestial Reference System. This is simply the ICRS shifted to the
+    centre of the Moon with the velocity adjusted with respect to the Moon.
+
+    This uses the ephemeris type `jpl` to ensure that Moon velocity is computed
+    (`builtin` cannot compute velocity). This is critical for coordinate
+    transformations that involve velocity.
+    """
+
+    body_name = "Moon"
+    ephemeris_type = "jpl"
 
 
 class MoonTODEquatorial(CelestialBodyTODEquatorial):
