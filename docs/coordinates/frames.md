@@ -28,9 +28,11 @@ Similarly, three other frames can be defined:
 - {py:class}`.CelestialBodyJ2000Equatorial`: An inertial equatorial frame with the alignment fixed at J2000 Epoch. This is similar to J2000 frame for the Earth.
 - {py:class}`.CelestialBodyTODEquatorial`: An equatorial frame with its orientation computed using the instantaneous orientation due to planetary nutation and precession.
 
-The equations for Body Fixed and TOD are given below. Note that the velocity rotation from Body Fixed to CRS is not a pure rotation, the rotation of the frame itself has to be taken into account.
+The equations for Body Fixed and TOD are given below, where $\alpha$ and $\delta$ are the instantaneous right ascension and declination in the rotation parameters, respectively, and $W$ is the angle of the prime meridian. Note that the velocity rotation from Body Fixed to CRS is not a pure rotation, the rotation of the frame itself has to be taken into account.
+
 $$
 \vec{r}_{CRS} = R_x(90+ \alpha) R_z(90- \delta)\times \vec{r}_{TOD}
+
 \vec{r}_{CRS} = R_x(90+ \alpha) R_z(90- \delta) R_x(W) \times \vec{r}_{BodyFixed}
 $$
 
