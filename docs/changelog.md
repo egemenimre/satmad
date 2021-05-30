@@ -5,10 +5,9 @@ Versions here correspond to those in [PyPI](https://pypi.org/project/satmad/) an
 
 ## Development Version
 
-The major functionalities under development are:
+- Introduced [Body Fixed Frame](coordinates/frames.md)
+- Added interactive Jupyter Notebooks (Binder links) to the [Tutorials](tutorials.md)
 
-- Introduction of [Body Fixed Frame](coordinates/frames.md)
-- Development of a generic AltAz class that supports other planets.
 
 ## Latest Version
 
