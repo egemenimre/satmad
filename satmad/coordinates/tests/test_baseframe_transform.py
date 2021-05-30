@@ -32,10 +32,10 @@ from satmad.coordinates.frames import (
     init_pvt,
 )
 from satmad.core.celestial_bodies_lib import (
-    MarsCRS,
-    MarsTODEquatorial,
-    MarsJ2000Equatorial,
     MarsBodyFixed,
+    MarsCRS,
+    MarsJ2000Equatorial,
+    MarsTODEquatorial,
 )
 from satmad.tests.common_test_funcs import pos_err, vel_err
 

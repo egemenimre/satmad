@@ -14,12 +14,11 @@ from numpy import inf
 
 from satmad.coordinates.frames import (
     CelestialBodyCRS,
-    CelestialBodyTODEquatorial,
-    CelestialBodyJ2000Equatorial,
     CelestialBodyFixed,
+    CelestialBodyJ2000Equatorial,
+    CelestialBodyTODEquatorial,
 )
 from satmad.core.celestial_body import CelestialBody, CelestialBodyEllipsoid
-
 
 # **************** Celestial Body Coordinate System Definitions ****************
 
