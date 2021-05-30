@@ -32,7 +32,8 @@ The equations for Body Fixed and TOD are given below, where $\alpha$ and $\delta
 
 $$
 \vec{r}_{CRS} = R_x(90+ \alpha) R_z(90- \delta)\times \vec{r}_{TOD}
-
+$$
+$$
 \vec{r}_{CRS} = R_x(90+ \alpha) R_z(90- \delta) R_x(W) \times \vec{r}_{BodyFixed}
 $$
 
