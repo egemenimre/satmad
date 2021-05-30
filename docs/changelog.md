@@ -7,8 +7,8 @@ Versions here correspond to those in [PyPI](https://pypi.org/project/satmad/) an
 
 The major functionalities under development are:
 
-- Introduction of Body Fixed Frame
-- Development of a more generic AltAz class.
+- Introduction of [Body Fixed Frame](coordinates/frames.md)
+- Development of a generic AltAz class that supports other planets.
 
 ## Latest Version
 
