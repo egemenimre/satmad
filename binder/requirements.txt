@@ -1,0 +1,3 @@
+# For application deployments, like Binder
+git+https://github.com/satmad/satmad.git#egg=satmad
+jupytext
