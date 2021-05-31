@@ -4,9 +4,13 @@
 #
 # Licensed under GNU GPL v3.0. See LICENSE.rst for more info.
 """
-Ground and Earth Location classes. These are based on
+Ground Location and related classes. These are based on
 :class:`astropy.coordinates.EarthLocation` class, but generalised
 to non-Earth cases.
+
+The prefix *Geo-* has been maintained to ensure compatibility with the astropy
+:class:`astropy.coordinates.EarthLocation` class, but the module is strictly
+not limited to Earth.
 
 """
 import collections
@@ -25,25 +29,22 @@ class GroundLocation(u.Quantity):
     """
     Location on a Central Body (e.g. Earth or Moon).
 
-    Initialization is first attempted assuming geocentric (x, y, z) coordinates
-    are given; if that fails, another attempt is made assuming geodetic
+    Initialization is first attempted assuming (geo)centric (x, y, z) coordinates
+    are given; if that fails, another attempt is made assuming (geo)detic
     coordinates (longitude, latitude, height above a reference ellipsoid).
-    When using the geodetic forms, Longitudes are measured increasing to the
+    When using the detic forms, Longitudes are measured increasing to the
     east, so west longitudes are negative. Internally, the coordinates are
-    stored as geocentric.
+    stored as (geo)centric.
 
     To ensure a specific type of coordinates is used, use the corresponding
     class methods (`from_geocentric` and `from_geodetic`) or initialize the
     arguments with names (``x``, ``y``, ``z`` for geocentric; ``lon``, ``lat``,
     ``height`` for geodetic).  See the class methods for details.
 
-
-    Notes
-    -----
-    This class fits into the coordinates transformation framework in that it
-    encodes a position on the `~astropy.coordinates.ITRS` frame.  To get a
-    proper `~astropy.coordinates.ITRS` object from this object, use the ``itrs``
-    property.
+    The prefix *Geo-* has been maintained in some methods and properties
+    to ensure compatibility with the astropy
+    :class:`astropy.coordinates.EarthLocation` class, but the module is strictly
+    not limited to Earth.
     """
 
     _location_dtype = np.dtype({"names": ["x", "y", "z"], "formats": [np.float64] * 3})
@@ -56,7 +57,7 @@ class GroundLocation(u.Quantity):
             return args[0].copy()
 
         if len(args) == 1 and isinstance(args[0], GeodeticLocation):
-            # try parsing as geodetic coordinates (lat, lon, alt)
+            # try parsing as (geo)detic coordinates (lat, lon, alt)
             self = cls.from_geodetic(
                 lon=args[0].lon, lat=args[0].lat, height=args[0].height, **kwargs
             )
@@ -72,7 +73,7 @@ class GroundLocation(u.Quantity):
             except Exception as exc_geodetic:
                 raise TypeError(
                     "Coordinates could not be parsed as either "
-                    "geocentric or geodetic, with respective "
+                    "(geo)centric or (geo)detic, with respective "
                     'exceptions "{}" and "{}"'.format(exc_geocentric, exc_geodetic)
                 )
         return self
@@ -81,7 +82,10 @@ class GroundLocation(u.Quantity):
     def from_geocentric(cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80):
         """
         Location on Central Body (e.g. Earth or Moon), initialized from
-        geocentric cartesian coordinates.
+        Central Body centric (e.g. geocentric for the Earth) cartesian coordinates.
+
+        This is the same as `from_cb_centric` method. It is kept for compatibility with
+        :class:`astropy.coordinates.EarthLocation` class.
 
         Parameters
         ----------
@@ -133,18 +137,50 @@ class GroundLocation(u.Quantity):
         return self
 
     @classmethod
+    def from_cb_centric(cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80):
+        """
+        Location on Central Body (e.g. Earth or Moon), initialized from
+        Central Body centric (e.g. geocentric for the Earth) cartesian coordinates.
+
+        Parameters
+        ----------
+        x, y, z : `~astropy.units.Quantity` or array_like
+            Cartesian coordinates.  If not quantities, ``unit`` should be given.
+        unit : `~astropy.units.UnitBase` object or None
+            Physical unit of the coordinate values.  If ``x``, ``y``, and/or
+            ``z`` are quantities, they will be converted to this unit.
+        ellipsoid : CelestialBodyEllipsoid, optional
+            Definition of the reference ellipsoid to use
+            (default: 'EARTH_ELLIPSOID_GRS80').
+
+        Raises
+        ------
+        astropy.units.UnitsError
+            If the units on ``x``, ``y``, and ``z`` do not match or an invalid
+            unit is given.
+        ValueError
+            If the shapes of ``x``, ``y``, and ``z`` do not match.
+        TypeError
+            If ``x`` is not a `~astropy.units.Quantity` and no unit is given.
+        """
+        return cls.from_geocentric(x, y, z, unit=unit, ellipsoid=ellipsoid)
+
+    @classmethod
     def from_geodetic(cls, lon, lat, height=0.0, ellipsoid=EARTH_ELLIPSOID_GRS80):
         """
         Location on Central Body (e.g. Earth or Moon), initialized from
-        geodetic coordinates.
+        Central Body detic (e.g. geodetic for the Earth) coordinates.
+
+        This is the same as `from_cb_detic` method. It is kept for compatibility with
+        :class:`astropy.coordinates.EarthLocation` class.
 
         Parameters
         ----------
         lon : `~astropy.coordinates.Longitude` or float
-            Earth East longitude.  Can be anything that initialises an
+            East longitude.  Can be anything that initialises an
             `~astropy.coordinates.Angle` object (if float, in degrees).
         lat : `~astropy.coordinates.Latitude` or float
-            Earth latitude.  Can be anything that initialises an
+            latitude.  Can be anything that initialises an
             `~astropy.coordinates.Latitude` object (if float, in degrees).
         height : `~astropy.units.Quantity` or float, optional
             Height above reference ellipsoid (if float, in meters; default: 0).
@@ -159,8 +195,7 @@ class GroundLocation(u.Quantity):
             If the units on ``lon`` and ``lat`` are inconsistent with angular
             ones, or that on ``height`` with a length.
         ValueError
-            If ``lon``, ``lat``, and ``height`` do not have the same shape, or
-            if ``ellipsoid`` is not recognized as among the ones implemented.
+            If ``lon``, ``lat``, and ``height`` do not have the same shape
 
         Notes
         -----
@@ -188,18 +223,101 @@ class GroundLocation(u.Quantity):
         self._ellipsoid = ellipsoid
         return self
 
+    @classmethod
+    def from_cb_detic(cls, lon, lat, height=0.0, ellipsoid=EARTH_ELLIPSOID_GRS80):
+        """
+        Location on Central Body (e.g. Earth or Moon), initialized from
+        Central Body detic (e.g. geodetic for the Earth) coordinates.
+
+        Parameters
+        ----------
+        lon : `~astropy.coordinates.Longitude` or float
+            Earth East longitude.  Can be anything that initialises an
+            `~astropy.coordinates.Angle` object (if float, in degrees).
+        lat : `~astropy.coordinates.Latitude` or float
+            latitude.  Can be anything that initialises an
+            `~astropy.coordinates.Latitude` object (if float, in degrees).
+        height : `~astropy.units.Quantity` or float, optional
+            Height above reference ellipsoid (if float, in meters; default: 0).
+        ellipsoid : CelestialBodyEllipsoid, optional
+            Definition of the reference ellipsoid to use
+            (default: 'EARTH_ELLIPSOID_GRS80').
+
+
+        Raises
+        ------
+        astropy.units.UnitsError
+            If the units on ``lon`` and ``lat`` are inconsistent with angular
+            ones, or that on ``height`` with a length.
+        ValueError
+            If ``lon``, ``lat``, and ``height`` do not have the same shape
+
+        Notes
+        -----
+        For the conversion to geocentric coordinates, the ERFA routine
+        ``gd2gce`` is used.  See https://github.com/liberfa/erfa
+        """
+        return cls.from_geodetic(lon, lat, height=height, ellipsoid=ellipsoid)
+
     @property
     def ellipsoid(self):
-        """The default ellipsoid used to convert to geodetic coordinates."""
+        """The default ellipsoid used to convert to (geo)detic coordinates."""
         return self._ellipsoid
 
     @property
     def geodetic(self):
-        """Convert to geodetic coordinates for the default ellipsoid."""
+        """Convert the internal (geo)centric to (geo)detic coordinates
+        for the default ellipsoid.
+
+        This is the same as `cb_detic` property. It is kept for compatibility with
+        :class:`astropy.coordinates.EarthLocation` class."""
+        return self.to_geodetic()
+
+    @property
+    def cb_detic(self):
+        """Convert the internal (geo)centric to (geo)detic coordinates
+        for the default ellipsoid."""
         return self.to_geodetic()
 
     def to_geodetic(self, ellipsoid=EARTH_ELLIPSOID_GRS80):
-        """Convert to geodetic coordinates.
+        """Convert the internal (geo)centric to (geo)detic coordinates.
+
+        This is the same as `to_cb_detic` method. It is kept for compatibility with
+        :class:`astropy.coordinates.EarthLocation` class.
+
+        Parameters
+        ----------
+        ellipsoid : CelestialBodyEllipsoid, optional
+            Definition of the reference ellipsoid to use
+            (default: 'EARTH_ELLIPSOID_GRS80').
+
+        Returns
+        -------
+        (lon, lat, height) : tuple
+            The tuple contains instances of `~astropy.coordinates.Longitude`,
+            `~astropy.coordinates.Latitude`, and `~astropy.units.Quantity`
+
+
+        Notes
+        -----
+        For the conversion to (geo)detic coordinates, the ERFA routine
+        ``gc2gde`` is used.  See https://github.com/liberfa/erfa
+        """
+
+        self_array = self.to(u.meter).view(self._array_dtype, np.ndarray)
+        lon, lat, height = erfa.gc2gde(
+            ellipsoid.re.to_value(u.m), 1 / ellipsoid.inv_f.to_value(), self_array
+        )
+        return GeodeticLocation(
+            Longitude(
+                lon * u.radian, u.degree, wrap_angle=180.0 * u.degree, copy=False
+            ),
+            Latitude(lat * u.radian, u.degree, copy=False),
+            u.Quantity(height * u.meter, self.unit, copy=False),
+        )
+
+    def to_cb_detic(self, ellipsoid=EARTH_ELLIPSOID_GRS80):
+        """Convert the internal (geo)centric to (geo)detic coordinates.
 
         Parameters
         ----------
@@ -219,18 +337,7 @@ class GroundLocation(u.Quantity):
         For the conversion to geodetic coordinates, the ERFA routine
         ``gc2gde`` is used.  See https://github.com/liberfa/erfa
         """
-
-        self_array = self.to(u.meter).view(self._array_dtype, np.ndarray)
-        lon, lat, height = erfa.gc2gde(
-            ellipsoid.re.to_value(u.m), 1 / ellipsoid.inv_f.to_value(), self_array
-        )
-        return GeodeticLocation(
-            Longitude(
-                lon * u.radian, u.degree, wrap_angle=180.0 * u.degree, copy=False
-            ),
-            Latitude(lat * u.radian, u.degree, copy=False),
-            u.Quantity(height * u.meter, self.unit, copy=False),
-        )
+        return self.to_geodetic(ellipsoid=ellipsoid)
 
     @property
     def lon(self):
@@ -250,12 +357,28 @@ class GroundLocation(u.Quantity):
     # mostly for symmetry with geodetic and to_geodetic.
     @property
     def geocentric(self):
-        """Convert to a tuple with X, Y, and Z as quantities"""
+        """Convert to a tuple with X, Y, and Z as quantities.
+
+        This is the same as `cb_centric` property. It is kept for compatibility with
+        :class:`astropy.coordinates.EarthLocation` class.
+        """
+        return self.to_geocentric()
+
+    @property
+    def cb_centric(self):
+        """Convert to a tuple with X, Y, and Z as quantities."""
         return self.to_geocentric()
 
     def to_geocentric(self):
-        """Convert to a tuple with X, Y, and Z as quantities"""
+        """Convert to a tuple with X, Y, and Z as quantities.
+
+        This is the same as `to_cb_centric` method. It is kept for compatibility with
+        :class:`astropy.coordinates.EarthLocation` class."""
         return self.x, self.y, self.z
+
+    def to_cb_centric(self):
+        """Convert to a tuple with X, Y, and Z as quantities."""
+        return self.to_geocentric()
 
     def to_body_fixed_coords(self, celestial_body, obstime=None):
         """
