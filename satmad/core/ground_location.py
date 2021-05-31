@@ -424,17 +424,17 @@ class GroundLocation(u.Quantity):
 
     @property
     def x(self):
-        """The X component of the geocentric coordinates."""
+        """The X component of the (geo)centric coordinates."""
         return self["x"]
 
     @property
     def y(self):
-        """The Y component of the geocentric coordinates."""
+        """The Y component of the (geo)centric coordinates."""
         return self["y"]
 
     @property
     def z(self):
-        """The Z component of the geocentric coordinates."""
+        """The Z component of the (geo)centric coordinates."""
         return self["z"]
 
     def __getitem__(self, item):
