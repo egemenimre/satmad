@@ -90,6 +90,18 @@ class MoonBodyFixed(CelestialBodyFixed):
     cb_crs = MoonCRS
 
 
+class MoonJ2000Equatorial(CelestialBodyJ2000Equatorial):
+    """
+    A coordinate frame representing the Equatorial System of Moon at J2000 Epoch.
+
+    This corresponds to the Moon Principal Axis (PA) system. This has a fixed and small
+    rotational offset with respect to the Mean Earth/rotation (ME) system.
+    """
+
+    body_name = "Moon"
+    cb_crs = MoonCRS
+
+
 # **************** GM values ****************
 
 GM_earth = 3.986004418e14 * u.m ** 3 / u.s ** 2
@@ -196,23 +208,12 @@ on Recommended Nominal Conversion Constants for Selected Solar and Planetary Pro
 """
 
 
-class MoonJ2000Equatorial(CelestialBodyJ2000Equatorial):
-    """
-    A coordinate frame representing the Equatorial System of Moon at J2000 Epoch.
-
-    This corresponds to the Moon Principal Axis (PA) system. This has a fixed and small
-    rotational offset with respect to the Mean Earth/rotation (ME) system.
-    """
-
-    body_name = "Moon"
-    cb_crs = MoonCRS
-
-
 MOON = CelestialBody(
     "Moon",
     "Default Moon Model.",
     GM_moon.to(u.km ** 3 / u.s ** 2),
-    ellipsoid=MOON_ELLIPSOID_IAUWG2015,
     inert_coord=MoonJ2000Equatorial,
+    body_fixed_coord=MoonBodyFixed,
+    ellipsoid=MOON_ELLIPSOID_IAUWG2015,
 )
 """Default Moon Model."""
