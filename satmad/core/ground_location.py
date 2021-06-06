@@ -18,7 +18,13 @@ import collections
 import erfa
 import numpy as np
 from astropy import units as u
-from astropy.coordinates import Angle, Latitude, Longitude
+from astropy.coordinates import (
+    Angle,
+    CartesianDifferential,
+    CartesianRepresentation,
+    Latitude,
+    Longitude,
+)
 
 from satmad.core.celestial_bodies_lib import EARTH_ELLIPSOID_GRS80
 
@@ -380,19 +386,19 @@ class GroundLocation(u.Quantity):
         """Convert to a tuple with X, Y, and Z as quantities."""
         return self.to_geocentric()
 
-    def to_body_fixed_coords(self, celestial_body, obstime=None):
+    def to_body_fixed_coords(self, body_fixed_coord, obstime=None):
         """
         Generates a Central Body Fixed object (e.g. `~astropy.coordinates.ITRS` object)
         with the location of this object at the requested ``obstime``.
 
-        The `celestial_body` object should have its `body_fixed_coord` defined, as the
-        resulting object will be of this type. For example, if the celestial body is
-        Earth, the resulting object is of the type ITRS.
+        The resulting object will be of  `body_fixed_coord` type.For example, if
+        the celestial body is Earth, the resulting object is of the type ITRS.
 
         Parameters
         ----------
-        celestial_body : CelestialBody
-            The Celestial Body where the object is defined.
+        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+            Default Central Body Fixed Coordinate to run the propagations (e.g. `ITRS`
+            for Earth)
         obstime : `~astropy.time.Time` or None
             The ``obstime`` to apply to the new object, or
             if None, the default ``obstime`` will be used.
@@ -412,9 +418,15 @@ class GroundLocation(u.Quantity):
             self = np.broadcast_to(self, obstime.shape, subok=True)
 
         try:
-            return celestial_body.body_fixed_coord_frame(
-                x=self.x, y=self.y, z=self.z, obstime=obstime
+            pos = CartesianRepresentation(x=self.x, y=self.y, z=self.z)
+            vel = CartesianDifferential(
+                d_x=self.x.to_value() * 0,
+                d_y=self.y.to_value() * 0,
+                d_z=self.z.to_value() * 0,
+                unit=u.m / u.s,
             )
+            pos = pos.with_differentials(vel)
+            return body_fixed_coord(x=pos, obstime=obstime)
         except TypeError:
             raise TypeError(
                 "Failed converting Geodetic coordinates to body fixed coordinates. "

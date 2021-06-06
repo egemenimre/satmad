@@ -12,6 +12,7 @@ import pytest
 from astropy import units as u
 from astropy.coordinates import (
     ITRS,
+    CartesianDifferential,
     CartesianRepresentation,
     EarthLocation,
     Latitude,
@@ -24,7 +25,6 @@ from satmad.core.celestial_bodies_lib import (
     EARTH,
     EARTH_ELLIPSOID_GRS80,
     EARTH_ELLIPSOID_WGS84,
-    MOON,
     SUN,
 )
 from satmad.core.ground_location import GeodeticLocation, GroundLocation
@@ -40,7 +40,9 @@ def test_get_body_fixed():
         10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH_ELLIPSOID_GRS80
     )
 
-    gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(EARTH, obstime=time)
+    gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(
+        EARTH.body_fixed_coord_frame, obstime=time
+    )
 
     r_itrs_true = ITRS(
         CartesianRepresentation(
@@ -52,6 +54,17 @@ def test_get_body_fixed():
                 ]
             ).transpose(),
             unit=u.m,
+        ).with_differentials(
+            CartesianDifferential(
+                np.asarray(
+                    [
+                        [0.0, 0.0, 0.0],
+                        [0.0, 0.0, 0.0],
+                        [0.0, 0.0, 0.0],
+                    ]
+                ).transpose(),
+                unit=u.m / u.s,
+            )
         ),
         obstime=time,
         representation_type="cartesian",
@@ -72,7 +85,7 @@ def test_get_body_fixed_no_coords():
             10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=SUN.ellipsoid
         )
 
-        gnd_loc.to_body_fixed_coords(SUN)
+        gnd_loc.to_body_fixed_coords(SUN.body_fixed_coord_frame)
 
 
 def test_copy():

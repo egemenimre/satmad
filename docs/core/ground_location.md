@@ -27,7 +27,7 @@ gnd_loc_cart = GroundLocation.from_geocentric(5000 * u.km, 3600 * u.km, 1500 * u
 
 Once initialised, the {py:class}`.GroundLocation` object can yield its geodetic position with the `geodetic` parameter or `to_geodetic()` method. The result is a {py:class}`.GeodeticLocation` class.
 
-Similarly, it can yield its geocentric cartesian position with the `geocentric` parameter or `to_geocentric()` method. This geocentric position is equal to the position in the Central Body Fixed frame, for example, ITRS for the Earth. The result is a three-element tuple of cartesian position. Perhaps more useful version of this is the `to_body_fixed_coords()` method, where the Geodetic Position is converted to a geocentric coordinates object as used by astropy (such as `ITRS` class for Earth). For this, one or more time values are to be provided, as well as a Celestial Body, whose internal `body_fixed_coord` is used to generate the resulting object. If there are no body-fixed coordinates are defined for the Celestial Body, then a `TypeError` will be raised.
+Similarly, it can yield its geocentric cartesian position with the `geocentric` parameter or `to_geocentric()` method. This geocentric position is equal to the position in the Central Body Fixed frame, for example, ITRS for the Earth. The result is a three-element tuple of cartesian position. Perhaps more useful version of this is the `to_body_fixed_coords()` method, where the Geodetic Position is converted to a geocentric coordinates object as used by astropy (such as `ITRS` class for Earth). For this, one or more time values are to be provided, as well as a Celestial Body `body_fixed_coord` to generate the resulting object. If there are no body-fixed coordinates are defined for the Celestial Body, then a `TypeError` will be raised.
 
 ```python
 import numpy as np
@@ -45,7 +45,7 @@ time = Time("2020-04-10T00:00:00", scale="utc") + np.arange(1, 4) * TimeDelta(1,
 gnd_loc = GroundLocation(10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH.ellipsoid)
 
 # Generate the ground locations in body fixed frame (in this instance ITRS)
-gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(EARTH, obstime=time)
+gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(EARTH.body_fixed_coord_frame, obstime=time)
 
 print(gnd_loc_body_fixed)
 ```
