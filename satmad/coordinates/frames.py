@@ -244,17 +244,6 @@ def cb_fixed_to_cb_crs(cb_fixed_coord, cb_crs_coord):
     return cb_crs.transform_to(cb_crs_coord)
 
 
-# @frame_transform_graph.transform(FunctionTransformWithFiniteDifference, ITRS, TETE)
-# def itrs_to_tete(itrs_coo, tete_frame):
-#     # compute the pmatrix, and then multiply by its transpose
-#     pmat = tete_to_itrs_mat(itrs_coo.obstime)
-#     newrepr = itrs_coo.cartesian.transform(matrix_transpose(pmat))
-#     tete = TETE(newrepr, obstime=itrs_coo.obstime)
-#
-#     # now do any needed offsets (no-op if same obstime)
-#     return tete.transform_to(tete_frame)
-
-
 class CelestialBodyCRS(BaseCoordinateFrame, ABC):
     """
     A coordinate frame in the generic Celestial Reference System (CRS). This CRS is
