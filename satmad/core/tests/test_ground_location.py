@@ -22,7 +22,6 @@ from astropy.time import Time, TimeDelta
 from pytest import approx
 
 from satmad.core.celestial_bodies_lib import (
-    EARTH,
     EARTH_ELLIPSOID_GRS80,
     EARTH_ELLIPSOID_WGS84,
     SUN,
@@ -40,9 +39,7 @@ def test_get_body_fixed():
         10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH_ELLIPSOID_GRS80
     )
 
-    gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(
-        EARTH.body_fixed_coord_frame, obstime=time
-    )
+    gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(obstime=time)
 
     r_itrs_true = ITRS(
         CartesianRepresentation(
@@ -82,10 +79,14 @@ def test_get_body_fixed_no_coords():
     with pytest.raises(TypeError):
 
         gnd_loc = GroundLocation(
-            10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=SUN.ellipsoid
+            10 * u.deg,
+            15 * u.deg,
+            150 * u.m,
+            ellipsoid=SUN.ellipsoid,
+            body_fixed_coord=SUN.body_fixed_coord_frame,
         )
 
-        gnd_loc.to_body_fixed_coords(SUN.body_fixed_coord_frame)
+        gnd_loc.to_body_fixed_coords()
 
 
 def test_copy():

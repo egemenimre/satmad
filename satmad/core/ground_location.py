@@ -19,6 +19,7 @@ import erfa
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import (
+    ITRS,
     Angle,
     CartesianDifferential,
     CartesianRepresentation,
@@ -64,28 +65,30 @@ class GroundLocation(u.Quantity):
 
         if len(args) == 1 and isinstance(args[0], GeodeticLocation):
             # try parsing as (geo)detic coordinates (lat, lon, alt)
-            self = cls.from_geodetic(
+            self = cls.from_cb_detic(
                 lon=args[0].lon, lat=args[0].lat, height=args[0].height, **kwargs
             )
             return self
 
         try:
-            # try parsing as geocentric cartesian
-            self = cls.from_geocentric(*args, **kwargs)
-        except (u.UnitsError, TypeError) as exc_geocentric:
+            # try parsing as (geo)centric cartesian
+            self = cls.from_cb_centric(*args, **kwargs)
+        except (u.UnitsError, TypeError) as exc_cb_centric:
             try:
-                # try parsing as geodetic coordinates (lat, lon, alt)
-                self = cls.from_geodetic(*args, **kwargs)
-            except Exception as exc_geodetic:
+                # try parsing as (geo)detic coordinates (lat, lon, alt)
+                self = cls.from_cb_detic(*args, **kwargs)
+            except Exception as exc_cb_detic:
                 raise TypeError(
                     "Coordinates could not be parsed as either "
                     "(geo)centric or (geo)detic, with respective "
-                    'exceptions "{}" and "{}"'.format(exc_geocentric, exc_geodetic)
+                    'exceptions "{}" and "{}"'.format(exc_cb_centric, exc_cb_detic)
                 )
         return self
 
     @classmethod
-    def from_geocentric(cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80):
+    def from_geocentric(
+        cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80, body_fixed_coord=ITRS
+    ):
         """
         Location on Central Body (e.g. Earth or Moon), initialized from
         Central Body centric (e.g. geocentric for the Earth) cartesian coordinates.
@@ -101,8 +104,61 @@ class GroundLocation(u.Quantity):
             Physical unit of the coordinate values.  If ``x``, ``y``, and/or
             ``z`` are quantities, they will be converted to this unit.
         ellipsoid : CelestialBodyEllipsoid, optional
-            Definition of the reference ellipsoid to use
+            Definition of the reference ellipsoid to use, should be compatible with the
+            `body_fixed_coord` parameter (i.e., a Moon body fixed coord should be used
+            with a Moon ellipsoid)
             (default: 'EARTH_ELLIPSOID_GRS80').
+        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+            Default Central Body Fixed Coordinate where the cartesian coords are defined
+            (e.g. `ITRS` for Earth)
+
+        Returns
+        -------
+        GroundLocation
+            Resulting ground location
+
+        Raises
+        ------
+        astropy.units.UnitsError
+            If the units on ``x``, ``y``, and ``z`` do not match or an invalid
+            unit is given.
+        ValueError
+            If the shapes of ``x``, ``y``, and ``z`` do not match.
+        TypeError
+            If ``x`` is not a `~astropy.units.Quantity` and no unit is given.
+        """
+        return cls.from_cb_centric(
+            x, y, z, unit=unit, ellipsoid=ellipsoid, body_fixed_coord=body_fixed_coord
+        )
+
+    @classmethod
+    def from_cb_centric(
+        cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80, body_fixed_coord=ITRS
+    ):
+        """
+        Location on Central Body (e.g. Earth or Moon), initialized from
+        Central Body centric (e.g. geocentric for the Earth) cartesian coordinates.
+
+        Parameters
+        ----------
+        x, y, z : `~astropy.units.Quantity` or array_like
+            Cartesian coordinates.  If not quantities, ``unit`` should be given.
+        unit : `~astropy.units.UnitBase` object or None
+            Physical unit of the coordinate values.  If ``x``, ``y``, and/or
+            ``z`` are quantities, they will be converted to this unit.
+        ellipsoid : CelestialBodyEllipsoid, optional
+            Definition of the reference ellipsoid to use, should be compatible with the
+            `body_fixed_coord` parameter (i.e., a Moon body fixed coord should be used
+            with a Moon ellipsoid)
+            (default: 'EARTH_ELLIPSOID_GRS80').
+        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+            Default Central Body Fixed Coordinate where the cartesian coords are defined
+            (e.g. `ITRS` for Earth)
+
+        Returns
+        -------
+        GroundLocation
+            Resulting ground location
 
         Raises
         ------
@@ -140,39 +196,18 @@ class GroundLocation(u.Quantity):
         struc["x"], struc["y"], struc["z"] = x, y, z
         self = super().__new__(cls, struc, unit, copy=False)
         self._ellipsoid = ellipsoid
+        self.body_fixed_coord = body_fixed_coord
         return self
 
     @classmethod
-    def from_cb_centric(cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80):
-        """
-        Location on Central Body (e.g. Earth or Moon), initialized from
-        Central Body centric (e.g. geocentric for the Earth) cartesian coordinates.
-
-        Parameters
-        ----------
-        x, y, z : `~astropy.units.Quantity` or array_like
-            Cartesian coordinates.  If not quantities, ``unit`` should be given.
-        unit : `~astropy.units.UnitBase` object or None
-            Physical unit of the coordinate values.  If ``x``, ``y``, and/or
-            ``z`` are quantities, they will be converted to this unit.
-        ellipsoid : CelestialBodyEllipsoid, optional
-            Definition of the reference ellipsoid to use
-            (default: 'EARTH_ELLIPSOID_GRS80').
-
-        Raises
-        ------
-        astropy.units.UnitsError
-            If the units on ``x``, ``y``, and ``z`` do not match or an invalid
-            unit is given.
-        ValueError
-            If the shapes of ``x``, ``y``, and ``z`` do not match.
-        TypeError
-            If ``x`` is not a `~astropy.units.Quantity` and no unit is given.
-        """
-        return cls.from_geocentric(x, y, z, unit=unit, ellipsoid=ellipsoid)
-
-    @classmethod
-    def from_geodetic(cls, lon, lat, height=0.0, ellipsoid=EARTH_ELLIPSOID_GRS80):
+    def from_geodetic(
+        cls,
+        lon,
+        lat,
+        height=0.0,
+        ellipsoid=EARTH_ELLIPSOID_GRS80,
+        body_fixed_coord=ITRS,
+    ):
         """
         Location on Central Body (e.g. Earth or Moon), initialized from
         Central Body detic (e.g. geodetic for the Earth) coordinates.
@@ -191,9 +226,76 @@ class GroundLocation(u.Quantity):
         height : `~astropy.units.Quantity` or float, optional
             Height above reference ellipsoid (if float, in meters; default: 0).
         ellipsoid : CelestialBodyEllipsoid, optional
-            Definition of the reference ellipsoid to use
+            Definition of the reference ellipsoid to use, should be compatible with the
+            `body_fixed_coord` parameter (i.e., a Moon body fixed coord should be used
+            with a Moon ellipsoid)
             (default: 'EARTH_ELLIPSOID_GRS80').
+        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+            Default Central Body Fixed Coordinate where the cartesian coords are defined
+            (e.g. `ITRS` for Earth)
 
+        Returns
+        -------
+        GroundLocation
+            Resulting ground location
+
+        Raises
+        ------
+        astropy.units.UnitsError
+            If the units on ``lon`` and ``lat`` are inconsistent with angular
+            ones, or that on ``height`` with a length.
+        ValueError
+            If ``lon``, ``lat``, and ``height`` do not have the same shape
+
+        Notes
+        -----
+        For the conversion to geocentric coordinates, the ERFA routine
+        ``gd2gce`` is used.  See https://github.com/liberfa/erfa
+        """
+        return cls.from_cb_detic(
+            lon,
+            lat,
+            height=height,
+            ellipsoid=ellipsoid,
+            body_fixed_coord=body_fixed_coord,
+        )
+
+    @classmethod
+    def from_cb_detic(
+        cls,
+        lon,
+        lat,
+        height=0.0,
+        ellipsoid=EARTH_ELLIPSOID_GRS80,
+        body_fixed_coord=ITRS,
+    ):
+        """
+        Location on Central Body (e.g. Earth or Moon), initialized from
+        Central Body detic (e.g. geodetic for the Earth) coordinates.
+
+        Parameters
+        ----------
+        lon : `~astropy.coordinates.Longitude` or float
+            Earth East longitude.  Can be anything that initialises an
+            `~astropy.coordinates.Angle` object (if float, in degrees).
+        lat : `~astropy.coordinates.Latitude` or float
+            latitude.  Can be anything that initialises an
+            `~astropy.coordinates.Latitude` object (if float, in degrees).
+        height : `~astropy.units.Quantity` or float, optional
+            Height above reference ellipsoid (if float, in meters; default: 0).
+        ellipsoid : CelestialBodyEllipsoid, optional
+            Definition of the reference ellipsoid to use, should be compatible with the
+            `body_fixed_coord` parameter (i.e., a Moon body fixed coord should be used
+            with a Moon ellipsoid)
+            (default: 'EARTH_ELLIPSOID_GRS80').
+        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+            Default Central Body Fixed Coordinate where the cartesian coords are defined
+            (e.g. `ITRS` for Earth)
+
+        Returns
+        -------
+        GroundLocation
+            Resulting ground location
 
         Raises
         ------
@@ -227,43 +329,8 @@ class GroundLocation(u.Quantity):
         self = xyz.ravel().view(cls._location_dtype, cls).reshape(xyz.shape[:-1])
         self._unit = u.m
         self._ellipsoid = ellipsoid
+        self.body_fixed_coord = body_fixed_coord
         return self
-
-    @classmethod
-    def from_cb_detic(cls, lon, lat, height=0.0, ellipsoid=EARTH_ELLIPSOID_GRS80):
-        """
-        Location on Central Body (e.g. Earth or Moon), initialized from
-        Central Body detic (e.g. geodetic for the Earth) coordinates.
-
-        Parameters
-        ----------
-        lon : `~astropy.coordinates.Longitude` or float
-            Earth East longitude.  Can be anything that initialises an
-            `~astropy.coordinates.Angle` object (if float, in degrees).
-        lat : `~astropy.coordinates.Latitude` or float
-            latitude.  Can be anything that initialises an
-            `~astropy.coordinates.Latitude` object (if float, in degrees).
-        height : `~astropy.units.Quantity` or float, optional
-            Height above reference ellipsoid (if float, in meters; default: 0).
-        ellipsoid : CelestialBodyEllipsoid, optional
-            Definition of the reference ellipsoid to use
-            (default: 'EARTH_ELLIPSOID_GRS80').
-
-
-        Raises
-        ------
-        astropy.units.UnitsError
-            If the units on ``lon`` and ``lat`` are inconsistent with angular
-            ones, or that on ``height`` with a length.
-        ValueError
-            If ``lon``, ``lat``, and ``height`` do not have the same shape
-
-        Notes
-        -----
-        For the conversion to geocentric coordinates, the ERFA routine
-        ``gd2gce`` is used.  See https://github.com/liberfa/erfa
-        """
-        return cls.from_geodetic(lon, lat, height=height, ellipsoid=ellipsoid)
 
     @property
     def ellipsoid(self):
@@ -386,19 +453,17 @@ class GroundLocation(u.Quantity):
         """Convert to a tuple with X, Y, and Z as quantities."""
         return self.to_geocentric()
 
-    def to_body_fixed_coords(self, body_fixed_coord, obstime=None):
+    def to_body_fixed_coords(self, obstime=None):
         """
         Generates a Central Body Fixed object (e.g. `~astropy.coordinates.ITRS` object)
         with the location of this object at the requested ``obstime``.
 
-        The resulting object will be of  `body_fixed_coord` type.For example, if
-        the celestial body is Earth, the resulting object is of the type ITRS.
+        The resulting object will be of the internal `body_fixed_coord` type.
+        For example, if the celestial body is Earth, the resulting object is of
+        the type ITRS.
 
         Parameters
         ----------
-        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
-            Default Central Body Fixed Coordinate to run the propagations (e.g. `ITRS`
-            for Earth)
         obstime : `~astropy.time.Time` or None
             The ``obstime`` to apply to the new object, or
             if None, the default ``obstime`` will be used.
@@ -415,18 +480,20 @@ class GroundLocation(u.Quantity):
         # Broadcast for a single position at multiple times, but don't attempt
         # to be more general here.
         if obstime and self.size == 1 and obstime.shape:
-            self = np.broadcast_to(self, obstime.shape, subok=True)
+            coords = np.broadcast_to(self, obstime.shape, subok=True)
+        else:
+            coords = self
 
         try:
-            pos = CartesianRepresentation(x=self.x, y=self.y, z=self.z)
+            pos = CartesianRepresentation(x=coords.x, y=coords.y, z=coords.z)
             vel = CartesianDifferential(
-                d_x=self.x.to_value() * 0,
-                d_y=self.y.to_value() * 0,
-                d_z=self.z.to_value() * 0,
+                d_x=coords.x.to_value() * 0,
+                d_y=coords.y.to_value() * 0,
+                d_z=coords.z.to_value() * 0,
                 unit=u.m / u.s,
             )
             pos = pos.with_differentials(vel)
-            return body_fixed_coord(x=pos, obstime=obstime)
+            return self.body_fixed_coord(x=pos, obstime=obstime)
         except TypeError:
             raise TypeError(
                 "Failed converting Geodetic coordinates to body fixed coordinates. "
