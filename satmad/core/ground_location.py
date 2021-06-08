@@ -87,7 +87,7 @@ class GroundLocation(u.Quantity):
 
     @classmethod
     def from_geocentric(
-        cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80, body_fixed_coord=ITRS
+        cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80, body_fixed_frame=ITRS
     ):
         """
         Location on Central Body (e.g. Earth or Moon), initialized from
@@ -105,10 +105,10 @@ class GroundLocation(u.Quantity):
             ``z`` are quantities, they will be converted to this unit.
         ellipsoid : CelestialBodyEllipsoid, optional
             Definition of the reference ellipsoid to use, should be compatible with the
-            `body_fixed_coord` parameter (i.e., a Moon body fixed coord should be used
+            `body_fixed_frame` parameter (i.e., a Moon body fixed coord should be used
             with a Moon ellipsoid)
             (default: 'EARTH_ELLIPSOID_GRS80').
-        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+        body_fixed_frame : `~astropy.coordinates.BaseRepresentation`
             Default Central Body Fixed Coordinate where the cartesian coords are defined
             (e.g. `ITRS` for Earth)
 
@@ -128,12 +128,12 @@ class GroundLocation(u.Quantity):
             If ``x`` is not a `~astropy.units.Quantity` and no unit is given.
         """
         return cls.from_cb_centric(
-            x, y, z, unit=unit, ellipsoid=ellipsoid, body_fixed_coord=body_fixed_coord
+            x, y, z, unit=unit, ellipsoid=ellipsoid, body_fixed_frame=body_fixed_frame
         )
 
     @classmethod
     def from_cb_centric(
-        cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80, body_fixed_coord=ITRS
+        cls, x, y, z, unit=None, ellipsoid=EARTH_ELLIPSOID_GRS80, body_fixed_frame=ITRS
     ):
         """
         Location on Central Body (e.g. Earth or Moon), initialized from
@@ -148,10 +148,10 @@ class GroundLocation(u.Quantity):
             ``z`` are quantities, they will be converted to this unit.
         ellipsoid : CelestialBodyEllipsoid, optional
             Definition of the reference ellipsoid to use, should be compatible with the
-            `body_fixed_coord` parameter (i.e., a Moon body fixed coord should be used
+            `body_fixed_frame` parameter (i.e., a Moon body fixed coord should be used
             with a Moon ellipsoid)
             (default: 'EARTH_ELLIPSOID_GRS80').
-        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+        body_fixed_frame : `~astropy.coordinates.BaseRepresentation`
             Default Central Body Fixed Coordinate where the cartesian coords are defined
             (e.g. `ITRS` for Earth)
 
@@ -196,7 +196,7 @@ class GroundLocation(u.Quantity):
         struc["x"], struc["y"], struc["z"] = x, y, z
         self = super().__new__(cls, struc, unit, copy=False)
         self._ellipsoid = ellipsoid
-        self.body_fixed_coord = body_fixed_coord
+        self.body_fixed_frame = body_fixed_frame
         return self
 
     @classmethod
@@ -206,7 +206,7 @@ class GroundLocation(u.Quantity):
         lat,
         height=0.0,
         ellipsoid=EARTH_ELLIPSOID_GRS80,
-        body_fixed_coord=ITRS,
+        body_fixed_frame=ITRS,
     ):
         """
         Location on Central Body (e.g. Earth or Moon), initialized from
@@ -227,10 +227,10 @@ class GroundLocation(u.Quantity):
             Height above reference ellipsoid (if float, in meters; default: 0).
         ellipsoid : CelestialBodyEllipsoid, optional
             Definition of the reference ellipsoid to use, should be compatible with the
-            `body_fixed_coord` parameter (i.e., a Moon body fixed coord should be used
+            `body_fixed_frame` parameter (i.e., a Moon body fixed coord should be used
             with a Moon ellipsoid)
             (default: 'EARTH_ELLIPSOID_GRS80').
-        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+        body_fixed_frame : `~astropy.coordinates.BaseRepresentation`
             Default Central Body Fixed Coordinate where the cartesian coords are defined
             (e.g. `ITRS` for Earth)
 
@@ -257,7 +257,7 @@ class GroundLocation(u.Quantity):
             lat,
             height=height,
             ellipsoid=ellipsoid,
-            body_fixed_coord=body_fixed_coord,
+            body_fixed_frame=body_fixed_frame,
         )
 
     @classmethod
@@ -267,7 +267,7 @@ class GroundLocation(u.Quantity):
         lat,
         height=0.0,
         ellipsoid=EARTH_ELLIPSOID_GRS80,
-        body_fixed_coord=ITRS,
+        body_fixed_frame=ITRS,
     ):
         """
         Location on Central Body (e.g. Earth or Moon), initialized from
@@ -285,10 +285,10 @@ class GroundLocation(u.Quantity):
             Height above reference ellipsoid (if float, in meters; default: 0).
         ellipsoid : CelestialBodyEllipsoid, optional
             Definition of the reference ellipsoid to use, should be compatible with the
-            `body_fixed_coord` parameter (i.e., a Moon body fixed coord should be used
+            `body_fixed_frame` parameter (i.e., a Moon body fixed coord should be used
             with a Moon ellipsoid)
             (default: 'EARTH_ELLIPSOID_GRS80').
-        body_fixed_coord : `~astropy.coordinates.BaseRepresentation`
+        body_fixed_frame : `~astropy.coordinates.BaseRepresentation`
             Default Central Body Fixed Coordinate where the cartesian coords are defined
             (e.g. `ITRS` for Earth)
 
@@ -329,7 +329,7 @@ class GroundLocation(u.Quantity):
         self = xyz.ravel().view(cls._location_dtype, cls).reshape(xyz.shape[:-1])
         self._unit = u.m
         self._ellipsoid = ellipsoid
-        self.body_fixed_coord = body_fixed_coord
+        self.body_fixed_frame = body_fixed_frame
         return self
 
     @property
@@ -458,7 +458,7 @@ class GroundLocation(u.Quantity):
         Generates a Central Body Fixed object (e.g. `~astropy.coordinates.ITRS` object)
         with the location of this object at the requested ``obstime``.
 
-        The resulting object will be of the internal `body_fixed_coord` type.
+        The resulting object will be of the internal `body_fixed_frame` type.
         For example, if the celestial body is Earth, the resulting object is of
         the type ITRS.
 
@@ -493,7 +493,7 @@ class GroundLocation(u.Quantity):
                 unit=u.m / u.s,
             )
             pos = pos.with_differentials(vel)
-            return self.body_fixed_coord(x=pos, obstime=obstime)
+            return self.body_fixed_frame(x=pos, obstime=obstime)
         except TypeError:
             raise TypeError(
                 "Failed converting Geodetic coordinates to body fixed coordinates. "

@@ -83,7 +83,7 @@ def test_get_body_fixed_no_coords():
             15 * u.deg,
             150 * u.m,
             ellipsoid=SUN.ellipsoid,
-            body_fixed_coord=SUN.body_fixed_coord_frame,
+            body_fixed_frame=SUN.body_fixed_coord_frame,
         )
 
         gnd_loc.to_body_fixed_coords()
