@@ -42,10 +42,10 @@ from satmad.core.ground_location import GroundLocation
 time = Time("2020-04-10T00:00:00", scale="utc") + np.arange(1, 4) * TimeDelta(1, format="jd")
 
 # Generate the Ground Location with the default Earth ellipsoid
-gnd_loc = GroundLocation(10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH.ellipsoid)
+gnd_loc = GroundLocation(10 * u.deg, 15 * u.deg, 150 * u.m, ellipsoid=EARTH.ellipsoid, body_fixed_frame = EARTH.body_fixed_coord_frame)
 
 # Generate the ground locations in body fixed frame (in this instance ITRS)
-gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(EARTH.body_fixed_coord_frame, obstime=time)
+gnd_loc_body_fixed = gnd_loc.to_body_fixed_coords(obstime=time)
 
 print(gnd_loc_body_fixed)
 ```
