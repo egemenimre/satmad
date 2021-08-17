@@ -68,6 +68,20 @@ def generate_geo_140w_trajectory(time_list):
     return trajectory
 
 
+def check_instantaneous(trajectory_generator, init_time, duration, steps, time):
+    """Generates az-el for a single time."""
+    time_list = prepare_timelist(init_time, duration, steps)["time_list"]
+    trajectory = trajectory_generator(time_list)
+
+    # Init location - default Ellipsoid is WGS84
+    ground_loc = EarthLocation(lat=41.015137, lon=28.979530, height=100 * u.m)
+
+    # generate the alt-az
+    sat_alt_az = trajectory(time).transform_to(AltAz(location=ground_loc, obstime=time))
+
+    return sat_alt_az
+
+
 def event_engine(trajectory_generator, init_time, duration, steps):
     """Generates events list to be tested."""
     time_list = prepare_timelist(init_time, duration, steps)["time_list"]
@@ -104,40 +118,43 @@ def test_basic_pass_find(steps, time_error, ang_error_1, ang_error_2):
 
     events = event_engine(generate_leo_trajectory, init_time, duration, steps)
 
-    # print(events.start_end_intervals)
-    # print(events.max_min_table)
+    print(events.start_end_intervals)
+    print(events.max_min_table)
 
     # Check max events
     # ----------------
-    # Case 1: "2015-10-04T11:51:44.967501459", alt: 6.914915588508499 deg
-    diff = (events.max_min_table[2]["value"] - 6.914915588508499) * u.deg
+    # Case 1: "2015-10-04T11:51:44.965499023", alt: 6.921085405952291 deg
+    diff = (events.max_min_table[2]["value"] - 6.921085405952291) * u.deg
 
-    # print(f"diff : {diff} --- (stepsize: {(duration/steps).to(u.s)})")
-    # print(
-    #     f'{events.max_min_table[2]["time"].datetime64} **** 2015-10-04T11:51:44.967501459'
-    # )
+    print(f"diff : {diff} --- (stepsize: {(duration/steps).to(u.s)})")
+    print(f'at time : {events.max_min_table[2]["time"].datetime64}')
 
     assert pytest.approx(diff.to_value(u.deg), abs=ang_error_1.to_value(u.deg)) == 0.0
 
-    # Case 2: "2015-10-04T10:15:28.951945200", alt: 63.38630365664624 deg
-    diff = (events.max_min_table[1]["value"] - 63.38630365664624) * u.deg
+    # Case 2: "2015-10-04T10:15:28.948189027", alt: 63.427834618376515 deg
+    diff = (events.max_min_table[1]["value"] - 63.427834618376515) * u.deg
 
     # print(f"diff : {diff} --- (stepsize: {(duration/steps).to(u.s)})")
-    # print(
-    #     f'{events.max_min_table[1]["time"].datetime64} **** 2015-10-04T10:15:28.951945200'
-    # )
+    # print(f'at time : {events.max_min_table[1]["time"].datetime64}')
     # time error:
     # - exact match for 21 sec timestep
     # - 2.5 sec off for 43 sec timestep
     # - 6.2 sec off for 86 sec timestep
 
+    # altaz = check_instantaneous(
+    #     generate_leo_trajectory,
+    #     init_time,
+    #     duration,
+    #     steps,
+    #     events.max_min_table[2]["time"],
+    # )
     assert pytest.approx(diff.to_value(u.deg), abs=ang_error_2.to_value(u.deg)) == 0.0
 
     # Check start / end intervals
     # ---------------------------
     diff = (
         events.start_end_intervals.get_interval(2).start
-        - Time("2015-10-04T11:49:36.742030377")
+        - Time("2015-10-04T11:49:36.549018004")
     ).to(u.ms)
 
     # print(f"diff : {diff} --- (stepsize: {(duration/steps).to(u.s)})")
@@ -146,7 +163,7 @@ def test_basic_pass_find(steps, time_error, ang_error_1, ang_error_2):
 
     diff = (
         events.start_end_intervals.get_interval(4).end
-        - Time("2015-10-04T21:23:19.417927488")
+        - Time("2015-10-04T21:23:19.43270995")
     ).to(u.ms)
 
     # print(f"diff : {diff} --- (stepsize: {(duration/steps).to(u.s)})")
