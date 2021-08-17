@@ -15,6 +15,4 @@ In addition to the relatively simple tutorials in this section, there is a repos
 -   [Numerical Orbit Propagation - Part 2](tutorials/numerical_prop_2.ipynb)
     
     [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/egemenimre/satmad/master?filepath=docs%2Ftutorials%2Fnumerical_prop_2.ipynb) 
--   [Getting Familiarised with the TLE object: Analysis of a Repeating Sun-Synchronous Orbit](tutorials/sso_analysis.ipynb)
-    
-    [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/egemenimre/satmad/master?filepath=docs%2Ftutorials%2Fsso_analysis.ipynb) 
+
