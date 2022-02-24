@@ -18,7 +18,7 @@ While the available propagation methods are those described by the [Scipy ODE so
 
 ## Usage
 
-The Numerical Propagator is initialised with an output stepsize (e.g. 120 seconds for a Low-Earth Orbit satellite) as well as relative and absolute tolerances that determine the propagation error. How to choose these tolerances have been investigated in this `[numerical propagation analysis](https://satmad-applications.readthedocs.io/en/latest/analyses/propagation/num_prop_performance_2.html).
+The Numerical Propagator is initialised with an output stepsize (e.g. 120 seconds for a Low-Earth Orbit satellite) as well as relative and absolute tolerances that determine the propagation error. How to choose these tolerances have been investigated in this [numerical propagation analysis](https://satmad-applications.readthedocs.io/en/latest/analyses/propagation/num_prop_performance_2.html).
 
 To generate the trajectory :meth:`.NumericalPropagator.gen_trajectory` method is called with an initial state and a propagation interval. A trajectory is then generated through this interval with the required output stepsize.
 
