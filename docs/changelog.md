@@ -5,8 +5,9 @@ Versions here correspond to those in [PyPI](https://pypi.org/project/satmad/) an
 
 ## Development Version
 
-- Introduced [Body Fixed Frame](coordinates/frames.md)
+- Introduced generic [Body Fixed Frame](coordinates/frames.md) for use with all celestial bodies
 - Added interactive Jupyter Notebooks (Binder links) to the [Tutorials](tutorials.md)
+- Upgraded to [Astropy 4.3](https://docs.astropy.org/en/stable/whatsnew/4.3.html)
 
 
 ## Latest Version
