@@ -214,4 +214,4 @@ class NumericalPropagator(AbstractPropagator):
         return [*v, *a]
 
 
-_km3s2 = u.km ** 3 / u.s ** 2
+_km3s2 = u.km**3 / u.s**2

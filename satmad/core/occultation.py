@@ -423,16 +423,16 @@ def compute_occultation(
 
                 if np.abs(a - b) < c < a + b:
                     # not annular
-                    x = (c ** 2 + a ** 2 - b ** 2) / (2 * c)
-                    y = np.sqrt(a ** 2 - x ** 2)
+                    x = (c**2 + a**2 - b**2) / (2 * c)
+                    y = np.sqrt(a**2 - x**2)
 
                     area = (
-                        a ** 2 * np.arccos(x / a)
-                        + b ** 2 * np.arccos((c - x) / b)
+                        a**2 * np.arccos(x / a)
+                        + b**2 * np.arccos((c - x) / b)
                         - c * y
                     )
 
-                    frac_light = 1 - area / (np.pi * a ** 2)
+                    frac_light = 1 - area / (np.pi * a**2)
                 else:
                     # annular
                     frac_light = (b / a) ** 2

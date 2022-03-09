@@ -104,7 +104,7 @@ class MoonJ2000Equatorial(CelestialBodyJ2000Equatorial):
 
 # **************** GM values ****************
 
-GM_earth = 3.986004418e14 * u.m ** 3 / u.s ** 2
+GM_earth = 3.986004418e14 * u.m**3 / u.s**2
 """Geocentric gravitational constant
 (TCG-compatible value). Also compatible with the WGS84 coordinate system.
 Includes mass of the atmosphere.
@@ -112,14 +112,14 @@ Includes mass of the atmosphere.
 (See IERS Technical Note No. 36 (2010) Table 1.1
 [TCF1] in:doc:`References <../references>`)"""
 
-GM_sun = 1.32712442099e20 * u.m ** 3 / u.s ** 2
+GM_sun = 1.32712442099e20 * u.m**3 / u.s**2
 """Heliocentric gravitational constant
 (TCB-compatible value, computed from the TDB-compatible value).
 
 (See IERS Technical Note No. 36 (2010) Table 1.1
 [TCF1] in :doc:`References <../references>`)"""
 
-GM_moon = 4.902802711497899e12 * u.m ** 3 / u.s ** 2
+GM_moon = 4.902802711497899e12 * u.m**3 / u.s**2
 r"""Lunar  gravitational constant.
 
 The value is derived from "Moon-Earth mass ratio" times "Geocentric
@@ -181,7 +181,7 @@ MOON_ELLIPSOID_IAUWG2015 = CelestialBodyEllipsoid(
 EARTH = CelestialBody(
     "Earth",
     "Default Earth Model.",
-    GM_earth.to(u.km ** 3 / u.s ** 2),
+    GM_earth.to(u.km**3 / u.s**2),
     inert_coord=GCRS,
     body_fixed_coord=ITRS,
     ellipsoid=EARTH_ELLIPSOID_WGS84,
@@ -191,7 +191,7 @@ EARTH = CelestialBody(
 SUN = CelestialBody(
     "Sun",
     "Default Sun Model.",
-    GM_sun.to(u.km ** 3 / u.s ** 2),
+    GM_sun.to(u.km**3 / u.s**2),
     inert_coord=HCRS,
     ellipsoid=CelestialBodyEllipsoid(
         "Sun Ellipsoid IAU Resolution B3 2015",
@@ -211,7 +211,7 @@ on Recommended Nominal Conversion Constants for Selected Solar and Planetary Pro
 MOON = CelestialBody(
     "Moon",
     "Default Moon Model.",
-    GM_moon.to(u.km ** 3 / u.s ** 2),
+    GM_moon.to(u.km**3 / u.s**2),
     inert_coord=MoonJ2000Equatorial,
     body_fixed_coord=MoonBodyFixed,
     ellipsoid=MOON_ELLIPSOID_IAUWG2015,

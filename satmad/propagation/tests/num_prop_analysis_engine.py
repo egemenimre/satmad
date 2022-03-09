@@ -91,7 +91,7 @@ def propagation_engine(
 
 
 def energy_along_trajectory(
-    coord_list: SkyCoord, mu=GM_earth.to_value(u.km ** 3 / u.s ** 2)
+    coord_list: SkyCoord, mu=GM_earth.to_value(u.km**3 / u.s**2)
 ):
     """Computes the absolute and relative (to initial) energy along the trajectory."""
 

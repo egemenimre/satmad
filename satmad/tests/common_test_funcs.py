@@ -24,7 +24,7 @@ from satmad.core.celestial_body import CelestialBody, CelestialBodyEllipsoid
 GMAT_MOON = CelestialBody(
     "Moon",
     "GMAT Moon Model.",
-    4902.8005821478 * (u.km ** 3 / u.s ** 2),
+    4902.8005821478 * (u.km**3 / u.s**2),
     ellipsoid=CelestialBodyEllipsoid(
         "GMAT Moon Ellipsoid", 1738.2 * u.km, inf * u.dimensionless_unscaled
     ),
@@ -34,7 +34,7 @@ GMAT_MOON = CelestialBody(
 GMAT_EARTH = CelestialBody(
     "Earth",
     "GMAT Earth Model.",
-    398600.4415 * (u.km ** 3 / u.s ** 2),
+    398600.4415 * (u.km**3 / u.s**2),
     inert_coord=GCRS,
     body_fixed_coord=ITRS,
     ellipsoid=CelestialBodyEllipsoid(

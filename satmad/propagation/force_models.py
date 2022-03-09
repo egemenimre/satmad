@@ -47,7 +47,7 @@ def two_body_accel(r, mu):
 
     """
     r_norm = np.linalg.norm(r)
-    a = -mu / (r_norm ** 3) * r
+    a = -mu / (r_norm**3) * r
     return a
 
 
@@ -86,6 +86,6 @@ def two_body_energy(r, v, mu):
     """
     r_norm = np.linalg.norm(r)
     v_norm = np.linalg.norm(v)
-    sp_energy = 0.5 * v_norm ** 2 - mu / r_norm
+    sp_energy = 0.5 * v_norm**2 - mu / r_norm
 
     return sp_energy

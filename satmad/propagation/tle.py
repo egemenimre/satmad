@@ -77,7 +77,7 @@ class TLE:
 
     # Gravitational constants(defaults to WGS72)
     _grav_model = WGS72
-    _mu = wgs72.mu * (u.km ** 3 / u.s ** 2)  # in km3 / s2
+    _mu = wgs72.mu * (u.km**3 / u.s**2)  # in km3 / s2
     _earth_radius = wgs72.radiusearthkm * u.km  # km
     _j2 = wgs72.j2
 
@@ -342,7 +342,7 @@ class TLE:
         """
         sma = altitude + earth_radius
         # mean motion - convert to float
-        mean_motion = np.sqrt(TLE._mu / sma ** 3).value
+        mean_motion = np.sqrt(TLE._mu / sma**3).value
 
         # mean motion assumed constant
         n_dot = 0
@@ -357,8 +357,8 @@ class TLE:
         inclination = (
             np.arccos(
                 (
-                    (-2 * sma ** 3.5 * om_dot_sun_sync * (1 - eccentricity ** 2) ** 2)
-                    / (3 * TLE._earth_radius ** 2 * TLE._j2 * np.sqrt(TLE._mu))
+                    (-2 * sma**3.5 * om_dot_sun_sync * (1 - eccentricity**2) ** 2)
+                    / (3 * TLE._earth_radius**2 * TLE._j2 * np.sqrt(TLE._mu))
                 )
                 .decompose()
                 .to_value(u.rad)

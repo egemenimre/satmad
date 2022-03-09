@@ -23,7 +23,7 @@ from satmad.tests.common_test_funcs import parse_rv_line
 _EARTH_GMAT = CelestialBody(
     "Earth",
     "Earth as depicted in GMAT.",
-    3.98600441500000e14 * u.m ** 3 / u.s ** 2,
+    3.98600441500000e14 * u.m**3 / u.s**2,
     inert_coord=GCRS,
 )
 

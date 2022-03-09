@@ -46,7 +46,7 @@ def rv_init_moon_crs():
 _MOONGMAT = CelestialBody(
     "Moon",
     "Default Moon Model. ",
-    4.90280105600000e12 * u.m ** 3 / u.s ** 2,
+    4.90280105600000e12 * u.m**3 / u.s**2,
     ellipsoid=CelestialBodyEllipsoid(
         "Moon Ellipsoid as defined by GMAT",
         1738.2 * u.km,

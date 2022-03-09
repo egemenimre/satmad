@@ -287,7 +287,7 @@ class AbstractKeplerianOrbitElements(ABC):
         Quantity
             mean motion in u.rad / u.s
         """
-        return np.sqrt(self.central_body.mu / np.abs(self.sm_axis ** 3)).to(
+        return np.sqrt(self.central_body.mu / np.abs(self.sm_axis**3)).to(
             u.rad / u.s, equivalencies=u.dimensionless_angles()
         )
 
@@ -457,7 +457,7 @@ class OsculatingKeplerianOrbElems(AbstractKeplerianOrbitElements):
         node = argp + nu
         mu = self.central_body.mu
 
-        p = a * (1 - e ** 2)
+        p = a * (1 - e**2)
 
         r = p / (1 + e * np.cos(nu))
 
@@ -551,11 +551,11 @@ def _rv_to_keplerian_elems(epoch, r, v, central_body):
     n_mag = n.norm()
 
     # find eccentricity vector and magnitude
-    ecc = ((v_mag ** 2 - mu / r_mag) * r - r.dot(v) * v) / mu
+    ecc = ((v_mag**2 - mu / r_mag) * r - r.dot(v) * v) / mu
     ecc_mag = ecc.norm().decompose()
 
     # Find two-body energy
-    energy = 0.5 * v_mag ** 2 - mu / r_mag
+    energy = 0.5 * v_mag**2 - mu / r_mag
 
     # If ecc_mag too close to 1  then the orbit is parabolic. Abort the conversion.
     if np.abs(1 - ecc_mag) < 1e-7:

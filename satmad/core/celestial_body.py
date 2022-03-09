@@ -47,7 +47,7 @@ class CelestialBodyEllipsoid:
         re=u.km,
         inv_f=u.dimensionless_unscaled,
         j2=u.dimensionless_unscaled,
-        mu=u.m ** 3 / u.s ** 2,
+        mu=u.m**3 / u.s**2,
         om=u.rad / u.s,
     )
     def __init__(self, name, re, inv_f, **kwargs):
@@ -81,7 +81,7 @@ class CelestialBody:
         Earth)
     """
 
-    @u.quantity_input(mu=u.km ** 3 / u.s ** 2)
+    @u.quantity_input(mu=u.km**3 / u.s**2)
     def __init__(self, name, info, mu, **kwargs):
         self.name = name
         self.info = info
