@@ -64,7 +64,6 @@ class AbstractKeplerianOrbitElements(ABC):
         true_anomaly,
         central_body=EARTH,
     ):
-
         # Fill init values with setters
         # Setters carry out the type and value checks
         # Ignore codestyle checks as mypy thinks these are read only
@@ -190,7 +189,6 @@ class AbstractKeplerianOrbitElements(ABC):
 
     @eccentricity.setter
     def eccentricity(self, e):
-
         # check eccentricity as Quantity and reduce to value
         if isinstance(e, Quantity):
             e = e.value
@@ -223,7 +221,6 @@ class AbstractKeplerianOrbitElements(ABC):
     @inclination.setter  # type: ignore
     @u.quantity_input(incl="angle")
     def inclination(self, incl):
-
         if 0 <= incl.to_value(u.rad) < np.pi:
             self._incl = incl
         else:
@@ -581,7 +578,6 @@ def _rv_to_keplerian_elems(epoch, r, v, central_body):
 
     # *** Case 1: Non-circular, Inclined Orbit ***
     if not is_circular and not is_equatorial:
-
         # Compute RAAN and fix quadrant
         raan = np.arccos(n.x / n_mag)
         if n.y < 0:
@@ -614,7 +610,6 @@ def _rv_to_keplerian_elems(epoch, r, v, central_body):
 
     # *** Case 3: Circular, Inclined Orbit ***
     elif is_circular and not is_equatorial:
-
         # Compute RAAN and fix quadrant
         raan = np.arccos(n.x / n_mag)
         if n.y < 0:

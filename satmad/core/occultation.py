@@ -71,7 +71,6 @@ def multi_body_occultation_intervals(
 
     # Compute intervals for each occulting object
     for occulting_body in occult_bodies:
-
         # Compute pos list for illum and occulting bodies in the local inertial frame
         illum_pos_list = illum_pos_list_icrs.transform_to(
             occulting_body.inert_coord_frame

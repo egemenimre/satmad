@@ -77,7 +77,6 @@ def test_get_body_fixed_no_coords():
     """Tests the body fixed coords output but the celestial body has no
     body fixed coordinates defined."""
     with pytest.raises(TypeError):
-
         gnd_loc = GroundLocation(
             10 * u.deg,
             15 * u.deg,

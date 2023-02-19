@@ -58,7 +58,6 @@ class GroundLocation(u.Quantity):
     _array_dtype = np.dtype((np.float64, (3,)))
 
     def __new__(cls, *args, **kwargs):
-
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], GroundLocation):
             # input is a GroundLocation object, copy it
             return args[0].copy()
@@ -209,7 +208,7 @@ class GroundLocation(u.Quantity):
         body_fixed_frame=ITRS,
     ):
         """
-        Location on Central Body (e.g. Earth or Moon), initialized from
+        Location on Central Body (e.g. Earth or Moon), initialised from
         Central Body detic (e.g. geodetic for the Earth) coordinates.
 
         This is the same as `from_cb_detic` method. It is kept for compatibility with
@@ -270,7 +269,7 @@ class GroundLocation(u.Quantity):
         body_fixed_frame=ITRS,
     ):
         """
-        Location on Central Body (e.g. Earth or Moon), initialized from
+        Location on Central Body (e.g. Earth or Moon), initialised from
         Central Body detic (e.g. geodetic for the Earth) coordinates.
 
         Parameters
@@ -419,7 +418,7 @@ class GroundLocation(u.Quantity):
 
     @property
     def lat(self):
-        """Longitude of the location, for the default ellipsoid."""
+        """(Geo)detic latitude of the location, for the default ellipsoid."""
         return self.geodetic[1]
 
     @property

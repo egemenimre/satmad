@@ -525,7 +525,6 @@ class TimeIntervalList:
     """
 
     def __init__(self, intervals, start_valid=None, end_valid=None, replicate=False):
-
         self._intervals: list = []
 
         if intervals:
@@ -919,7 +918,6 @@ class TimeIntervalList:
 
         # Fill the atomic `TimeInterval` objects using the merged list
         for p_interval in p_intervals:
-
             # check for empty instances
             if not _are_times_almost_equal(p_interval.lower, p_interval.upper):
                 # duration not empty, add the interval

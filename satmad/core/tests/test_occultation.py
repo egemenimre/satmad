@@ -295,7 +295,6 @@ def _check_entry_exit_times(intervals, truth_intervals, start_diff, end_diff):
     tolerances."""
 
     for i, truth_event_entry, truth_event_exit in truth_intervals:
-
         truth_event = TimeInterval(Time(truth_event_entry), Time(truth_event_exit))
         interval = intervals.get_interval(i)
 

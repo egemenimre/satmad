@@ -242,7 +242,6 @@ class TleTimeSeries(_TleList):
     """
 
     def __init__(self, tle_list, sat_number):
-
         # init a TLE Storage and filter for the sat number
         self.tle_list = (
             TleStorage(tle_list)
@@ -356,7 +355,6 @@ def _parse_tle_list(tle_source_str_list):
 
     name = line1 = line2 = None
     for i, line in enumerate(tle_source_str_list):
-
         # strip spaces and EOF around the line
         line = line.strip()
         # skip empty lines

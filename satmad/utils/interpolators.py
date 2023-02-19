@@ -32,7 +32,6 @@ class DiscreteTimeData:
     _unit = None
 
     def __init__(self, time_list, value_list, axis=0):
-
         self.data_interval = TimeInterval(time_list[0], time_list[-1])
         self._init_time = time_list[0]
         # Convert time to "days since epoch"

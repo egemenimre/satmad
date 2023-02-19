@@ -96,7 +96,8 @@ def _elems_assert(osc_elems, truth_elems, errs):
 def __init_ell_incl():
     """Case 1: Initialises an Earth Elliptical Inclined orbit satellite. GMAT example.
 
-    This case deliberately uses an ITRS input, degrading the agreement between GMAT and SatMAD."""
+    This case deliberately uses an ITRS input, degrading the agreement between GMAT and SatMAD.
+    """
 
     rv_line = "2010-01-01T13:24:28.100   3769.438525258299  6010.414642548296   1306.35068662678  -5.810744579719358   3.604099244744345   0.9947338414920035"
     gmat_elems_line = "25198.05865856482         7191.999999999875         0.02000000000000014       12.84999999999999         306.6                      314.1899999999973          99.8870000000026         "

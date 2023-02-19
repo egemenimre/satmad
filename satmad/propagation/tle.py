@@ -623,7 +623,6 @@ class TLE:
 
     @eccentricity.setter
     def eccentricity(self, e):
-
         # check eccentricity as Quantity and reduce to value
         if isinstance(e, Quantity):
             e = e.value
@@ -704,7 +703,6 @@ class TLE:
 
     @mean_motion.setter
     def mean_motion(self, n):
-
         # check mean motion as Quantity
         if isinstance(n, Quantity):
             n = n.to(u.rad / u.s, equivalencies=u.dimensionless_angles()).value

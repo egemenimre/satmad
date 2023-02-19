@@ -47,7 +47,6 @@ class DiscreteTimeEvents:
     def __init__(
         self, time_list, value_list, crossing_value=0, neg_to_pos_is_start=True
     ):
-
         # Init underlying Discrete Data object
         if isinstance(value_list, np.ndarray):
             self.discrete_data = DiscreteTimeData(
@@ -172,7 +171,6 @@ class DiscreteTimeEvents:
         # loop through each root and classify them as start / end events
         events_list = []
         for deriv in self.discrete_data.deriv_interpolate(start_end_events):
-
             if neg_to_pos_is_start:
                 if deriv > 0:
                     events_list.append("start")
@@ -209,7 +207,6 @@ class DiscreteTimeEvents:
         sec_deriv_list = self.discrete_data.sec_deriv_interpolate(min_max_events)
 
         for sec_deriv in sec_deriv_list:
-
             if sec_deriv < 0:
                 events_list.append("max")
             else:
