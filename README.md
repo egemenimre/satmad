@@ -5,6 +5,8 @@
 [![Documentation Status](https://readthedocs.org/projects/satmad/badge/?version=latest)](https://satmad.readthedocs.io/en/latest/?badge=latest)
 [![Astropy Badge](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat-square)](http://www.astropy.org/)
 
+********** This project is suspended. Please check [satkit](https://github.com/egemenimre/satkit) project instead **********
+
 SatMAD is an open source Python package, aiming at providing the base functionality to solve satellite mission analysis and design as well as orbital mechanics problems with enough precision and performance to be used in the design and operation of real satellites. The target audience is academics and amateur satellite community, including Cubesats (and anyone else who might be interested).
 
 The focus is on good documentation and good test coverage to produce a reliable flight dynamics library.
